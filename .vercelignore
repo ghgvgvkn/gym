@@ -1,0 +1,12 @@
+# This is a static deployment: only the site (index.html), the app prototype,
+# and the example report are served. Everything else is source/tooling that the
+# static site doesn't need at runtime. The api/ handlers use a framework-agnostic
+# signature (not Vercel's req,res), so they're excluded to avoid broken functions.
+node_modules
+api
+packages
+scripts
+sql
+data
+.github
+*.log

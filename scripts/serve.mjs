@@ -14,7 +14,7 @@ const PORT = 4173;
 createServer(async (req, res) => {
   try {
     let url = decodeURIComponent(req.url.split("?")[0]);
-    if (url === "/") url = "/web/index.html";
+    if (url === "/") url = "/index.html";
     else if (url === "/app" || url === "/app/") url = "/app/index.html";
     else if (url.endsWith("/")) url += "index.html";
     const path = join(ROOT, normalize(url));
