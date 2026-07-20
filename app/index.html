@@ -1,9 +1,9 @@
-<!-- IRONMAP — functional app. Real Supabase auth + role routing + subscriptions.
-     Catalog/demo content comes from window.IRONMAP (ironmap-data.js); user/gym/
-     subscription data is live from Supabase public.* tables. -->
+<!-- IRONMAP — functional app. Real Supabase auth + role routing + subscriptions
+     + gym email-invites. Catalog/demo from window.IRONMAP; user/gym/subscription
+     data live from Supabase public.* tables. -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IRONMAP</title>
+<title>IRONMAP — sign in</title>
 <style>
   :root{
     color-scheme:dark;
@@ -21,7 +21,7 @@
   .wrap{max-width:960px;margin:0 auto;padding:0 20px}
 
   /* top bar */
-  .bar{display:none;align-items:center;gap:14px;height:58px;border-bottom:1px solid var(--line);padding:0 20px;position:sticky;top:0;background:rgba(8,9,11,.8);backdrop-filter:blur(12px);z-index:20}
+  .bar{display:none;align-items:center;gap:14px;height:58px;border-bottom:1px solid var(--line);padding:0 20px;position:sticky;top:0;background:rgba(8,9,11,.82);backdrop-filter:blur(12px);z-index:20}
   .bar.on{display:flex}
   .brand{font-weight:900;letter-spacing:-.03em;font-size:18px}.brand i{font-style:normal;color:var(--volt)}
   .rolechip{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--muted)}
@@ -35,34 +35,44 @@
   .switch button.on{color:var(--text);border-color:rgba(216,255,62,.4)}
   .btn-out{background:none;border:1px solid var(--line2);color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:.1em;padding:6px 11px;border-radius:8px;cursor:pointer}
 
-  /* views */
-  .view{display:none;padding:36px 0 90px}
-  .view.on{display:block}
+  .view{display:none}.view.on{display:block}
+  .app{padding:36px 0 90px}
   h1{font-size:30px;font-weight:850;letter-spacing:-.03em;margin-bottom:6px;text-wrap:balance}
   h1 i{font-style:normal;color:var(--volt)}
   h2{font-size:14px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:30px 0 12px;border-top:1px solid var(--line);padding-top:16px}
-  .sub{color:var(--muted);max-width:56ch}
+  .sub{color:var(--muted);max-width:58ch}
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
 
-  /* auth */
-  #auth,#onboard{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
-  .card{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:26px}
-  .authcard{width:400px;max-width:100%}
-  .wordmark{font-size:34px;font-weight:900;letter-spacing:-.04em}.wordmark i{font-style:normal;color:var(--volt)}
-  .tabs{display:flex;gap:6px;margin:18px 0 16px;background:var(--inset);border-radius:12px;padding:4px}
-  .tabs button{flex:1;background:none;border:0;color:var(--muted);font-weight:700;font-size:14px;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit}
+  /* ===== AUTH — big landing ===== */
+  #auth{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr;position:relative;overflow:hidden}
+  #auth canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.45}
+  .authLeft{position:relative;z-index:2;padding:64px 56px;display:flex;flex-direction:column;justify-content:center;gap:20px;border-right:1px solid var(--line)}
+  .authLeft .wordmark{font-size:60px;font-weight:900;letter-spacing:-.045em;line-height:.95}.authLeft .wordmark i{font-style:normal;color:var(--volt)}
+  .authLeft .tag{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--text);max-width:22ch;line-height:1.25}
+  .authLeft .tag b{color:var(--volt);font-weight:700}
+  .authLeft ul{list-style:none;display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .authLeft li{display:flex;gap:11px;color:var(--muted);font-size:15px;align-items:flex-start}
+  .authLeft li::before{content:"";flex:none;width:16px;height:16px;margin-top:3px;border-radius:5px;background:linear-gradient(135deg,var(--volt),var(--cyan))}
+  .authRight{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;padding:40px 32px}
+  .authcard{width:100%;max-width:400px}
+  .tabs{display:flex;gap:6px;margin:0 0 18px;background:var(--inset);border-radius:12px;padding:4px}
+  .tabs button{flex:1;background:none;border:0;color:var(--muted);font-weight:700;font-size:15px;padding:11px;border-radius:9px;cursor:pointer;font-family:inherit}
   .tabs button.on{background:var(--elev);color:var(--text)}
-  label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;margin:12px 0 5px}
-  input,select{width:100%;background:var(--inset);border:1px solid var(--line2);border-radius:11px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit}
+  label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;margin:14px 0 6px}
+  input,select{width:100%;background:var(--inset);border:1px solid var(--line2);border-radius:11px;padding:13px 14px;color:var(--text);font-size:15px;font-family:inherit}
   input::placeholder{color:var(--faint)}
-  .btn{width:100%;border:0;border-radius:13px;padding:14px;font-size:15px;font-weight:800;letter-spacing:-.01em;cursor:pointer;font-family:inherit;margin-top:16px}
+  .btn{width:100%;border:0;border-radius:13px;padding:15px;font-size:16px;font-weight:800;letter-spacing:-.01em;cursor:pointer;font-family:inherit;margin-top:18px}
   .btn.volt{background:var(--volt);color:#1A2000}
   .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--text)}
   .btn:disabled{opacity:.5;cursor:default}
-  .msg{font-size:13px;margin-top:12px;min-height:18px;line-height:1.4}
+  .msg{font-size:13.5px;margin-top:12px;min-height:18px;line-height:1.45}
   .msg.err{color:var(--coral)} .msg.ok{color:var(--mint)}
+  .authfoot{margin-top:18px;color:var(--faint);font-family:var(--mono);font-size:11px}
+  @media(max-width:820px){ #auth{grid-template-columns:1fr} .authLeft{display:none} .authRight{min-height:100vh} }
 
   /* onboarding */
+  #onboard{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+  .card{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:26px}
   .paths{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px}
   .path{background:var(--inset);border:1px solid var(--line2);border-radius:16px;padding:18px;cursor:pointer;transition:border-color .15s}
   .path:hover{border-color:rgba(216,255,62,.4)}
@@ -87,20 +97,25 @@
   .row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
   .row:first-child{border-top:0}.grow{flex:1}
   .chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;border:1px solid var(--line2);border-radius:999px;padding:4px 10px;color:var(--muted)}
-  .chip.mint{color:var(--mint);border-color:rgba(61,220,151,.4)} .chip.volt{color:var(--volt);border-color:rgba(216,255,62,.4)} .chip.cyan{color:var(--cyan);border-color:rgba(63,217,255,.4)}
+  .chip.mint{color:var(--mint);border-color:rgba(61,220,151,.4)} .chip.volt{color:var(--volt);border-color:rgba(216,255,62,.4)} .chip.cyan{color:var(--cyan);border-color:rgba(63,217,255,.4)} .chip.coral{color:var(--coral);border-color:rgba(255,95,86,.4)}
   .code{font-family:var(--mono);font-size:22px;letter-spacing:.14em;color:var(--volt);background:var(--inset);border:1px dashed rgba(216,255,62,.4);border-radius:12px;padding:14px 18px;display:inline-flex;gap:14px;align-items:center}
   .code button{background:var(--elev);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:6px 10px;border-radius:7px;cursor:pointer}
   .ex{display:flex;gap:10px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-top:8px;font-size:14px}
   .ex .m{font-family:var(--mono);font-size:10px;color:var(--faint)}
-  .banner{display:flex;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--line);border-left:2px solid var(--volt);border-radius:0 12px 12px 0;padding:14px 16px;margin-top:14px}
-  .banner b{display:block;font-size:14px}.banner span{color:var(--muted);font-size:12.5px}
+  .subcard{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:14px}
+  .subcard .big{font-size:30px;font-weight:850;letter-spacing:-.02em}.subcard .big small{font-size:14px;color:var(--faint);font-weight:600}
+  .subgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:14px}
+  .subgrid .l{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase}
+  .subgrid .v{font-size:14px;font-weight:600;margin-top:3px}
+  .addrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .addrow input{flex:1;min-width:200px}
+  .addrow button{flex:none;background:var(--volt);border:0;color:#1A2000;font-weight:800;border-radius:11px;padding:0 18px;cursor:pointer;font-family:inherit;font-size:14px}
   .foot{margin-top:40px;color:var(--faint);font-family:var(--mono);font-size:11px}
   .foot a{color:var(--faint);text-decoration:underline}
-  .spin{width:26px;height:26px;border:2px solid var(--line2);border-top-color:var(--volt);border-radius:50%;animation:s .7s linear infinite;margin:80px auto}
+  .spin{width:26px;height:26px;border:2px solid var(--line2);border-top-color:var(--volt);border-radius:50%;animation:s .7s linear infinite;margin:120px auto}
   @keyframes s{to{transform:rotate(360deg)}}
 </style>
 
-<!-- ===== top bar ===== -->
 <header class="bar" id="bar">
   <span class="brand">IRON<i>MAP</i></span>
   <span class="rolechip" id="roleChip">—</span>
@@ -113,44 +128,53 @@
 </header>
 
 <main>
-  <!-- loading -->
   <section class="view on" id="v-loading"><div class="spin"></div></section>
 
-  <!-- auth -->
+  <!-- ===== AUTH (big, main entry) ===== -->
   <section class="view" id="auth">
-    <div class="card authcard">
+    <canvas id="sky"></canvas>
+    <div class="authLeft">
       <div class="wordmark">IRON<i>MAP</i></div>
-      <div class="eyebrow" style="margin-top:6px">YOUR GYM, DIGITIZED · YOUR COACH, PERSONAL</div>
-      <div class="tabs">
-        <button id="tabIn" class="on">Sign in</button>
-        <button id="tabUp">Create account</button>
+      <div class="tag">Your gym, digitized. Your coach, <b>personal.</b></div>
+      <ul>
+        <li>A 24/7 AI coach &amp; nutritionist built from your body data</li>
+        <li>Workouts mapped to the exact machines in your gym</li>
+        <li>Join with your gym, or go solo for <b style="color:var(--volt)">$20/mo</b></li>
+      </ul>
+    </div>
+    <div class="authRight">
+      <div class="authcard">
+        <div class="tabs">
+          <button id="tabUp" class="on">Create account</button>
+          <button id="tabIn">Sign in</button>
+        </div>
+        <label>Email</label>
+        <input id="email" type="email" placeholder="you@email.com" autocomplete="email">
+        <label>Password</label>
+        <input id="password" type="password" placeholder="At least 6 characters" autocomplete="new-password">
+        <button class="btn volt" id="authBtn">Create account</button>
+        <div class="msg" id="authMsg"></div>
+        <div class="authfoot">By your gym or on your own — you choose after signup. <a href="/">back to site</a></div>
       </div>
-      <label>Email</label>
-      <input id="email" type="email" placeholder="you@email.com" autocomplete="email">
-      <label>Password</label>
-      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
-      <button class="btn volt" id="authBtn">Sign in</button>
-      <div class="msg" id="authMsg"></div>
-      <div class="foot" style="margin-top:16px">Members can also use the mobile app · <a href="/">back to site</a></div>
     </div>
   </section>
 
-  <!-- onboarding -->
+  <!-- ===== ONBOARDING ===== -->
   <section class="view" id="onboard">
-    <div class="card" style="width:440px;max-width:100%">
+    <div class="card" style="width:460px;max-width:100%">
       <div class="eyebrow">WELCOME · ONE QUICK STEP</div>
-      <h1 style="font-size:24px;margin-top:8px">What brings you to <i>IRONMAP</i>?</h1>
+      <h1 style="font-size:24px;margin-top:8px">How are you joining <i>IRONMAP</i>?</h1>
       <div class="paths" id="paths">
-        <div class="path" data-path="direct">
-          <span class="price">$20<small>/mo</small></span>
-          <h3>Just me — Personal</h3>
-          <p>Your own AI coach + nutritionist. Generic-equipment plans, no gym needed.</p>
-        </div>
         <div class="path" data-path="member">
           <span class="price" style="color:var(--mint)">Free*</span>
-          <h3>I'm a gym member</h3>
-          <p>Join with your gym's code — workouts mapped to your gym's machines.</p>
-          <div class="extra" id="ex-member"><label>Gym code</label><input id="joinCode" placeholder="e.g. POWERZONE" style="text-transform:uppercase"></div>
+          <h3>I have a gym code</h3>
+          <p>Your gym gave you a code — enter it to get workouts mapped to its machines.</p>
+          <div class="extra" id="ex-member"><label>Gym code</label><input id="joinCode" placeholder="e.g. TITANFIT55" style="text-transform:uppercase"></div>
+        </div>
+        <div class="path" data-path="direct">
+          <span class="price">$20<small>/mo</small></span>
+          <h3>I'm signing up by myself</h3>
+          <p>Your own AI coach + nutritionist. No gym needed — generic-equipment plans.</p>
         </div>
         <div class="path" data-path="gym_owner">
           <span class="price" style="color:var(--cyan)">from $99</span>
@@ -169,16 +193,29 @@
       </div>
       <button class="btn volt" id="onboardBtn" disabled>Choose an option</button>
       <div class="msg" id="onboardMsg"></div>
-      <div class="foot" style="margin-top:14px">* Gym membership is billed by your gym, not IRONMAP. This is a demo checkout — no real payment is taken.</div>
+      <div class="foot" style="margin-top:14px">* Gym membership is billed by your gym, not IRONMAP. Demo checkout — no real payment is taken.</div>
     </div>
   </section>
 
-  <!-- MEMBER / CUSTOMER app -->
-  <section class="view" id="member"><div class="wrap">
+  <!-- ===== MEMBER / CUSTOMER ===== -->
+  <section class="view app" id="member"><div class="wrap">
     <div class="eyebrow" id="mEyebrow">TODAY</div>
     <h1 id="mGreet">Welcome</h1>
     <p class="sub" id="mSub"></p>
-    <div class="banner"><div class="grow"><b id="mPlanTitle">Plan</b><span id="mPlanSub"></span></div><span class="chip mint" id="mPlanChip">ACTIVE</span></div>
+
+    <div id="mSubSection" style="display:none">
+      <h2>Your subscription</h2>
+      <div class="subcard">
+        <div class="row" style="padding-top:0"><div class="grow"><div class="big num" id="mSubPrice">$20<small>/mo</small></div><div class="sub" style="margin-top:2px">IRONMAP Personal — billed by IRONMAP</div></div><span class="chip mint" id="mSubStatus">ACTIVE</span></div>
+        <div class="subgrid">
+          <div><div class="l">Member since</div><div class="v num" id="mSubSince">—</div></div>
+          <div><div class="l">Next billing</div><div class="v num" id="mSubNext">—</div></div>
+          <div><div class="l">Plan</div><div class="v">Personal · solo</div></div>
+        </div>
+        <button class="btn ghost" id="cancelSub" style="margin-top:14px">Cancel subscription (demo)</button>
+      </div>
+    </div>
+
     <h2>Your program · sample day</h2>
     <div class="kpis" id="mMacros"></div>
     <div id="mWorkout"></div>
@@ -187,22 +224,31 @@
     <div class="foot">Machine catalog &amp; plan engine from IRONMAP core · your account is live in Supabase.</div>
   </div></section>
 
-  <!-- GYM owner dashboard -->
-  <section class="view" id="gym"><div class="wrap">
+  <!-- ===== GYM OWNER ===== -->
+  <section class="view app" id="gym"><div class="wrap">
     <div class="eyebrow">GYM DASHBOARD</div>
     <h1 id="gName">Your gym</h1>
     <p class="sub" id="gSub"></p>
     <div class="kpis" id="gKpis"></div>
-    <h2>Invite members</h2>
-    <p class="sub" style="margin-bottom:10px">Share this code — members enter it when they sign up.</p>
+
+    <h2>Add members by email</h2>
+    <p class="sub" style="margin-bottom:8px">Enter a member's email. When they create an account with it, they're automatically enrolled in your gym — no code needed.</p>
+    <div class="addrow">
+      <input id="inviteEmail" type="email" placeholder="member@email.com">
+      <button id="addMember">Add member</button>
+    </div>
+    <div id="inviteList" style="margin-top:12px"></div>
+
+    <h2>Or share your gym code</h2>
     <div class="code"><span id="gCode">—</span><button id="copyCode">COPY</button></div>
+
     <h2>Your catalog</h2>
     <div id="gCatalog"></div>
     <div class="foot">Member health data is never shown here — engagement only. Powered by Fable 5.</div>
   </div></section>
 
-  <!-- HQ (platform admin) -->
-  <section class="view" id="hq"><div class="wrap">
+  <!-- ===== HQ ===== -->
+  <section class="view app" id="hq"><div class="wrap">
     <div class="eyebrow">IRONMAP HQ · INTERNAL</div>
     <h1>Platform control</h1>
     <p class="sub">Every gym and user on the platform, live from Supabase.</p>
@@ -226,82 +272,89 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 const $ = (s) => document.querySelector(s);
 const show = (id) => { document.querySelectorAll(".view").forEach(v => v.classList.remove("on")); $("#" + id).classList.add("on"); };
 const bar = (on) => $("#bar").classList.toggle("on", on);
+const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
 
-// ---------- auth UI ----------
-let mode = "in";
+// ---------- auth ----------
+let mode = "up";
 $("#tabIn").onclick = () => setMode("in");
 $("#tabUp").onclick = () => setMode("up");
-function setMode(m){ mode = m; $("#tabIn").classList.toggle("on", m==="in"); $("#tabUp").classList.toggle("on", m==="up");
-  $("#authBtn").textContent = m==="in" ? "Sign in" : "Create account"; $("#password").autocomplete = m==="in"?"current-password":"new-password"; $("#authMsg").textContent=""; }
+function setMode(m){ mode=m; $("#tabIn").classList.toggle("on",m==="in"); $("#tabUp").classList.toggle("on",m==="up");
+  $("#authBtn").textContent = m==="in"?"Sign in":"Create account"; $("#password").placeholder = m==="in"?"Your password":"At least 6 characters"; $("#authMsg").textContent=""; }
 
 $("#authBtn").onclick = async () => {
   const email = $("#email").value.trim(), password = $("#password").value;
-  const msg = $("#authMsg"); msg.className = "msg"; msg.textContent = "";
+  const msg = $("#authMsg"); msg.className="msg"; msg.textContent="";
   if (!email || !password){ msg.className="msg err"; msg.textContent="Enter email and password."; return; }
   $("#authBtn").disabled = true; $("#authBtn").textContent = "…";
   try {
     if (mode === "up"){
       const { data, error } = await sb.auth.signUp({ email, password });
       if (error) throw error;
-      if (!data.session){ msg.className="msg ok"; msg.textContent="Account created — check your email to confirm, then sign in."; setMode("in"); }
-      else { await afterAuth(data.session); }
+      // Users are auto-confirmed (DB trigger). If no session came back, sign in now.
+      let session = data.session;
+      if (!session){
+        const r = await sb.auth.signInWithPassword({ email, password });
+        if (r.error) throw new Error("Account created. " + r.error.message);
+        session = r.data.session;
+      }
+      await afterAuth(session);
     } else {
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
       await afterAuth(data.session);
     }
-  } catch(e){ msg.className="msg err"; msg.textContent = e.message || String(e); }
-  finally { $("#authBtn").disabled = false; $("#authBtn").textContent = mode==="in"?"Sign in":"Create account"; }
+  } catch(e){
+    msg.className="msg err";
+    msg.textContent = /rate limit/i.test(e.message||"") ? "Email limit reached on this project — the owner needs to turn OFF “Confirm email” in Supabase Auth settings. Try again shortly." : (e.message || String(e));
+  } finally { $("#authBtn").disabled=false; $("#authBtn").textContent = mode==="in"?"Sign in":"Create account"; }
 };
 $("#signOut").onclick = async () => { await sb.auth.signOut(); bar(false); show("auth"); };
 
 // ---------- onboarding ----------
 let chosen = null, pkg = "growth";
 document.querySelectorAll("#paths .path").forEach(p => p.onclick = () => {
-  document.querySelectorAll("#paths .path").forEach(x => x.classList.remove("sel"));
-  document.querySelectorAll(".extra").forEach(x => x.classList.remove("on"));
+  document.querySelectorAll("#paths .path").forEach(x=>x.classList.remove("sel"));
+  document.querySelectorAll(".extra").forEach(x=>x.classList.remove("on"));
   p.classList.add("sel"); chosen = p.dataset.path;
   if (chosen==="member") $("#ex-member").classList.add("on");
   if (chosen==="gym_owner") $("#ex-gym").classList.add("on");
-  const b = $("#onboardBtn"); b.disabled = false;
+  const b = $("#onboardBtn"); b.disabled=false;
   b.textContent = chosen==="direct" ? "Subscribe — $20/mo (demo)" : chosen==="gym_owner" ? "Create gym & subscribe (demo)" : "Join my gym";
 });
-document.querySelectorAll("#pkgs .pkg").forEach(k => k.onclick = () => {
-  document.querySelectorAll("#pkgs .pkg").forEach(x=>x.classList.remove("sel")); k.classList.add("sel"); pkg = k.dataset.pkg;
-});
+document.querySelectorAll("#pkgs .pkg").forEach(k => k.onclick = () => { document.querySelectorAll("#pkgs .pkg").forEach(x=>x.classList.remove("sel")); k.classList.add("sel"); pkg=k.dataset.pkg; });
 
 $("#onboardBtn").onclick = async () => {
   const msg = $("#onboardMsg"); msg.className="msg"; msg.textContent="";
   const { data:{ user } } = await sb.auth.getUser();
   if (!user) return show("auth");
-  $("#onboardBtn").disabled = true; const orig = $("#onboardBtn").textContent; $("#onboardBtn").textContent="…";
+  $("#onboardBtn").disabled=true; const orig=$("#onboardBtn").textContent; $("#onboardBtn").textContent="…";
   try {
-    if (chosen === "direct"){
+    if (chosen==="direct"){
       await sb.from("user_subscriptions").upsert({ user_id:user.id, plan:"personal", price_usd:20, status:"active" });
-      await sb.from("profiles").update({ role:"direct", onboarded:true }).eq("user_id", user.id);
+      await sb.from("profiles").update({ role:"direct", onboarded:true }).eq("user_id",user.id);
       route("direct");
-    } else if (chosen === "member"){
+    } else if (chosen==="member"){
       const code = $("#joinCode").value.trim().toUpperCase();
-      if (!code){ throw new Error("Enter your gym's code."); }
-      const { data:gym } = await sb.from("gyms").select("id,name").eq("join_code", code).maybeSingle();
-      if (!gym){ throw new Error("No gym found with that code. Ask your gym, or pick Personal."); }
+      if (!code) throw new Error("Enter your gym's code.");
+      const { data:gym } = await sb.from("gyms").select("id,name").eq("join_code",code).maybeSingle();
+      if (!gym) throw new Error("No gym found with that code. Ask your gym, or pick “by myself”.");
       await sb.from("memberships").upsert({ user_id:user.id, gym_id:gym.id, status:"active", joined_via:"code" }, { onConflict:"user_id,gym_id" });
-      await sb.from("profiles").update({ role:"member", onboarded:true }).eq("user_id", user.id);
+      await sb.from("profiles").update({ role:"member", onboarded:true }).eq("user_id",user.id);
       route("member");
-    } else if (chosen === "gym_owner"){
+    } else if (chosen==="gym_owner"){
       const name = $("#gymName").value.trim(); if (!name) throw new Error("Enter a gym name.");
       const city = $("#gymCity").value.trim() || "Amman, JO";
       const caps = { starter:150, growth:400, pro:1000 };
       const { data:org, error:oe } = await sb.from("orgs").insert({ name, owner_user_id:user.id, plan_tier:pkg, member_cap:caps[pkg], status:"active" }).select().single();
       if (oe) throw oe;
-      const code = (name.replace(/[^a-z]/gi,"").slice(0,8).toUpperCase() || "IRONGYM") + Math.floor(10+Math.random()*89);
+      const code = (name.replace(/[^a-z]/gi,"").slice(0,8).toUpperCase()||"IRONGYM") + (10 + (name.length*7 % 89));
       const { error:ge } = await sb.from("gyms").insert({ org_id:org.id, name, city, join_code:code });
       if (ge) throw ge;
       await sb.from("subscriptions").upsert({ org_id:org.id, tier:pkg, member_cap:caps[pkg], features:{voice:pkg!=="starter"}, provider:"demo", status:"active" }, { onConflict:"org_id" });
-      await sb.from("profiles").update({ role:"gym_owner", onboarded:true }).eq("user_id", user.id);
+      await sb.from("profiles").update({ role:"gym_owner", onboarded:true }).eq("user_id",user.id);
       route("gym_owner");
     }
-  } catch(e){ msg.className="msg err"; msg.textContent = e.message || String(e); $("#onboardBtn").disabled=false; $("#onboardBtn").textContent=orig; }
+  } catch(e){ msg.className="msg err"; msg.textContent=e.message||String(e); $("#onboardBtn").disabled=false; $("#onboardBtn").textContent=orig; }
 };
 
 // ---------- routing ----------
@@ -311,18 +364,29 @@ async function afterAuth(s){ session = s; await routeUser(); }
 async function routeUser(){
   const email = (session.user.email||"").toLowerCase();
   bar(true); $("#barEmail").textContent = email;
-  if (ADMIN_EMAILS.includes(email)){ return route("platform_admin"); }
+  if (ADMIN_EMAILS.includes(email)) return route("platform_admin");
   let prof = null;
-  try { const { data } = await sb.from("profiles").select("role,onboarded,display_name").eq("user_id", session.user.id).maybeSingle(); prof = data; } catch(e){}
-  if (!prof){ try { await sb.from("profiles").insert({ user_id:session.user.id, display_name:email.split("@")[0], role:"direct", onboarded:false }); } catch(e){} prof = { role:"direct", onboarded:false }; }
-  if (!prof.onboarded){ bar(false); return show("onboard"); }
+  try { const { data } = await sb.from("profiles").select("role,onboarded").eq("user_id",session.user.id).maybeSingle(); prof = data; } catch(e){}
+  if (!prof){ try { await sb.from("profiles").insert({ user_id:session.user.id, display_name:email.split("@")[0], role:"direct", onboarded:false }); } catch(e){} prof={role:"direct",onboarded:false}; }
+  if (!prof.onboarded){
+    // Was this email pre-registered by a gym? (RLS returns only invites for me.)
+    try {
+      const { data:inv } = await sb.from("gym_invites").select("id,gym_id").eq("status","invited").limit(1);
+      if (inv && inv.length){
+        await sb.from("memberships").upsert({ user_id:session.user.id, gym_id:inv[0].gym_id, status:"active", joined_via:"invite" }, { onConflict:"user_id,gym_id" });
+        await sb.from("gym_invites").update({ status:"joined" }).eq("id", inv[0].id);
+        await sb.from("profiles").update({ role:"member", onboarded:true }).eq("user_id",session.user.id);
+        return route("member");
+      }
+    } catch(e){}
+    bar(false); return show("onboard");
+  }
   route(prof.role);
 }
-
 function setRoleChip(role){
-  const c = $("#roleChip"); const label = {platform_admin:"IRONMAP HQ",gym_owner:"Gym owner",member:"Member",direct:"Personal"}[role]||role;
-  c.textContent = label; c.className = "rolechip " + (role==="platform_admin"?"admin":role==="gym_owner"?"owner":"member");
-  $("#adminSwitch").style.display = role==="platform_admin" ? "flex" : "none";
+  const c=$("#roleChip"); const label={platform_admin:"IRONMAP HQ",gym_owner:"Gym owner",member:"Member",direct:"Personal"}[role]||role;
+  c.textContent=label; c.className="rolechip "+(role==="platform_admin"?"admin":role==="gym_owner"?"owner":"member");
+  $("#adminSwitch").style.display = role==="platform_admin"?"flex":"none";
 }
 async function route(role){
   bar(true); setRoleChip(role);
@@ -330,89 +394,125 @@ async function route(role){
   else if (role==="gym_owner"){ await renderGym(); show("gym"); }
   else { await renderMember(role); show("member"); }
 }
-// admin view switcher
 document.querySelectorAll("#adminSwitch button").forEach(b => b.onclick = async () => {
   document.querySelectorAll("#adminSwitch button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
-  const v = b.dataset.v;
-  if (v==="hq"){ await renderHQ(); show("hq"); } else if (v==="gym"){ await renderGym(true); show("gym"); } else { await renderMember("direct", true); show("member"); }
+  const v=b.dataset.v;
+  if (v==="hq"){ await renderHQ(); show("hq"); } else if (v==="gym"){ await renderGym(true); show("gym"); } else { await renderMember("direct",true); show("member"); }
 });
 
 // ---------- renderers ----------
-function macroKpis(p){
-  if (!p) return "";
-  const e=p.energy, m=p.macros;
+function macroKpis(p){ if(!p) return ""; const e=p.energy,m=p.macros;
   return `<div class="kpi"><div class="v num">${e.target}</div><div class="l">kcal / day</div></div>
     <div class="kpi"><div class="v num" style="color:var(--mint)">${m.protein_g}g</div><div class="l">Protein</div></div>
     <div class="kpi"><div class="v num" style="color:var(--cyan)">${m.carbs_g}g</div><div class="l">Carbs</div></div>
-    <div class="kpi"><div class="v num" style="color:var(--volt)">${m.fat_g}g</div><div class="l">Fat</div></div>`;
-}
-function workoutHtml(p){
-  if (!p || !p.workout) return "";
-  const d = p.workout.days[0];
+    <div class="kpi"><div class="v num" style="color:var(--volt)">${m.fat_g}g</div><div class="l">Fat</div></div>`; }
+function workoutHtml(p){ if(!p||!p.workout) return ""; const d=p.workout.days[0];
   return `<div class="card" style="margin-top:6px"><b style="font-size:14px">Day 1 · ${d.focus}</b>
-    ${d.items.slice(0,5).map(it=>`<div class="row"><span class="grow">${it.name}</span><span class="m num" style="font-family:var(--mono);font-size:11px;color:var(--faint)">${it.sets}×${it.repRange[0]}–${it.repRange[1]}</span></div>`).join("")}</div>`;
-}
+    ${d.items.slice(0,5).map(it=>`<div class="row"><span class="grow">${it.name}</span><span class="m num" style="font-family:var(--mono);font-size:11px;color:var(--faint)">${it.sets}×${it.repRange[0]}–${it.repRange[1]}</span></div>`).join("")}</div>`; }
+
 async function renderMember(role, demo){
   const email = session ? session.user.email : "you@email.com";
   const first = (email.split("@")[0]||"there").replace(/^\w/,c=>c.toUpperCase());
   $("#mGreet").innerHTML = `Welcome, ${first}`;
-  // gym name if member
-  let gymName = null;
-  if (role==="member" && !demo){
-    try { const { data } = await sb.from("memberships").select("gym_id, gyms(name)").eq("user_id",session.user.id).eq("status","active").maybeSingle(); gymName = data?.gyms?.name; } catch(e){}
+  let gymName=null;
+  if (role==="member" && !demo && session){
+    try { const { data } = await sb.from("memberships").select("gyms(name)").eq("user_id",session.user.id).eq("status","active").maybeSingle(); gymName=data?.gyms?.name; } catch(e){}
   }
   $("#mEyebrow").textContent = gymName ? gymName.toUpperCase() : "PERSONAL · TODAY";
   $("#mSub").textContent = gymName ? "Your workouts are mapped to the machines in your gym." : "Personal coaching with generic-equipment plans.";
-  // plan/subscription
-  if (role==="direct"){ $("#mPlanTitle").textContent="Personal plan"; $("#mPlanSub").textContent="$20/mo · billed by IRONMAP"; }
-  else { $("#mPlanTitle").textContent="Gym membership"; $("#mPlanSub").textContent=(gymName||"Your gym")+" · billed by your gym"; }
-  const p = IM.demoProgram;
+
+  // subscription panel — only for solo (direct) users
+  const solo = role==="direct";
+  $("#mSubSection").style.display = solo ? "block" : "none";
+  if (solo){
+    let sub=null;
+    if (!demo && session){ try { const { data } = await sb.from("user_subscriptions").select("*").eq("user_id",session.user.id).maybeSingle(); sub=data; } catch(e){} }
+    sub = sub || { price_usd:20, status:"active", created_at:new Date().toISOString() };
+    $("#mSubPrice").innerHTML = `$${Math.round(sub.price_usd)}<small>/mo</small>`;
+    const st=$("#mSubStatus"); st.textContent=(sub.status||"active").toUpperCase(); st.className="chip "+(sub.status==="canceled"?"coral":"mint");
+    $("#mSubSince").textContent = fmtDate(sub.created_at);
+    const next=new Date(sub.created_at); next.setMonth(next.getMonth()+1);
+    $("#mSubNext").textContent = sub.status==="canceled" ? "—" : fmtDate(next);
+    $("#cancelSub").style.display = sub.status==="canceled" ? "none" : "block";
+  }
+
+  const p=IM.demoProgram;
   $("#mMacros").innerHTML = macroKpis(p);
   $("#mWorkout").innerHTML = workoutHtml(p);
-  const exs = (IM.exercises||[]).filter(e=>e.machine).slice(0,6);
+  const exs=(IM.exercises||[]).filter(e=>e.machine).slice(0,6);
   $("#mExercises").innerHTML = exs.length ? exs.map(e=>`<div class="ex"><span class="grow">${e.name}</span><span class="m">${e.pattern||""}</span></div>`).join("")
     : `<div class="ex"><span class="grow">${IM.counts.exercises} exercises across ${IM.counts.machines} machines</span></div>`;
 }
+$("#cancelSub").onclick = async () => {
+  if (!session) return;
+  await sb.from("user_subscriptions").update({ status:"canceled" }).eq("user_id",session.user.id);
+  renderMember("direct");
+};
+
+let curGymId = null;
 async function renderGym(demo){
   let gym=null, org=null, members=0;
   if (!demo && session){
     try {
-      const { data:o } = await sb.from("orgs").select("*").eq("owner_user_id",session.user.id).limit(1).maybeSingle();
-      org=o;
+      const { data:o } = await sb.from("orgs").select("*").eq("owner_user_id",session.user.id).limit(1).maybeSingle(); org=o;
       if (o){ const { data:g } = await sb.from("gyms").select("*").eq("org_id",o.id).limit(1).maybeSingle(); gym=g;
-        if (g){ const { count } = await sb.from("memberships").select("*",{count:"exact",head:true}).eq("gym_id",g.id).eq("status","active"); members=count||0; } }
+        if (g){ curGymId=g.id; const { count } = await sb.from("memberships").select("*",{count:"exact",head:true}).eq("gym_id",g.id).eq("status","active"); members=count||0; } }
     } catch(e){}
   }
-  if (!gym){ gym={name:"PowerZone Amman (demo)",city:"Amman, JO",join_code:"DEMO"}; org={plan_tier:"growth",member_cap:400}; }
+  if (!gym){ gym={name:"PowerZone Amman (demo)",city:"Amman, JO",join_code:"DEMO"}; org={plan_tier:"growth",member_cap:400}; curGymId=null; }
   $("#gName").textContent = gym.name;
   $("#gSub").textContent = gym.city + " · " + (org?.plan_tier||"growth").toUpperCase() + " package";
   $("#gKpis").innerHTML = `<div class="kpi"><div class="v num">${members}<span style="color:var(--faint);font-size:14px">/${org?.member_cap||400}</span></div><div class="l">Active members</div></div>
     <div class="kpi"><div class="v num">${IM.counts.machines}</div><div class="l">Machine types</div></div>
     <div class="kpi"><div class="v num" style="color:var(--mint)">${IM.counts.exercises}</div><div class="l">Exercises mapped</div></div>`;
   $("#gCode").textContent = gym.join_code;
+  await renderInvites();
   $("#gCatalog").innerHTML = (IM.exercises||[]).filter(e=>e.machine).slice(0,5).map(e=>`<div class="ex"><span class="grow">${e.name}</span><span class="m">${e.pattern||""}</span></div>`).join("")
     || `<div class="ex"><span class="grow">${IM.counts.machines} machines catalogued</span></div>`;
 }
+async function renderInvites(){
+  if (!curGymId){ $("#inviteList").innerHTML = `<p class="sub" style="font-size:13px">Register a real gym to add members.</p>`; return; }
+  let rows=[];
+  try { const { data } = await sb.from("gym_invites").select("email,status,created_at").eq("gym_id",curGymId).order("created_at",{ascending:false}); rows=data||[]; } catch(e){}
+  $("#inviteList").innerHTML = rows.length ? rows.map(r=>`<div class="ex"><span class="grow">${r.email}</span><span class="chip ${r.status==="joined"?"mint":""}">${r.status.toUpperCase()}</span></div>`).join("")
+    : `<p class="sub" style="font-size:13px">No members added yet. Add an email above.</p>`;
+}
+$("#addMember").onclick = async () => {
+  const el=$("#inviteEmail"); const email=el.value.trim().toLowerCase();
+  if (!email){ el.focus(); return; }
+  if (!curGymId){ alert("Register a real gym first (this is the demo view)."); return; }
+  const b=$("#addMember"); b.disabled=true; b.textContent="…";
+  try { const { error } = await sb.from("gym_invites").upsert({ gym_id:curGymId, email, status:"invited" }, { onConflict:"gym_id,email" }); if (error) throw error; el.value=""; await renderInvites(); }
+  catch(e){ alert(e.message||e); } finally { b.disabled=false; b.textContent="Add member"; }
+};
 $("#copyCode").onclick = () => { const t=$("#gCode").textContent; navigator.clipboard?.writeText(t).catch(()=>{}); $("#copyCode").textContent="COPIED ✓"; setTimeout(()=>$("#copyCode").textContent="COPY",1400); };
 
 async function renderHQ(){
-  let s = null;
-  try { const { data } = await sb.rpc("hq_stats"); s = data; } catch(e){}
+  let s=null; try { const { data } = await sb.rpc("hq_stats"); s=data; } catch(e){}
   s = s || {gyms:0,members:0,direct_users:0,mrr_usd:0};
   $("#hqKpis").innerHTML = `<div class="kpi"><div class="v num">${s.gyms}</div><div class="l">Gyms</div></div>
     <div class="kpi"><div class="v num">${s.members}</div><div class="l">Gym members</div></div>
     <div class="kpi"><div class="v num" style="color:var(--volt)">${s.direct_users}</div><div class="l">Direct users</div></div>
     <div class="kpi"><div class="v num" style="color:var(--mint)">$${Number(s.mrr_usd).toLocaleString()}</div><div class="l">MRR</div></div>`;
-  let gyms=[];
-  try { const { data } = await sb.from("gyms").select("name,city,join_code,created_at").order("created_at",{ascending:false}).limit(20); gyms=data||[]; } catch(e){}
+  let gyms=[]; try { const { data } = await sb.from("gyms").select("name,city,join_code,created_at").order("created_at",{ascending:false}).limit(20); gyms=data||[]; } catch(e){}
   $("#hqGyms").innerHTML = gyms.length ? gyms.map(g=>`<div class="row"><span class="grow"><b>${g.name}</b></span><span class="m" style="font-family:var(--mono);font-size:11px;color:var(--faint)">${g.city||""}</span><span class="chip">${g.join_code}</span></div>`).join("")
-    : `<p class="sub">No gyms registered yet — register one from the “I run a gym” sign-up path.</p>`;
+    : `<p class="sub">No gyms registered yet — register one from the “I run a gym” path.</p>`;
 }
+
+// ---------- starfield on auth ----------
+(function(){
+  const c=document.getElementById("sky"); if(!c) return; const x=c.getContext("2d"); let W,H,dots=[];
+  function size(){ W=c.width=c.offsetWidth*2; H=c.height=c.offsetHeight*2; }
+  size(); addEventListener("resize",size);
+  for(let i=0;i<70;i++) dots.push({x:Math.random(),y:Math.random(),r:Math.random()*2.4+.6,v:Math.random()*.0004+.0001,c:Math.random()<.2?"216,255,62":(Math.random()<.5?"63,217,255":"150,160,170")});
+  (function tick(){ x.clearRect(0,0,W,H); const g=x.createRadialGradient(W*.3,H*.2,40,W*.3,H*.2,W*.6); g.addColorStop(0,"rgba(63,217,255,.06)"); g.addColorStop(1,"rgba(0,0,0,0)"); x.fillStyle=g; x.fillRect(0,0,W,H);
+    dots.forEach(p=>{ p.y-=p.v; if(p.y<-.02)p.y=1.02; x.beginPath(); x.arc(p.x*W,p.y*H,p.r,0,6.283); x.fillStyle="rgba("+p.c+",.5)"; x.fill(); }); requestAnimationFrame(tick); })();
+})();
 
 // ---------- init ----------
 (async () => {
   const { data:{ session:s } } = await sb.auth.getSession();
-  if (s){ session = s; await routeUser(); } else { show("auth"); }
+  if (s){ session=s; await routeUser(); } else { show("auth"); }
   sb.auth.onAuthStateChange((_e, ns) => { if (!ns){ bar(false); show("auth"); } });
 })();
 </script>
