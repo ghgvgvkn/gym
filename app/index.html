@@ -1,1827 +1,418 @@
+<!-- IRONMAP — functional app. Real Supabase auth + role routing + subscriptions.
+     Catalog/demo content comes from window.IRONMAP (ironmap-data.js); user/gym/
+     subscription data is live from Supabase public.* tables. -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IRONMAP — App Design Prototype</title>
+<title>IRONMAP</title>
 <style>
   :root{
-    color-scheme: dark;
-    --bg:#08090B; --stage:#0B0C0E; --surface:#14161A; --elev:#1B1E24; --inset:#101215;
+    color-scheme:dark;
+    --bg:#08090B; --surf:#14161A; --elev:#1B1E24; --inset:#101215;
     --line:rgba(235,240,245,.08); --line2:rgba(235,240,245,.16);
-    --text:#EDF0F2; --muted:#98A1AC; --faint:#67717C;
+    --text:#EDF0F2; --muted:#98A1AC; --faint:#69727D;
     --volt:#D8FF3E; --cyan:#3FD9FF; --mint:#3DDC97; --coral:#FF5F56; --violet:#B7A6FF;
     --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Segoe UI",Roboto,sans-serif;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0; padding:0; background:var(--bg);}
-  body{font-family:var(--sans); color:var(--text); -webkit-font-smoothing:antialiased; overflow-x:hidden;}
-  button{font-family:inherit; cursor:pointer;}
-  .num{font-variant-numeric:tabular-nums;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .num{font-variant-numeric:tabular-nums}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
 
-  /* ============ STAGE LAYOUT ============ */
-  .masthead{
-    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
-    padding:14px 22px; border-bottom:1px solid var(--line);
-    font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--faint);
-  }
-  .masthead .brand{color:var(--text); font-weight:700;}
-  .masthead .brand b{color:var(--volt); font-weight:700;}
-  .masthead .spacer{flex:1;}
-  .mtoggle{
-    display:flex; border:1px solid var(--line2); border-radius:999px; overflow:hidden;
-  }
-  .mtoggle button{
-    background:transparent; border:0; color:var(--muted); font-family:var(--mono);
-    font-size:10px; letter-spacing:.12em; padding:6px 14px;
-  }
-  .mtoggle button.on{background:var(--volt); color:#1A2000; font-weight:700;}
-  .masthead a{color:var(--cyan); text-decoration:none; font-family:var(--mono); font-size:10px; letter-spacing:.12em;}
+  /* top bar */
+  .bar{display:none;align-items:center;gap:14px;height:58px;border-bottom:1px solid var(--line);padding:0 20px;position:sticky;top:0;background:rgba(8,9,11,.8);backdrop-filter:blur(12px);z-index:20}
+  .bar.on{display:flex}
+  .brand{font-weight:900;letter-spacing:-.03em;font-size:18px}.brand i{font-style:normal;color:var(--volt)}
+  .rolechip{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--muted)}
+  .rolechip.owner{color:var(--cyan);border-color:rgba(63,217,255,.4)}
+  .rolechip.admin{color:var(--volt);border-color:rgba(216,255,62,.4)}
+  .rolechip.member,.rolechip.direct{color:var(--mint);border-color:rgba(61,220,151,.4)}
+  .bar .sp{flex:1}
+  .bar .email{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .switch{display:flex;gap:4px}
+  .switch button{background:var(--surf);border:1px solid var(--line);color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:5px 9px;border-radius:7px;cursor:pointer}
+  .switch button.on{color:var(--text);border-color:rgba(216,255,62,.4)}
+  .btn-out{background:none;border:1px solid var(--line2);color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:.1em;padding:6px 11px;border-radius:8px;cursor:pointer}
 
-  .stage{
-    display:flex; gap:26px; align-items:flex-start; justify-content:center;
-    padding:30px 22px 60px; min-height:calc(100vh - 60px);
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(63,217,255,.05), transparent 60%),
-      radial-gradient(900px 500px at 85% 110%, rgba(216,255,62,.04), transparent 60%),
-      var(--stage);
-  }
-  .rail{
-    display:flex; flex-direction:column; gap:8px; width:210px; flex:none; position:sticky; top:26px;
-  }
-  .rail .rlabel{font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--faint); margin:10px 4px 4px;}
-  .rail button{
-    display:flex; align-items:center; gap:10px; text-align:left;
-    background:var(--surface); border:1px solid var(--line); border-radius:10px;
-    color:var(--muted); padding:11px 14px; font-size:13px; font-weight:600;
-  }
-  .rail button .k{font-family:var(--mono); font-size:9px; color:var(--faint); letter-spacing:.1em;}
-  .rail button.on{color:var(--text); border-color:rgba(216,255,62,.45); background:var(--elev);}
-  .rail button.on .k{color:var(--volt);}
-  .deck{display:flex; flex-direction:column; align-items:center; gap:18px;}
-  .caption{
-    max-width:420px; text-align:center; color:var(--muted); font-size:13px; line-height:1.55; margin:0;
-  }
-  .caption b{color:var(--text);}
+  /* views */
+  .view{display:none;padding:36px 0 90px}
+  .view.on{display:block}
+  h1{font-size:30px;font-weight:850;letter-spacing:-.03em;margin-bottom:6px;text-wrap:balance}
+  h1 i{font-style:normal;color:var(--volt)}
+  h2{font-size:14px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:30px 0 12px;border-top:1px solid var(--line);padding-top:16px}
+  .sub{color:var(--muted);max-width:56ch}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
 
-  /* ============ PHONE FRAME ============ */
-  .phone-wrap{position:relative;}
-  .phone{
-    width:390px; height:844px; border-radius:54px; position:relative;
-    background:#000; border:1px solid #2A2E33;
-    box-shadow:0 0 0 10px #131518, 0 0 0 11px #33383E, 0 40px 90px rgba(0,0,0,.65);
-    overflow:hidden; transform-origin:top center;
-  }
-  .island{
-    position:absolute; top:12px; left:50%; transform:translateX(-50%);
-    width:118px; height:34px; border-radius:20px; background:#000; z-index:60;
-    border:1px solid rgba(255,255,255,.05);
-  }
-  .statusbar{
-    position:absolute; top:0; left:0; right:0; height:54px; z-index:50;
-    display:flex; justify-content:space-between; align-items:center; padding:16px 28px 0;
-    font-size:14px; font-weight:700; pointer-events:none;
-  }
-  .statusbar .sig{display:flex; gap:5px; align-items:center; font-size:11px; font-family:var(--mono);}
-  .app{
-    position:absolute; inset:0; background:var(--bg); overflow:hidden;
-  }
-  .screen{
-    position:absolute; inset:0; padding:70px 22px 108px; overflow-y:auto; overscroll-behavior:contain;
-    opacity:0; pointer-events:none; transform:translateY(8px); transition:opacity .28s ease, transform .28s ease;
-    scrollbar-width:none;
-  }
-  .screen::-webkit-scrollbar{display:none;}
-  .screen.active{opacity:1; pointer-events:auto; transform:none;}
-  @media (prefers-reduced-motion: reduce){ .screen{transition:none; transform:none;} }
+  /* auth */
+  #auth,#onboard{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+  .card{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:26px}
+  .authcard{width:400px;max-width:100%}
+  .wordmark{font-size:34px;font-weight:900;letter-spacing:-.04em}.wordmark i{font-style:normal;color:var(--volt)}
+  .tabs{display:flex;gap:6px;margin:18px 0 16px;background:var(--inset);border-radius:12px;padding:4px}
+  .tabs button{flex:1;background:none;border:0;color:var(--muted);font-weight:700;font-size:14px;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit}
+  .tabs button.on{background:var(--elev);color:var(--text)}
+  label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;margin:12px 0 5px}
+  input,select{width:100%;background:var(--inset);border:1px solid var(--line2);border-radius:11px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit}
+  input::placeholder{color:var(--faint)}
+  .btn{width:100%;border:0;border-radius:13px;padding:14px;font-size:15px;font-weight:800;letter-spacing:-.01em;cursor:pointer;font-family:inherit;margin-top:16px}
+  .btn.volt{background:var(--volt);color:#1A2000}
+  .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--text)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .msg{font-size:13px;margin-top:12px;min-height:18px;line-height:1.4}
+  .msg.err{color:var(--coral)} .msg.ok{color:var(--mint)}
 
-  /* ============ APP PRIMITIVES ============ */
-  .eyebrow{font-family:var(--mono); font-size:10px; letter-spacing:.2em; color:var(--faint); text-transform:uppercase;}
-  .h-greet{font-size:30px; font-weight:800; letter-spacing:-.02em; margin:4px 0 0;}
-  .card{background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:16px;}
-  .btn{
-    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-    border:0; border-radius:16px; padding:16px; font-size:16px; font-weight:700; letter-spacing:-.01em;
-  }
-  .btn.volt{background:var(--volt); color:#1A2000;}
-  .btn.ghost{background:transparent; border:1px solid var(--line2); color:var(--text);}
-  .chip{
-    display:inline-flex; align-items:center; gap:6px;
-    font-family:var(--mono); font-size:10px; letter-spacing:.08em; color:var(--muted);
-    border:1px solid var(--line2); border-radius:999px; padding:5px 10px;
-  }
-  .chip.volt{background:rgba(216,255,62,.12); border-color:rgba(216,255,62,.4); color:var(--volt);}
-  .chip.cyan{background:rgba(63,217,255,.1); border-color:rgba(63,217,255,.35); color:var(--cyan);}
-  .chip.mint{background:rgba(61,220,151,.1); border-color:rgba(61,220,151,.35); color:var(--mint);}
-  .chip.coral{background:rgba(255,95,86,.1); border-color:rgba(255,95,86,.4); color:var(--coral);}
-  button.chip{background:transparent; margin:0;}
-  .row{display:flex; align-items:center; gap:10px;}
-  .row .grow{flex:1;}
+  /* onboarding */
+  .paths{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px}
+  .path{background:var(--inset);border:1px solid var(--line2);border-radius:16px;padding:18px;cursor:pointer;transition:border-color .15s}
+  .path:hover{border-color:rgba(216,255,62,.4)}
+  .path.sel{border-color:var(--volt);background:var(--elev)}
+  .path h3{font-size:16px;font-weight:800;margin-bottom:4px}
+  .path p{color:var(--muted);font-size:13px}
+  .path .price{float:right;font-weight:850;font-size:18px;color:var(--volt)}
+  .path .price small{font-size:11px;color:var(--faint);font-weight:600}
+  .extra{margin-top:12px;display:none}.extra.on{display:block}
+  .pkgs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .pkg{background:var(--inset);border:1px solid var(--line2);border-radius:12px;padding:12px;text-align:center;cursor:pointer}
+  .pkg.sel{border-color:var(--volt);background:var(--elev)}
+  .pkg .n{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted)}
+  .pkg .p{font-size:19px;font-weight:850;margin:4px 0}.pkg .p small{font-size:10px;color:var(--faint)}
+  .pkg .c{font-family:var(--mono);font-size:9px;color:var(--faint)}
 
-  /* tab bar */
-  .tabbar{
-    position:absolute; left:14px; right:14px; bottom:14px; z-index:55; height:76px;
-    background:rgba(20,22,26,.86); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
-    border:1px solid var(--line2); border-radius:26px;
-    display:flex; align-items:center; justify-content:space-around; padding:0 8px;
-  }
-  .tabbar button{
-    background:none; border:0; color:var(--faint); display:flex; flex-direction:column; align-items:center; gap:3px;
-    font-size:9px; font-family:var(--mono); letter-spacing:.1em; padding:6px 10px;
-  }
-  .tabbar button svg{width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
-  .tabbar button.on{color:var(--volt);}
-  .tabbar .orbtab{
-    width:54px; height:54px; border-radius:50%; margin-top:-26px;
-    background:radial-gradient(circle at 34% 30%, rgba(216,255,62,.9), rgba(63,217,255,.75) 58%, rgba(11,12,14,.9));
-    box-shadow:0 0 24px rgba(63,217,255,.35), inset 0 0 12px rgba(0,0,0,.4);
-    border:1px solid rgba(235,240,245,.25);
-  }
-  .tabbar .orbtab.on{box-shadow:0 0 34px rgba(216,255,62,.5);}
-
-  /* ============ WELCOME ============ */
-  #scr-welcome{padding:0; display:flex; flex-direction:column;}
-  #scr-welcome .sky{position:absolute; inset:0;}
-  #scr-welcome .inner{
-    position:relative; z-index:2; margin-top:auto; padding:0 26px 46px;
-    display:flex; flex-direction:column; gap:12px;
-    background:linear-gradient(180deg, transparent, rgba(8,9,11,.88) 34%);
-    padding-top:120px;
-  }
-  .wordmark{font-size:44px; font-weight:900; letter-spacing:-.04em; line-height:1;}
-  .wordmark i{font-style:normal; color:var(--volt);}
-  .tagline{color:var(--muted); font-size:16px; line-height:1.5; margin:2px 0 14px; max-width:30ch;}
-  .qrhint{
-    display:flex; gap:12px; align-items:center; margin-top:10px;
-    color:var(--faint); font-size:12px; line-height:1.45;
-  }
-  .qrglyph{width:38px; height:38px; flex:none; border-radius:8px; border:1px solid var(--line2); padding:6px;}
-  .qrglyph rect{fill:var(--muted);}
-
-  /* ============ TODAY ============ */
-  .streakchip{display:flex; align-items:center; gap:7px; font-weight:800; font-size:15px; color:var(--volt);}
-  .streakchip svg{width:17px; height:17px; fill:var(--volt);}
-  .readiness{display:flex; gap:14px; align-items:center; margin-top:16px;}
-  .readiness .mini-body{width:44px; height:64px; flex:none;}
-  .workout-hero{
-    margin-top:14px; border-radius:24px; padding:20px; position:relative; overflow:hidden;
-    background:linear-gradient(150deg, #171A10 0%, #12150C 45%, #101215 100%);
-    border:1px solid rgba(216,255,62,.28);
-  }
-  .workout-hero .glow{position:absolute; width:260px; height:260px; border-radius:50%; right:-90px; top:-110px;
-    background:radial-gradient(circle, rgba(216,255,62,.16), transparent 65%);}
-  .workout-hero h2{margin:8px 0 4px; font-size:28px; font-weight:850; letter-spacing:-.02em;}
-  .exlist{display:flex; gap:6px; margin:14px 0 16px; flex-wrap:wrap;}
-  .exlist .ex{
-    font-size:11px; color:var(--muted); background:rgba(235,240,245,.05);
-    border:1px solid var(--line); padding:5px 9px; border-radius:8px;
-  }
-  .statrow{display:flex; gap:10px; margin-top:14px;}
-  .stat{
-    flex:1; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:13px 14px;
-  }
-  .stat .v{font-size:22px; font-weight:800; letter-spacing:-.02em;}
-  .stat .l{font-family:var(--mono); font-size:9px; letter-spacing:.14em; color:var(--faint); margin-top:3px; text-transform:uppercase;}
-  .coachnote{display:flex; gap:11px; margin-top:14px; align-items:flex-start;}
-  .coachnote .dot{
-    width:34px; height:34px; border-radius:50%; flex:none; margin-top:2px;
-    background:radial-gradient(circle at 35% 30%, rgba(216,255,62,.85), rgba(63,217,255,.7) 60%, transparent);
-    box-shadow:0 0 14px rgba(63,217,255,.35);
-  }
-  .coachnote p{margin:0; font-size:13.5px; line-height:1.5; color:var(--text);}
-  .coachnote .who{font-family:var(--mono); font-size:9px; letter-spacing:.16em; color:var(--faint);}
-
-  /* ============ WORKOUT ============ */
-  .machinecard{
-    border-radius:22px; overflow:hidden; border:1px solid var(--line2); position:relative;
-    background:
-      linear-gradient(160deg, rgba(63,217,255,.06), transparent 55%),
-      repeating-linear-gradient(0deg, rgba(235,240,245,.03) 0 1px, transparent 1px 22px),
-      repeating-linear-gradient(90deg, rgba(235,240,245,.03) 0 1px, transparent 1px 22px),
-      #0E1013;
-  }
-  .machinecard svg.machine{display:block; width:100%; height:196px;}
-  .machinecard .mtag{
-    position:absolute; left:12px; top:12px;
-  }
-  .machinecard .mlabel{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:12px 14px; border-top:1px solid var(--line); background:rgba(20,22,26,.7);
-  }
-  .machinecard .mlabel b{font-size:14.5px;}
-  .machinecard .mlabel span{font-family:var(--mono); font-size:10px; color:var(--faint); letter-spacing:.08em;}
-  .setrows{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
-  .setrow{
-    display:flex; align-items:center; gap:12px; background:var(--surface);
-    border:1px solid var(--line); border-radius:14px; padding:12px 14px; font-size:14px;
-  }
-  .setrow.done{opacity:.55;}
-  .setrow.now{border-color:rgba(216,255,62,.5); background:var(--elev);}
-  .setrow .sn{font-family:var(--mono); font-size:10px; color:var(--faint); width:38px; letter-spacing:.1em;}
-  .setrow .kg{font-weight:800; font-size:16px;}
-  .setrow .check{
-    width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line2);
-    display:flex; align-items:center; justify-content:center; color:transparent; flex:none; background:none; padding:0;
-  }
-  .setrow.done .check{background:var(--volt); border-color:var(--volt); color:#1A2000; font-weight:900; font-size:13px;}
-  .restwrap{display:flex; flex-direction:column; align-items:center; margin-top:16px; gap:2px;}
-  .ring{position:relative; width:158px; height:158px;}
-  .ring svg{transform:rotate(-90deg);}
-  .ring .base{stroke:rgba(235,240,245,.08); fill:none; stroke-width:9;}
-  .ring .arc{stroke:var(--volt); fill:none; stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset .95s linear;}
-  .ring .t{
-    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  }
-  .ring .t b{font-size:36px; font-weight:850; letter-spacing:-.02em; color:var(--volt);}
-  .ring .t span{font-family:var(--mono); font-size:9px; letter-spacing:.2em; color:var(--faint);}
-  .busy-sheet{
-    position:absolute; left:12px; right:12px; bottom:100px; z-index:58;
-    background:var(--elev); border:1px solid var(--line2); border-radius:22px; padding:16px;
-    transform:translateY(24px); opacity:0; pointer-events:none; transition:all .3s cubic-bezier(.2,.9,.3,1.1);
-    box-shadow:0 22px 50px rgba(0,0,0,.55);
-  }
-  .busy-sheet.open{transform:none; opacity:1; pointer-events:auto;}
-  @media (prefers-reduced-motion: reduce){ .busy-sheet{transition:none;} }
-
-  /* ============ COACH ============ */
-  #orbCanvas{display:block; margin:4px auto 0; width:230px; height:230px;}
-  .orbstate{text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:.24em; color:var(--faint); margin-top:2px;}
-  .msgs{display:flex; flex-direction:column; gap:10px; margin-top:18px;}
-  .msg{max-width:82%; padding:12px 14px; border-radius:18px; font-size:14px; line-height:1.5;}
-  .msg.user{align-self:flex-end; background:var(--elev); border:1px solid var(--line2); border-bottom-right-radius:6px;}
-  .msg.ai{align-self:flex-start; background:var(--surface); border:1px solid var(--line); border-bottom-left-radius:6px;}
-  [dir="rtl"] .msg.user{border-radius:18px; border-bottom-left-radius:6px;}
-  [dir="rtl"] .msg.ai{border-radius:18px; border-bottom-right-radius:6px;}
-  .toolchip{
-    align-self:flex-start; display:flex; gap:8px; align-items:center;
-    font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; color:var(--mint);
-    background:rgba(61,220,151,.08); border:1px solid rgba(61,220,151,.3); border-radius:10px; padding:8px 11px;
-  }
-  .inputrow{
-    display:flex; gap:10px; margin-top:16px; align-items:center;
-  }
-  .inputrow .field{
-    flex:1; background:var(--surface); border:1px solid var(--line2); border-radius:16px;
-    color:var(--faint); font-size:13.5px; padding:14px 16px;
-  }
-  .mic{
-    width:50px; height:50px; border-radius:50%; border:0; background:var(--volt); flex:none;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .mic svg{width:22px; height:22px; stroke:#1A2000; fill:none; stroke-width:2; stroke-linecap:round;}
-
-  /* ============ FOOD ============ */
-  .macros{display:flex; gap:10px; margin-top:16px;}
-  .macro{flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;}
-  .macro .mr{position:relative; width:74px; height:74px;}
-  .macro svg{transform:rotate(-90deg);}
-  .macro .mb{stroke:rgba(235,240,245,.08); fill:none; stroke-width:7;}
-  .macro .ma{fill:none; stroke-width:7; stroke-linecap:round;}
-  .macro .mv{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800;}
-  .macro .ml{font-family:var(--mono); font-size:9px; letter-spacing:.14em; color:var(--faint); text-transform:uppercase;}
-  .meal{
-    display:flex; gap:12px; align-items:center; background:var(--surface); border:1px solid var(--line);
-    border-radius:18px; padding:14px; margin-top:10px;
-  }
-  .meal .slot{
-    width:46px; height:46px; border-radius:14px; flex:none; display:flex; align-items:center; justify-content:center;
-    font-family:var(--mono); font-size:9px; letter-spacing:.05em; color:var(--muted); background:var(--inset); border:1px solid var(--line);
-    text-transform:uppercase;
-  }
-  .meal b{font-size:14.5px; display:block;}
-  .meal .kcal{font-family:var(--mono); font-size:11px; color:var(--faint); margin-top:2px;}
-  .meal .act{margin-left:auto; flex:none;}
-  [dir="rtl"] .meal .act{margin-left:0; margin-right:auto;}
-
-  /* ============ PROGRESS ============ */
-  .deltacard{display:flex; gap:10px; margin-top:14px;}
-  .delta{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:14px;}
-  .delta .dv{font-size:24px; font-weight:850; letter-spacing:-.02em;}
-  .delta .dl{font-family:var(--mono); font-size:9px; letter-spacing:.13em; color:var(--faint); margin-top:4px; text-transform:uppercase;}
-  .bodywrap{display:flex; gap:16px; margin-top:16px; align-items:center;}
-  .bodywrap svg{flex:none;}
-  .legend{display:flex; flex-direction:column; gap:8px; font-size:12px; color:var(--muted);}
-  .legend .sw{width:12px; height:12px; border-radius:4px; display:inline-block; margin-right:7px; vertical-align:-1px;}
-  [dir="rtl"] .legend .sw{margin-right:0; margin-left:7px;}
-  .spark{margin-top:14px;}
-  .spark svg{width:100%; height:70px; display:block;}
-
-  /* body svg fills */
-  .m0{fill:rgba(235,240,245,.07);}
-  .m1{fill:rgba(183,166,255,.45);}
-  .m2{fill:rgba(255,95,86,.55);}
-  .mhot{fill:rgba(216,255,62,.55);}
-  .mwarm{fill:rgba(61,220,151,.45);}
-  .bstroke{stroke:rgba(235,240,245,.25); stroke-width:1; fill:none;}
-
-  /* ============ GYM DASHBOARD ============ */
-  .browser{
-    width:min(1060px, 92vw); border-radius:16px; overflow:hidden; border:1px solid #2A2E33;
-    box-shadow:0 40px 90px rgba(0,0,0,.6); background:var(--bg);
-  }
-  .browser .bbar{
-    display:flex; align-items:center; gap:8px; padding:12px 16px; background:#15181C; border-bottom:1px solid var(--line);
-  }
-  .browser .bdot{width:11px; height:11px; border-radius:50%;}
-  .browser .burl{
-    flex:1; max-width:380px; margin:0 auto; background:var(--inset); border:1px solid var(--line);
-    border-radius:8px; font-family:var(--mono); font-size:11px; color:var(--faint); padding:6px 12px; text-align:center;
-  }
-  .dash{padding:24px; display:flex; flex-direction:column; gap:18px;}
-  .dash .dhead{display:flex; align-items:center; gap:14px;}
-  .dash h2{margin:0; font-size:22px; letter-spacing:-.02em;}
-  .kpis{display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px;}
-  .kpi{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px;}
-  .kpi .kv{font-size:30px; font-weight:850; letter-spacing:-.03em;}
-  .kpi .kv small{font-size:15px; color:var(--faint); font-weight:600;}
-  .kpi .kl{font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; color:var(--faint); margin-top:6px; text-transform:uppercase;}
-  .util{background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
-  .util .uhead{display:flex; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line);}
-  .util .uhead b{font-size:14px;}
-  .urow{display:flex; align-items:center; gap:14px; padding:11px 18px; border-bottom:1px solid var(--line); font-size:13px;}
-  .urow:last-child{border-bottom:none;}
-  .urow .un{width:210px; flex:none; font-weight:600;}
-  .urow .uz{width:150px; flex:none; font-family:var(--mono); font-size:10px; color:var(--faint);}
-  .meter{flex:1; height:8px; border-radius:99px; background:rgba(235,240,245,.07); overflow:hidden;}
-  .meter i{display:block; height:100%; border-radius:99px;}
-  .urow .up{width:44px; text-align:right; font-family:var(--mono); font-size:11px; color:var(--muted);}
-
-  .dtabs{display:flex; gap:8px;}
-  .dtabs button{
-    background:var(--surface); border:1px solid var(--line); color:var(--muted);
-    padding:9px 16px; border-radius:10px; font-size:13px; font-weight:600;
-  }
-  .dtabs button.on{background:var(--elev); border-color:rgba(216,255,62,.45); color:var(--text);}
-  .dtab-panel{display:none;}
-  .dtab-panel.on{display:flex; flex-direction:column; gap:18px;}
-
-  .invitecard{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; gap:24px; flex-wrap:wrap;}
-  .invite-qr{flex:none; display:flex; flex-direction:column; align-items:center; gap:9px;}
-  .invite-qr svg{width:92px; height:92px; border-radius:12px; border:1px solid var(--line2); padding:10px; background:var(--inset);}
-  .invite-qr svg rect{fill:var(--muted);}
-  .invite-qr span{font-family:var(--mono); font-size:10px; color:var(--faint); letter-spacing:.06em;}
-  .invite-form{flex:1; min-width:280px; display:flex; flex-direction:column; gap:11px;}
-  .linkrow{display:flex; gap:8px;}
-  .linkrow .link{
-    flex:1; background:var(--inset); border:1px solid var(--line2); border-radius:10px; padding:10px 14px;
-    font-family:var(--mono); font-size:12px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  }
-  .linkrow button{
-    flex:none; background:var(--elev); border:1px solid var(--line2); border-radius:10px; padding:0 16px;
-    font-size:11px; font-weight:700; color:var(--text); font-family:var(--mono); letter-spacing:.08em;
-  }
-  .emailrow{display:flex; gap:8px; flex-wrap:wrap;}
-  .emailrow input{flex:1; min-width:160px; background:var(--inset); border:1px solid var(--line2); border-radius:10px; padding:10px 14px; color:var(--text); font-size:13px;}
-  .emailrow input::placeholder{color:var(--faint);}
-  .emailrow select{background:var(--inset); border:1px solid var(--line2); border-radius:10px; padding:10px; color:var(--muted); font-size:11px; font-family:var(--mono);}
-  .emailrow button{flex:none; background:var(--volt); border:0; border-radius:10px; padding:0 18px; font-size:13px; font-weight:700; color:#1A2000;}
-  .pendingwrap{display:flex; flex-direction:column; gap:7px; margin-top:2px;}
-  .pendingwrap .plabel{font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; color:var(--faint); text-transform:uppercase;}
-  .inviterow{display:flex; align-items:center; gap:12px; background:var(--inset); border:1px solid var(--line); border-radius:10px; padding:9px 13px; font-size:12.5px;}
-  .inviterow .ie-email{flex:1; font-weight:600;}
-  .inviterow .ie-role{font-family:var(--mono); font-size:9.5px; color:var(--faint); letter-spacing:.08em;}
-
-  .roster{background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
-  .roster .rhead{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--line);}
-  .roster .rhead b{font-size:14px;}
-  .rrow{display:flex; align-items:center; gap:14px; padding:10px 18px; border-bottom:1px solid var(--line); font-size:13px;}
-  .rrow:last-child{border-bottom:none;}
-  .rrow .ravatar{
-    width:30px; height:30px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;
-    font-size:10.5px; font-weight:800; font-family:var(--mono);
-  }
-  .rrow .rname{width:170px; flex:none; font-weight:600;}
-  .rrow .rmeta{width:150px; flex:none; color:var(--faint); font-family:var(--mono); font-size:10.5px;}
-  .rrow .rstreak{width:60px; flex:none; font-family:var(--mono); font-size:12px; color:var(--muted);}
-
-  .hqgrid{display:grid; grid-template-columns:1.7fr 1fr; gap:14px;}
-  @media (max-width:760px){ .hqgrid{grid-template-columns:1fr;} }
-  .hqtable{background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
-  .hqtable .qhead{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--line);}
-  .hqtable .qhead b{font-size:14px;}
-  .hqrow{display:flex; align-items:center; gap:12px; padding:10px 18px; border-bottom:1px solid var(--line); font-size:13px;}
-  .hqrow:last-child{border-bottom:none;}
-  .healthdot{width:7px; height:7px; border-radius:50%; flex:none;}
-  .hqrow .gname{width:170px; flex:none;}
-  .hqrow .gname b{display:block; font-size:13px;}
-  .hqrow .gname span{font-family:var(--mono); font-size:9.5px; color:var(--faint);}
-  .hqrow .gcap{width:64px; flex:none; text-align:right; font-family:var(--mono); font-size:11px; color:var(--muted);}
-  .hqrow .gmrr{width:52px; flex:none; text-align:right; font-family:var(--mono); font-size:11px; color:var(--mint);}
-  .attnlist{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:8px; display:flex; flex-direction:column;}
-  .attnlist .qhead{border:0; padding:8px 10px 10px;}
-  .attnrow{display:flex; gap:10px; align-items:flex-start; padding:11px 10px; border-radius:10px;}
-  .attnrow:not(:last-child){border-bottom:1px solid var(--line);}
-  .attnrow b{display:block; font-size:12.5px;}
-  .attnrow span{font-size:11.5px; color:var(--muted); line-height:1.4;}
-
-  /* ============ TUTORIAL VIDEO MODAL ============ */
-  .playoverlay{
-    position:absolute; left:50%; top:88px; transform:translate(-50%,-50%); z-index:5;
-    width:52px; height:52px; border-radius:50%; background:rgba(8,9,11,.55); backdrop-filter:blur(6px);
-    -webkit-backdrop-filter:blur(6px); border:1.5px solid rgba(235,240,245,.55); padding:0;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .playoverlay svg{width:18px; height:18px; fill:#fff; margin-left:2px;}
-  .tutmodal{
-    position:absolute; inset:0; z-index:70; opacity:0; pointer-events:none; transition:opacity .25s ease;
-    display:flex; flex-direction:column; justify-content:flex-end;
-  }
-  .tutmodal.open{opacity:1; pointer-events:auto;}
-  .tutmodal .scrim{position:absolute; inset:0; background:rgba(4,5,6,.72);}
-  .tutsheet{
-    position:relative; z-index:2; background:var(--elev); border:1px solid var(--line2); border-bottom:0;
-    border-radius:26px 26px 0 0; padding:18px 18px 30px;
-    transform:translateY(16px); transition:transform .28s cubic-bezier(.2,.9,.3,1.1);
-  }
-  .tutmodal.open .tutsheet{transform:none;}
-  @media (prefers-reduced-motion: reduce){ .tutmodal, .tutsheet{transition:none;} }
-  .tuthead{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
-  .tutclose{
-    width:28px; height:28px; border-radius:50%; background:var(--surface); border:1px solid var(--line2);
-    color:var(--muted); flex:none; display:flex; align-items:center; justify-content:center; font-size:13px; padding:0;
-  }
-  .tutstage{
-    border-radius:16px; position:relative; overflow:hidden; height:186px;
-    border:1px solid rgba(61,220,151,.3); transition:border-color .2s ease;
-    background:
-      repeating-linear-gradient(0deg, rgba(235,240,245,.03) 0 1px, transparent 1px 22px),
-      repeating-linear-gradient(90deg, rgba(235,240,245,.03) 0 1px, transparent 1px 22px),
-      #0D1210;
-  }
-  .tutstage[data-angle="front"]{border-color:rgba(216,255,62,.35);}
-  .tutstage[data-angle="close"]{border-color:rgba(63,217,255,.35);}
-  .tutstage svg{width:100%; height:100%; display:block;}
-  .pose-a{opacity:1; transition:opacity .4s ease;}
-  .pose-b{opacity:0; transition:opacity .4s ease;}
-  @media (prefers-reduced-motion: reduce){ .pose-a, .pose-b{transition:none;} }
-  .tutbar-wrap{margin-top:11px; display:flex; align-items:center; gap:10px;}
-  .tutplay{width:32px; height:32px; border-radius:50%; background:var(--volt); border:0; flex:none; padding:0; display:flex; align-items:center; justify-content:center;}
-  .tutplay svg{width:14px; height:14px;}
-  .tutbar{flex:1; height:4px; border-radius:99px; background:rgba(235,240,245,.1); overflow:hidden; position:relative;}
-  .tutbar i{position:absolute; left:0; top:0; bottom:0; width:46%; background:var(--mint); border-radius:99px; transition:width .9s ease;}
-  @media (prefers-reduced-motion: reduce){ .tutbar i{transition:none;} }
-  .tutloop{font-family:var(--mono); font-size:9px; color:var(--faint); letter-spacing:.06em; flex:none;}
-  .angletabs{display:flex; gap:6px; margin-top:13px;}
-  .anglebtn{flex:1; background:var(--surface); border:1px solid var(--line); color:var(--muted); font-family:var(--mono); font-size:9.5px; letter-spacing:.07em; padding:8px 6px; border-radius:9px;}
-  .anglebtn.on{color:var(--text); border-color:rgba(216,255,62,.4);}
-  .tutcaption{font-size:12px; color:var(--muted); margin:11px 2px 0; line-height:1.5; min-height:18px;}
-  .cuelist{display:flex; flex-direction:column; gap:9px; margin-top:13px;}
-  .cuerow{display:flex; gap:9px; align-items:flex-start; font-size:12.5px; line-height:1.45;}
-  .cuerow .cdot{
-    width:16px; height:16px; border-radius:50%; background:rgba(61,220,151,.15); border:1px solid rgba(61,220,151,.4);
-    color:var(--mint); flex:none; display:flex; align-items:center; justify-content:center; font-size:9px; margin-top:1px;
-  }
-
-  /* ============ SESSION + SIGN-IN ============ */
-  .bsession{font-family:var(--mono); font-size:10px; color:var(--faint); letter-spacing:.06em; white-space:nowrap;}
-  .bout{background:none; border:1px solid var(--line2); border-radius:7px; color:var(--muted); font-family:var(--mono); font-size:9px; letter-spacing:.1em; padding:4px 9px; flex:none;}
-  .si-wrap{display:flex; justify-content:center; padding:58px 20px 70px;}
-  .si-card{width:370px; display:flex; flex-direction:column; gap:11px;}
-  .si-card .wordmark{font-size:30px;}
-  .si-input{width:100%; background:var(--inset); border:1px solid var(--line2); border-radius:12px; padding:13px 15px; color:var(--text); font-size:14px;}
-  .si-input::placeholder{color:var(--faint);}
-  .si-note{font-size:12px; color:var(--muted); line-height:1.5; min-height:18px;}
-  .si-div{display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:9px; letter-spacing:.16em; color:var(--faint); margin-top:6px;}
-  .si-div::before, .si-div::after{content:""; flex:1; height:1px; background:var(--line);}
-  .si-demo{display:flex; flex-direction:column; gap:8px;}
-  .si-demo button{display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; color:var(--text); font-size:13px; font-weight:600;}
-  .si-demo button span{color:var(--faint); font-family:var(--mono); font-size:9.5px; text-align:right;}
-  .si-foot{font-size:11px; color:var(--faint); line-height:1.5;}
-
-  /* ============ SUBSCRIPTIONS ============ */
-  .plancards{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px;}
-  .plancard{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:15px;}
-  .plancard .pname{font-size:13px; font-weight:700;}
-  .plancard .pprice{font-size:22px; font-weight:850; letter-spacing:-.02em; margin-top:4px; color:var(--volt);}
-  .plancard .pprice small{font-size:10px; color:var(--faint); font-weight:600; letter-spacing:.06em;}
-  .plancard .pcount{font-family:var(--mono); font-size:9.5px; color:var(--faint); letter-spacing:.1em; margin-top:6px;}
-  .plancard.ghosted{border-style:dashed; display:flex; align-items:center; justify-content:center; color:var(--faint); font-size:13px; font-weight:600; min-height:96px;}
-
-  /* ============ HQ USERS TABLE ============ */
-  .colhead{display:flex; gap:14px; padding:8px 18px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:8.5px; letter-spacing:.14em; color:var(--faint);}
-  .colhead span{flex:none;}
-  .uw-name{width:150px; flex:none; font-weight:600;}
-  .uw-pay{width:64px; flex:none; text-align:right; font-family:var(--mono); font-size:11px; color:var(--muted);}
-  .uw-ai{width:58px; flex:none; text-align:right; font-family:var(--mono); font-size:11px; color:var(--cyan);}
-  .uw-plans{width:50px; flex:none; text-align:right; font-family:var(--mono); font-size:11px; color:var(--muted);}
-  .hqrow .gai{width:52px; flex:none; text-align:right; font-family:var(--mono); font-size:11px; color:var(--cyan);}
-  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  @media (max-width:760px){ .two-col{grid-template-columns:1fr;} }
-
-  /* ============ MACHINE REVIEW QUEUE ============ */
-  .mthumb{width:46px; height:46px; border-radius:10px; flex:none; border:1px solid var(--line2); display:flex; align-items:center; justify-content:center;
-    background:repeating-linear-gradient(0deg, rgba(235,240,245,.04) 0 1px, transparent 1px 8px), #0E1013;}
-  .mthumb svg{width:30px; height:30px; stroke:#5FD4F2; fill:none; stroke-width:1.6; stroke-linecap:round;}
-  .btn-sm{border:0; border-radius:9px; padding:8px 13px; font-size:11.5px; font-weight:700; flex:none;}
-  .btn-sm.volt{background:var(--volt); color:#1A2000;}
-  .btn-sm.ghost{background:transparent; border:1px solid var(--line2); color:var(--muted);}
-
-  /* ============ RESPONSIVE STAGE ============ */
-  @media (max-width: 900px){
-    .stage{flex-direction:column; align-items:center; padding:18px 12px 50px;}
-    .rail{position:static; width:100%; flex-direction:row; flex-wrap:wrap; justify-content:center;}
-    .rail .rlabel{display:none;}
-    .rail button{padding:9px 12px; font-size:12px;}
-  }
-
-  @keyframes pulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.03);} }
-  .pulsing{animation:pulse 1s ease-in-out infinite;}
-  @media (prefers-reduced-motion: reduce){ .pulsing{animation:none;} }
+  /* dashboard bits */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:16px 0}
+  .kpi{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:15px}
+  .kpi .v{font-size:26px;font-weight:850;letter-spacing:-.02em}
+  .kpi .l{font-family:var(--mono);font-size:9px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase;margin-top:4px}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+  .row:first-child{border-top:0}.grow{flex:1}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;border:1px solid var(--line2);border-radius:999px;padding:4px 10px;color:var(--muted)}
+  .chip.mint{color:var(--mint);border-color:rgba(61,220,151,.4)} .chip.volt{color:var(--volt);border-color:rgba(216,255,62,.4)} .chip.cyan{color:var(--cyan);border-color:rgba(63,217,255,.4)}
+  .code{font-family:var(--mono);font-size:22px;letter-spacing:.14em;color:var(--volt);background:var(--inset);border:1px dashed rgba(216,255,62,.4);border-radius:12px;padding:14px 18px;display:inline-flex;gap:14px;align-items:center}
+  .code button{background:var(--elev);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:6px 10px;border-radius:7px;cursor:pointer}
+  .ex{display:flex;gap:10px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-top:8px;font-size:14px}
+  .ex .m{font-family:var(--mono);font-size:10px;color:var(--faint)}
+  .banner{display:flex;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--line);border-left:2px solid var(--volt);border-radius:0 12px 12px 0;padding:14px 16px;margin-top:14px}
+  .banner b{display:block;font-size:14px}.banner span{color:var(--muted);font-size:12.5px}
+  .foot{margin-top:40px;color:var(--faint);font-family:var(--mono);font-size:11px}
+  .foot a{color:var(--faint);text-decoration:underline}
+  .spin{width:26px;height:26px;border:2px solid var(--line2);border-top-color:var(--volt);border-radius:50%;animation:s .7s linear infinite;margin:80px auto}
+  @keyframes s{to{transform:rotate(360deg)}}
 </style>
 
-<header class="masthead">
-  <span class="brand" id="brandLabel">IRON<b>MAP</b> · APP DESIGN PROTOTYPE · V0.4</span>
-  <span class="spacer"></span>
-  <div class="mtoggle" id="langToggle">
-    <button class="on" data-lang="en">EN</button>
-    <button data-lang="ar">عربي</button>
+<!-- ===== top bar ===== -->
+<header class="bar" id="bar">
+  <span class="brand">IRON<i>MAP</i></span>
+  <span class="rolechip" id="roleChip">—</span>
+  <div class="switch" id="adminSwitch" style="display:none">
+    <button data-v="hq">HQ</button><button data-v="gym">GYM</button><button data-v="member">MEMBER</button>
   </div>
-  <div class="mtoggle" id="viewToggle">
-    <button class="on" data-view="member">MEMBER APP</button>
-    <button data-view="gym">GYM DASHBOARD</button>
-    <button data-view="platform">IRONMAP HQ</button>
-    <button data-view="signin">SIGN IN</button>
-  </div>
-  <a href="https://claude.ai/code/artifact/a6006d07-8b71-4805-b70e-f6993be746bd" target="_blank" rel="noopener">ARCHITECTURE DOC ↗</a>
+  <span class="sp"></span>
+  <span class="email" id="barEmail"></span>
+  <button class="btn-out" id="signOut">SIGN OUT</button>
 </header>
 
-<div class="stage">
-  <nav class="rail" id="rail">
-    <div class="rlabel">MEMBER APP</div>
-    <button data-scr="welcome" class="on"><span class="k">01</span> <span data-i18n="r_welcome">Welcome / Login</span></button>
-    <button data-scr="today"><span class="k">02</span> <span data-i18n="r_today">Today — home</span></button>
-    <button data-scr="workout"><span class="k">03</span> <span data-i18n="r_workout">Workout player</span></button>
-    <button data-scr="coach"><span class="k">04</span> <span data-i18n="r_coach">Coach — voice orb</span></button>
-    <button data-scr="food"><span class="k">05</span> <span data-i18n="r_food">Food Dr.</span></button>
-    <button data-scr="progress"><span class="k">06</span> <span data-i18n="r_progress">Progress</span></button>
-  </nav>
+<main>
+  <!-- loading -->
+  <section class="view on" id="v-loading"><div class="spin"></div></section>
 
-  <main class="deck">
-    <!-- ================= PHONE ================= -->
-    <div class="phone-wrap" id="phoneWrap">
-      <div class="phone" id="phone">
-        <div class="island"></div>
-        <div class="statusbar"><span class="num">9:41</span><span class="sig">●●●● 5G ▮▮▮</span></div>
-        <div class="app" id="app">
-
-          <!-- WELCOME -->
-          <section class="screen active" id="scr-welcome">
-            <canvas class="sky" id="skyCanvas"></canvas>
-            <div class="inner">
-              <div class="eyebrow" data-i18n="w_eyebrow">POWERZONE GYM · AMMAN</div>
-              <div class="wordmark">IRON<i>MAP</i></div>
-              <p class="tagline" data-i18n="w_tagline">Your gym, digitized. Your coach, personal. Every workout mapped to the exact machines on your floor.</p>
-              <button class="btn volt" id="loginBtn" data-i18n="w_start">Get started</button>
-              <button class="btn ghost" data-i18n="w_code">I have a gym code</button>
-              <div class="qrhint">
-                <svg class="qrglyph" viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="1" y="1" width="8" height="8" rx="1.5"/><rect x="15" y="1" width="8" height="8" rx="1.5"/>
-                  <rect x="1" y="15" width="8" height="8" rx="1.5"/><rect x="12" y="12" width="4" height="4"/>
-                  <rect x="19" y="15" width="4" height="4"/><rect x="15" y="19" width="4" height="4"/>
-                </svg>
-                <span data-i18n="w_qr">New here? Scan the IRONMAP QR poster at your gym's front desk — your floor loads automatically.</span>
-              </div>
-            </div>
-          </section>
-
-          <!-- TODAY -->
-          <section class="screen" id="scr-today">
-            <div class="row">
-              <div class="grow">
-                <div class="eyebrow num" data-i18n="t_date">TUESDAY · JUL 15</div>
-                <h1 class="h-greet" data-i18n="t_greet">Evening, Ahmed</h1>
-              </div>
-              <div class="streakchip num">
-                <svg viewBox="0 0 24 24"><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 .5C15 15 17 14 17 11c2 2 3 4 3 6.5A7.5 7.5 0 0 1 12.5 25 8 8 0 0 1 5 17c0-6 6-8 7-15z"/></svg>
-                12
-              </div>
-            </div>
-
-            <div class="card readiness">
-              <svg class="mini-body" viewBox="0 0 44 64" aria-hidden="true">
-                <circle cx="22" cy="7" r="5" class="m0"/>
-                <rect x="14" y="14" width="16" height="20" rx="5" class="mwarm"/>
-                <rect x="7" y="15" width="5" height="16" rx="2.5" class="m0"/>
-                <rect x="32" y="15" width="5" height="16" rx="2.5" class="m0"/>
-                <rect x="14" y="36" width="7" height="22" rx="3.5" class="m2"/>
-                <rect x="23" y="36" width="7" height="22" rx="3.5" class="m2"/>
-              </svg>
-              <div class="grow">
-                <b style="font-size:14.5px;" data-i18n="t_ready">How's the body today?</b>
-                <div style="color:var(--muted); font-size:12px; margin-top:3px;" data-i18n="t_ready2">Quads flagged sore yesterday — tap to update.</div>
-              </div>
-              <span class="chip cyan" data-i18n="t_30s">30-SEC CHECK-IN</span>
-            </div>
-
-            <div class="workout-hero">
-              <div class="glow"></div>
-              <span class="chip volt" data-i18n="t_adj">ADJUSTED FOR SORENESS</span>
-              <h2 data-i18n="t_push">Pull Day</h2>
-              <div class="eyebrow num" data-i18n="t_meta">6 EXERCISES · ~52 MIN · UPPER FLOOR</div>
-              <div class="exlist">
-                <span class="ex" data-i18n="t_e1">Iso-Lateral Row</span>
-                <span class="ex" data-i18n="t_e2">Lat Pulldown #2</span>
-                <span class="ex" data-i18n="t_e3">Seated Cable Row</span>
-                <span class="ex" data-i18n="t_e4">Rear Delt Fly</span>
-                <span class="ex num" data-i18n="t_e5">+2</span>
-              </div>
-              <button class="btn volt" data-goto="workout" data-i18n="t_start">Start workout</button>
-            </div>
-
-            <div class="statrow">
-              <div class="stat"><div class="v num">14<span style="color:var(--faint); font-size:14px;">/20</span></div><div class="l" data-i18n="t_sets">Hard sets this week</div></div>
-              <div class="stat"><div class="v num" style="color:var(--mint);">96<span style="color:var(--faint); font-size:14px;">g</span></div><div class="l" data-i18n="t_protein">Protein today</div></div>
-              <div class="stat"><div class="v num" style="color:var(--cyan);">41<span style="color:var(--faint); font-size:14px;">d</span></div><div class="l" data-i18n="t_scan">To next scan</div></div>
-            </div>
-
-            <div class="coachnote">
-              <div class="dot"></div>
-              <div>
-                <div class="who" data-i18n="t_coach">COACH · 6:10 PM</div>
-                <p data-i18n="t_msg">Quads still at 6/10 soreness, so today became a pull session — squats moved to Thursday. The Iso-Lateral Row is free right now.</p>
-              </div>
-            </div>
-          </section>
-
-          <!-- WORKOUT -->
-          <section class="screen" id="scr-workout">
-            <div class="row" style="margin-bottom:12px;">
-              <div class="grow">
-                <div class="eyebrow num" data-i18n="k_step">EXERCISE 2 OF 6 · PULL DAY</div>
-                <h1 style="font-size:24px; font-weight:850; letter-spacing:-.02em; margin:4px 0 0;" data-i18n="k_name">Iso-Lateral Row</h1>
-              </div>
-              <button class="chip" id="tutorialChip" data-i18n="k_tut">▶ TUTORIAL</button>
-            </div>
-
-            <div class="machinecard">
-              <span class="chip cyan mtag" data-i18n="k_live">YOUR GYM · UPPER FLOOR · PULL AREA</span>
-              <svg class="machine" viewBox="0 0 390 196" aria-hidden="true">
-                <g stroke="#5FD4F2" stroke-width="2" fill="none" stroke-linecap="round" opacity=".9">
-                  <path d="M70 170 L70 60 Q70 44 86 44 L150 44"/>
-                  <path d="M70 170 L130 170"/>
-                  <rect x="88" y="78" width="34" height="70" rx="4"/>
-                  <path d="M105 78 L105 60 L150 52"/>
-                  <path d="M150 44 L210 84 L232 84"/>
-                  <path d="M210 84 L210 128"/>
-                  <rect x="188" y="128" width="44" height="14" rx="6"/>
-                  <path d="M232 84 Q262 84 268 108 L268 128"/>
-                  <rect x="246" y="128" width="46" height="12" rx="6"/>
-                  <path d="M268 140 L268 170 M292 140 L292 170 M246 170 L312 170"/>
-                  <circle cx="150" cy="44" r="6"/>
-                  <path d="M96 86 h18 M96 98 h18 M96 110 h18 M96 122 h18 M96 134 h18"/>
-                </g>
-                <g font-family="SF Mono, Menlo, monospace" font-size="9" fill="#67717C" letter-spacing="2">
-                  <text x="20" y="26">PHOTO · CAPTURED BY STAFF · CONFIDENCE 0.94</text>
-                </g>
-              </svg>
-              <button class="playoverlay" id="playOverlay" aria-label="watch tutorial">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8V4z"/></svg>
-              </button>
-              <div class="mlabel">
-                <div><b data-i18n="k_mname">Hammer Strength · Iso-Lateral Row #1</b><br><span data-i18n="k_mset">SEAT 4 · CHEST PAD 2 · NEUTRAL GRIP</span></div>
-                <span class="chip volt num">3×8–10</span>
-              </div>
-            </div>
-
-            <div class="setrows">
-              <div class="setrow done"><span class="sn num">SET 1</span><span class="kg num">40 kg × 10</span><span class="grow"></span><span class="chip num" data-i18n="k_rir1">RIR 3</span><button class="check">✓</button></div>
-              <div class="setrow now"><span class="sn num">SET 2</span><span class="kg num">45 kg × 8</span><span class="grow"></span><span class="chip volt num" data-i18n="k_rir2">TARGET RIR 2</span><button class="check" id="logSet" aria-label="log set">✓</button></div>
-              <div class="setrow"><span class="sn num">SET 3</span><span class="kg num">45 kg × 8</span><span class="grow"></span><span class="chip num">—</span><button class="check">✓</button></div>
-            </div>
-
-            <div class="restwrap">
-              <div class="ring" id="restRing">
-                <svg width="158" height="158" viewBox="0 0 158 158">
-                  <circle class="base" cx="79" cy="79" r="70"/>
-                  <circle class="arc" id="restArc" cx="79" cy="79" r="70" stroke-dasharray="439.8" stroke-dashoffset="0"/>
-                </svg>
-                <div class="t"><b class="num" id="restT">01:30</b><span data-i18n="k_rest">REST</span></div>
-              </div>
-            </div>
-
-            <div class="row" style="margin-top:14px; gap:10px;">
-              <button class="btn ghost" id="busyBtn" style="font-size:14px; padding:13px;" data-i18n="k_busy">Machine busy?</button>
-              <button class="btn volt" style="font-size:14px; padding:13px;" data-i18n="k_next">Done — next</button>
-            </div>
-
-            <div class="busy-sheet" id="busySheet">
-              <div class="eyebrow" style="margin-bottom:10px;" data-i18n="k_alt">CLOSEST ALTERNATIVE · SAME MUSCLES</div>
-              <div class="row">
-                <div class="grow">
-                  <b style="font-size:15px;" data-i18n="k_altname">Seated Cable Row — Station 3</b>
-                  <div style="color:var(--muted); font-size:12px; margin-top:3px;" data-i18n="k_altmeta">8 m away · lats + mid-back · V-grip on the rack</div>
-                </div>
-                <span class="chip mint" data-i18n="k_free">FREE NOW</span>
-              </div>
-              <button class="btn volt" style="margin-top:12px; padding:12px; font-size:14px;" data-i18n="k_swap">Swap this exercise</button>
-            </div>
-
-            <div class="tutmodal" id="tutModal">
-              <div class="scrim" id="tutScrim"></div>
-              <div class="tutsheet">
-                <div class="tuthead">
-                  <span class="chip mint" data-i18n="k_reftag">REFERENCE TUTORIAL · 3D MODEL</span>
-                  <span class="grow" style="flex:1;"></span>
-                  <button class="tutclose" id="tutCloseBtn" aria-label="close">✕</button>
-                </div>
-                <div class="tutstage" id="tutStage" data-angle="side">
-                  <svg viewBox="0 0 320 190" aria-hidden="true">
-                    <g stroke="#3DDC97" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".55">
-                      <rect x="252" y="26" width="38" height="128" rx="4"/>
-                      <path d="M258 40h26M258 52h26M258 64h26M258 140h26"/>
-                      <path d="M252 130h38" stroke-dasharray="2 3"/>
-                      <path d="M228 154V34"/>
-                      <circle cx="228" cy="30" r="6"/>
-                      <rect x="58" y="140" width="52" height="13" rx="6"/>
-                      <path d="M84 153v22M70 175h28"/>
-                      <path d="M182 100 Q150 148 82 116" stroke-dasharray="2 4" opacity=".5"/>
-                    </g>
-                    <g class="pose pose-a" stroke="#3DDC97" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M84 140 L90 92"/>
-                      <circle cx="93" cy="80" r="9" fill="#3DDC97" fill-opacity=".18"/>
-                      <path d="M90 96 L140 104 L182 100"/>
-                      <path d="M182 100 L228 30" stroke="#3FD9FF" stroke-width="1.8"/>
-                      <rect x="253" y="122" width="34" height="7" rx="2" fill="#3DDC97" fill-opacity=".35" stroke="none"/>
-                    </g>
-                    <g class="pose pose-b" stroke="#3DDC97" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M84 140 L88 90"/>
-                      <circle cx="90" cy="78" r="9" fill="#3DDC97" fill-opacity=".18"/>
-                      <path d="M88 94 L58 100 L82 116"/>
-                      <path d="M82 116 Q150 70 228 30" stroke="#3FD9FF" stroke-width="1.8"/>
-                      <rect x="253" y="96" width="34" height="7" rx="2" fill="#D8FF3E" fill-opacity=".55" stroke="none"/>
-                    </g>
-                    <g font-family="SF Mono, Menlo, monospace" font-size="8" fill="#4A5560" letter-spacing="1.5">
-                      <text x="14" y="20">MOTION REFERENCE · LOOPING</text>
-                    </g>
-                  </svg>
-                </div>
-                <div class="tutbar-wrap">
-                  <button class="tutplay" id="tutPlayBtn" aria-label="play or pause">
-                    <svg class="ic-pause" viewBox="0 0 24 24" fill="#1A2000" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
-                    <svg class="ic-play" viewBox="0 0 24 24" fill="#1A2000" aria-hidden="true" hidden><path d="M7 4l13 8-13 8V4z"/></svg>
-                  </button>
-                  <div class="tutbar"><i id="tutbarFill"></i></div>
-                  <span class="tutloop num" data-i18n="k_loop">LOOP · 2.4S</span>
-                </div>
-                <div class="angletabs">
-                  <button class="anglebtn" data-angle="front" data-i18n="k_angF">FRONT</button>
-                  <button class="anglebtn on" data-angle="side" data-i18n="k_angS">SIDE</button>
-                  <button class="anglebtn" data-angle="close" data-i18n="k_angC">CLOSE-UP</button>
-                </div>
-                <p class="tutcaption" id="tutCaption"></p>
-                <div class="cuelist">
-                  <div class="cuerow"><span class="cdot">✓</span><span data-i18n="k_cue1">Drive elbows back and down — not up</span></div>
-                  <div class="cuerow"><span class="cdot">✓</span><span data-i18n="k_cue2">Pause 1 second at full contraction</span></div>
-                  <div class="cuerow"><span class="cdot">✓</span><span data-i18n="k_cue3">3-second controlled negative</span></div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- COACH -->
-          <section class="screen" id="scr-coach">
-            <div class="eyebrow" style="text-align:center;" data-i18n="c_head">COACH · ALWAYS ON · AR / EN</div>
-            <canvas id="orbCanvas" width="460" height="460"></canvas>
-            <div class="orbstate" id="orbState">IDLE — TAP THE ORB</div>
-            <div class="msgs">
-              <div class="msg user" data-i18n="c_u1">My lower back feels tight today</div>
-              <div class="msg ai" data-i18n="c_a1">Understood — nothing alarming in your logs, but we won't load the spine today. I'm swapping Romanian deadlifts for back extensions and adding 5 minutes of hip mobility to your warm-up.</div>
-              <div class="toolchip"><span>✓</span><span class="num" data-i18n="c_tool">plan.swap_exercise → back_extension · plan.add_warmup</span></div>
-              <div class="msg ai" data-i18n="c_a2">If it's a sharp pain rather than tightness, stop and tell me — that's a different protocol.</div>
-            </div>
-            <div class="inputrow">
-              <div class="field" data-i18n="c_field">Message your coach…</div>
-              <button class="mic" aria-label="voice">
-                <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-              </button>
-            </div>
-          </section>
-
-          <!-- FOOD -->
-          <section class="screen" id="scr-food">
-            <div class="row">
-              <div class="grow">
-                <div class="eyebrow" data-i18n="f_head">FOOD DR. · WEEK 3</div>
-                <h1 style="font-size:24px; font-weight:850; letter-spacing:-.02em; margin:4px 0 0;" data-i18n="f_title">Today's fuel</h1>
-              </div>
-              <span class="chip mint" data-i18n="f_mode">MID HEALTHY · 80/20</span>
-            </div>
-
-            <div class="macros">
-              <div class="macro"><div class="mr"><svg width="74" height="74" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" cx="37" cy="37" r="31" stroke="#D8FF3E" stroke-dasharray="194.8" stroke-dashoffset="52"/></svg><div class="mv num">1840</div></div><div class="ml num" data-i18n="f_kcal">KCAL / 2300</div></div>
-              <div class="macro"><div class="mr"><svg width="74" height="74" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" cx="37" cy="37" r="31" stroke="#3DDC97" stroke-dasharray="194.8" stroke-dashoffset="66"/></svg><div class="mv num">96</div></div><div class="ml num" data-i18n="f_prot">PROTEIN / 145G</div></div>
-              <div class="macro"><div class="mr"><svg width="74" height="74" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" cx="37" cy="37" r="31" stroke="#3FD9FF" stroke-dasharray="194.8" stroke-dashoffset="90"/></svg><div class="mv num">168</div></div><div class="ml num" data-i18n="f_carb">CARBS / 260G</div></div>
-              <div class="macro"><div class="mr"><svg width="74" height="74" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" cx="37" cy="37" r="31" stroke="#B7A6FF" stroke-dasharray="194.8" stroke-dashoffset="108"/></svg><div class="mv num">44</div></div><div class="ml num" data-i18n="f_fat">FAT / 72G</div></div>
-            </div>
-
-            <div class="meal">
-              <div class="slot" data-i18n="f_s1">7 AM</div>
-              <div><b data-i18n="f_m1">Labneh, za'atar toast + eggs</b><span class="kcal num" data-i18n="f_m1k">420 kcal · 28g protein</span></div>
-              <span class="act chip mint">✓</span>
-            </div>
-            <div class="meal">
-              <div class="slot" data-i18n="f_s2">1 PM</div>
-              <div><b data-i18n="f_m2">Chicken shawarma bowl, freekeh</b><span class="kcal num" data-i18n="f_m2k">640 kcal · 46g protein</span></div>
-              <span class="act chip mint">✓</span>
-            </div>
-            <div class="meal" style="border-color:rgba(216,255,62,.4);">
-              <div class="slot" data-i18n="f_s3">5 PM</div>
-              <div><b data-i18n="f_m3">Pre-workout: dates + espresso</b><span class="kcal num" data-i18n="f_m3k">180 kcal · timed for 6 PM session</span></div>
-              <span class="act chip volt" data-i18n="f_now">NOW</span>
-            </div>
-            <div class="meal">
-              <div class="slot" data-i18n="f_s4">8 PM</div>
-              <div><b data-i18n="f_m4">Salmon, roast potato + salad</b><span class="kcal num" data-i18n="f_m4k">600 kcal · swap → grilled kofta</span></div>
-              <span class="act chip" data-i18n="f_swap">⇄ SWAP</span>
-            </div>
-
-            <div class="coachnote" style="margin-top:16px;">
-              <div class="dot"></div>
-              <div>
-                <div class="who" data-i18n="f_dr">FOOD DR.</div>
-                <p data-i18n="f_note">Friday is mansaf at your mom's — I've already banked 350 kcal across Thursday and Saturday. Enjoy it guilt-free.</p>
-              </div>
-            </div>
-          </section>
-
-          <!-- PROGRESS -->
-          <section class="screen" id="scr-progress">
-            <div class="row">
-              <div class="grow">
-                <div class="eyebrow num" data-i18n="p_head">INBODY · JUN 2 → JUL 12</div>
-                <h1 style="font-size:24px; font-weight:850; letter-spacing:-.02em; margin:4px 0 0;" data-i18n="p_title">Your body, measured</h1>
-              </div>
-              <span class="chip cyan" data-i18n="p_scan">SCAN IN 41 D</span>
-            </div>
-
-            <div class="deltacard">
-              <div class="delta"><div class="dv num" style="color:var(--mint);">+<span data-count="0.8">0.0</span> kg</div><div class="dl" data-i18n="p_muscle">Skeletal muscle</div></div>
-              <div class="delta"><div class="dv num" style="color:var(--volt);">−<span data-count="1.2">0.0</span> kg</div><div class="dl" data-i18n="p_fat">Body fat</div></div>
-              <div class="delta"><div class="dv num" style="color:var(--cyan);"><span data-count="1408">0</span></div><div class="dl" data-i18n="p_bmr">Measured BMR</div></div>
-            </div>
-
-            <div class="card bodywrap">
-              <svg width="150" height="240" viewBox="0 0 150 240" aria-hidden="true">
-                <circle cx="75" cy="20" r="13" class="m0"/>
-                <rect x="52" y="38" width="46" height="30" rx="10" class="mhot"/>
-                <rect x="52" y="70" width="46" height="34" rx="10" class="mwarm"/>
-                <rect x="30" y="40" width="16" height="52" rx="8" class="mwarm"/>
-                <rect x="104" y="40" width="16" height="52" rx="8" class="m1"/>
-                <rect x="30" y="94" width="16" height="26" rx="8" class="m0"/>
-                <rect x="104" y="94" width="16" height="26" rx="8" class="m0"/>
-                <rect x="52" y="106" width="21" height="62" rx="9" class="m2"/>
-                <rect x="77" y="106" width="21" height="62" rx="9" class="m2"/>
-                <rect x="52" y="172" width="21" height="52" rx="9" class="m0"/>
-                <rect x="77" y="172" width="21" height="52" rx="9" class="m0"/>
-              </svg>
-              <div class="legend">
-                <div><span class="sw" style="background:rgba(216,255,62,.55);"></span><span data-i18n="p_l1">Chest — strongest gain (+4.1%)</span></div>
-                <div><span class="sw" style="background:rgba(61,220,151,.45);"></span><span data-i18n="p_l2">Back &amp; right arm — on track</span></div>
-                <div><span class="sw" style="background:rgba(183,166,255,.45);"></span><span data-i18n="p_l3">Left arm −4% lean vs right → unilateral work added</span></div>
-                <div><span class="sw" style="background:rgba(255,95,86,.55);"></span><span data-i18n="p_l4">Quads — sore, volume pulled this week</span></div>
-              </div>
-            </div>
-
-            <div class="card spark">
-              <div class="row"><b style="font-size:14px;" data-i18n="p_trend">Weight trend</b><span class="grow"></span><span class="chip num">83.4 → 82.1 kg</span></div>
-              <svg viewBox="0 0 340 70" preserveAspectRatio="none">
-                <polyline points="0,18 34,22 68,20 102,28 136,26 170,34 204,31 238,40 272,38 306,46 340,44"
-                  fill="none" stroke="#3FD9FF" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="340" cy="44" r="4" fill="#D8FF3E"/>
-              </svg>
-            </div>
-          </section>
-
-          <!-- TAB BAR -->
-          <nav class="tabbar" id="tabbar">
-            <button data-scr="today"><svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8M5 10v10h14V10"/></svg><span data-i18n="tb_today">TODAY</span></button>
-            <button data-scr="workout"><svg viewBox="0 0 24 24"><path d="M2 12h3M19 12h3M7 8v8M17 8v8M7 12h10"/><rect x="4.6" y="9" width="2.6" height="6" rx="1"/><rect x="16.8" y="9" width="2.6" height="6" rx="1"/></svg><span data-i18n="tb_train">TRAIN</span></button>
-            <button data-scr="coach" class="orbtab" aria-label="coach"></button>
-            <button data-scr="food"><svg viewBox="0 0 24 24"><path d="M4 11h16a8 8 0 0 1-16 0zM9 11V7M12 11V5M15 11V7"/></svg><span data-i18n="tb_food">FOOD</span></button>
-            <button data-scr="progress"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg><span data-i18n="tb_prog">BODY</span></button>
-          </nav>
-        </div>
+  <!-- auth -->
+  <section class="view" id="auth">
+    <div class="card authcard">
+      <div class="wordmark">IRON<i>MAP</i></div>
+      <div class="eyebrow" style="margin-top:6px">YOUR GYM, DIGITIZED · YOUR COACH, PERSONAL</div>
+      <div class="tabs">
+        <button id="tabIn" class="on">Sign in</button>
+        <button id="tabUp">Create account</button>
       </div>
+      <label>Email</label>
+      <input id="email" type="email" placeholder="you@email.com" autocomplete="email">
+      <label>Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+      <button class="btn volt" id="authBtn">Sign in</button>
+      <div class="msg" id="authMsg"></div>
+      <div class="foot" style="margin-top:16px">Members can also use the mobile app · <a href="/">back to site</a></div>
     </div>
+  </section>
 
-    <!-- ================= SIGN IN ================= -->
-    <div class="browser" id="signinFrame" hidden>
-      <div class="bbar">
-        <span class="bdot" style="background:#FF5F56;"></span><span class="bdot" style="background:#FFBD2E;"></span><span class="bdot" style="background:#27C93F;"></span>
-        <span class="burl">app.ironmap.fit / login</span>
-      </div>
-      <div class="si-wrap">
-        <div class="si-card">
-          <div class="wordmark">IRON<i>MAP</i></div>
-          <div class="eyebrow">GYM &amp; HQ PORTAL — MEMBERS USE THE MOBILE APP</div>
-          <input class="si-input" type="email" id="siEmail" placeholder="you@yourgym.com">
-          <input class="si-input" type="password" id="siPass" placeholder="Password">
-          <button class="btn volt" id="siSubmit" style="padding:14px;">Sign in</button>
-          <div class="si-note" id="siNote">Role-based routing: gym staff land on their gym dashboard, IRONMAP staff on HQ. Members use the mobile app.</div>
-          <div class="si-div">TRY A DEMO ACCOUNT</div>
-          <div class="si-demo">
-            <button data-email="owner@powerzone.jo">Gym owner<span>owner@powerzone.jo → GYM DASHBOARD</span></button>
-            <button data-email="admin@ironmap.fit">IRONMAP admin<span>admin@ironmap.fit → HQ</span></button>
+  <!-- onboarding -->
+  <section class="view" id="onboard">
+    <div class="card" style="width:440px;max-width:100%">
+      <div class="eyebrow">WELCOME · ONE QUICK STEP</div>
+      <h1 style="font-size:24px;margin-top:8px">What brings you to <i>IRONMAP</i>?</h1>
+      <div class="paths" id="paths">
+        <div class="path" data-path="direct">
+          <span class="price">$20<small>/mo</small></span>
+          <h3>Just me — Personal</h3>
+          <p>Your own AI coach + nutritionist. Generic-equipment plans, no gym needed.</p>
+        </div>
+        <div class="path" data-path="member">
+          <span class="price" style="color:var(--mint)">Free*</span>
+          <h3>I'm a gym member</h3>
+          <p>Join with your gym's code — workouts mapped to your gym's machines.</p>
+          <div class="extra" id="ex-member"><label>Gym code</label><input id="joinCode" placeholder="e.g. POWERZONE" style="text-transform:uppercase"></div>
+        </div>
+        <div class="path" data-path="gym_owner">
+          <span class="price" style="color:var(--cyan)">from $99</span>
+          <h3>I run a gym</h3>
+          <p>Digitize your floor and give members a 24/7 coach. Pick a package.</p>
+          <div class="extra" id="ex-gym">
+            <label>Gym name</label><input id="gymName" placeholder="PowerZone Amman">
+            <label>City</label><input id="gymCity" placeholder="Amman, JO">
+            <div class="pkgs" id="pkgs">
+              <div class="pkg" data-pkg="starter"><div class="n">STARTER</div><div class="p">$99<small>/mo</small></div><div class="c">150 members</div></div>
+              <div class="pkg sel" data-pkg="growth"><div class="n">GROWTH</div><div class="p">$249<small>/mo</small></div><div class="c">400 members</div></div>
+              <div class="pkg" data-pkg="pro"><div class="n">PRO</div><div class="p">$599<small>/mo</small></div><div class="c">1000+</div></div>
+            </div>
           </div>
         </div>
       </div>
+      <button class="btn volt" id="onboardBtn" disabled>Choose an option</button>
+      <div class="msg" id="onboardMsg"></div>
+      <div class="foot" style="margin-top:14px">* Gym membership is billed by your gym, not IRONMAP. This is a demo checkout — no real payment is taken.</div>
     </div>
+  </section>
 
-    <!-- ================= GYM DASHBOARD ================= -->
-    <div class="browser" id="gymFrame" hidden>
-      <div class="bbar">
-        <span class="bdot" style="background:#FF5F56;"></span><span class="bdot" style="background:#FFBD2E;"></span><span class="bdot" style="background:#27C93F;"></span>
-        <span class="burl">app.ironmap.fit / powerzone-amman</span>
-        <span class="bsession num" id="gymSession">owner@powerzone.jo</span>
-        <button class="bout" id="gymSignout">SIGN OUT</button>
-      </div>
-      <div class="dash">
-        <div class="dhead">
-          <h2>PowerZone Amman</h2>
-          <span class="chip volt">GROWTH · 400 CAP</span>
-          <span class="chip" id="gymCatChip">CATALOG · 47 MACHINES · 9/10 PATTERNS</span>
-          <span class="grow" style="flex:1;"></span>
-          <button class="chip coral" id="reviewChip">2 PHOTOS NEED REVIEW</button>
-        </div>
+  <!-- MEMBER / CUSTOMER app -->
+  <section class="view" id="member"><div class="wrap">
+    <div class="eyebrow" id="mEyebrow">TODAY</div>
+    <h1 id="mGreet">Welcome</h1>
+    <p class="sub" id="mSub"></p>
+    <div class="banner"><div class="grow"><b id="mPlanTitle">Plan</b><span id="mPlanSub"></span></div><span class="chip mint" id="mPlanChip">ACTIVE</span></div>
+    <h2>Your program · sample day</h2>
+    <div class="kpis" id="mMacros"></div>
+    <div id="mWorkout"></div>
+    <h2>Exercises available to you</h2>
+    <div id="mExercises"></div>
+    <div class="foot">Machine catalog &amp; plan engine from IRONMAP core · your account is live in Supabase.</div>
+  </div></section>
 
-        <div class="dtabs" id="gymTabs">
-          <button class="on" data-gtab="overview">Overview</button>
-          <button data-gtab="members">Members &amp; invites</button>
-          <button data-gtab="subs">Subscriptions</button>
-          <button data-gtab="machines">Machines</button>
-        </div>
+  <!-- GYM owner dashboard -->
+  <section class="view" id="gym"><div class="wrap">
+    <div class="eyebrow">GYM DASHBOARD</div>
+    <h1 id="gName">Your gym</h1>
+    <p class="sub" id="gSub"></p>
+    <div class="kpis" id="gKpis"></div>
+    <h2>Invite members</h2>
+    <p class="sub" style="margin-bottom:10px">Share this code — members enter it when they sign up.</p>
+    <div class="code"><span id="gCode">—</span><button id="copyCode">COPY</button></div>
+    <h2>Your catalog</h2>
+    <div id="gCatalog"></div>
+    <div class="foot">Member health data is never shown here — engagement only. Powered by Fable 5.</div>
+  </div></section>
 
-        <div class="dtab-panel on" id="gtab-overview">
-          <div class="kpis">
-            <div class="kpi"><div class="kv num">312<small>/400</small></div><div class="kl">Active members</div></div>
-            <div class="kpi"><div class="kv num">1,204</div><div class="kl">Workouts this week</div></div>
-            <div class="kpi"><div class="kv num" style="color:var(--coral);">18</div><div class="kl">At-risk · no session 14d</div></div>
-            <div class="kpi"><div class="kv num">1,420<small>/2,000</small></div><div class="kl">AI voice minutes</div></div>
-            <div class="kpi"><div class="kv num" style="color:var(--mint);">68%</div><div class="kl">Members on the app</div></div>
-          </div>
-          <div class="util">
-            <div class="uhead"><b>Machine utilization — last 30 days</b><span class="chip cyan">PURCHASING INTEL</span></div>
-            <div class="urow"><span class="un">Iso-Lateral Row #1</span><span class="uz">Upper floor · pull</span><div class="meter"><i style="width:92%; background:var(--volt);"></i></div><span class="up num">92%</span></div>
-            <div class="urow"><span class="un">Pendulum Squat</span><span class="uz">Ground floor · legs</span><div class="meter"><i style="width:88%; background:var(--volt);"></i></div><span class="up num">88%</span></div>
-            <div class="urow"><span class="un">Lat Pulldown #2</span><span class="uz">Upper floor · pull</span><div class="meter"><i style="width:81%; background:var(--mint);"></i></div><span class="up num">81%</span></div>
-            <div class="urow"><span class="un">Chest Press #1</span><span class="uz">Upper floor · push</span><div class="meter"><i style="width:74%; background:var(--mint);"></i></div><span class="up num">74%</span></div>
-            <div class="urow"><span class="un">Cable Crossover</span><span class="uz">Upper floor · push</span><div class="meter"><i style="width:63%; background:var(--cyan);"></i></div><span class="up num">63%</span></div>
-            <div class="urow"><span class="un">Abductor #2</span><span class="uz">Ground floor · legs</span><div class="meter"><i style="width:12%; background:var(--coral);"></i></div><span class="up num">12%</span></div>
-          </div>
-          <p style="margin:0; color:var(--faint); font-size:12px; font-family:var(--mono); letter-spacing:.06em;">
-            MEMBER HEALTH DATA IS NEVER SHOWN HERE — ENGAGEMENT AGGREGATES ONLY (PRIVACY WALL, MIN COHORT 5).
-          </p>
-        </div>
-
-        <div class="dtab-panel" id="gtab-members">
-          <div class="invitecard">
-            <div class="invite-qr">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="1" y="1" width="8" height="8" rx="1"/><rect x="15" y="1" width="8" height="8" rx="1"/>
-                <rect x="1" y="15" width="8" height="8" rx="1"/><rect x="12" y="12" width="4" height="4"/>
-                <rect x="19" y="15" width="4" height="4"/><rect x="15" y="19" width="4" height="4"/>
-                <rect x="12" y="1" width="2" height="2"/><rect x="1" y="12" width="2" height="2"/>
-              </svg>
-              <span>GYM CODE · PWZN-AMM</span>
-            </div>
-            <div class="invite-form">
-              <b style="font-size:14px;">Invite members</b>
-              <div class="linkrow">
-                <span class="link" id="joinLink">app.ironmap.fit/join/powerzone-amman</span>
-                <button id="copyLinkBtn">COPY</button>
-              </div>
-              <div class="emailrow">
-                <input type="email" id="inviteEmail" placeholder="member@email.com">
-                <select id="inviteRole"><option>MEMBER</option><option>STAFF</option></select>
-                <button id="sendInviteBtn">Send invite</button>
-              </div>
-              <div class="pendingwrap">
-                <span class="plabel">Pending invites</span>
-                <div id="pendingInvites">
-                  <div class="inviterow"><span class="ie-email">nour.hijazi@gmail.com</span><span class="ie-role">MEMBER</span><span class="chip">SENT · 2H AGO</span></div>
-                  <div class="inviterow"><span class="ie-email">staff.omar@powerzone.jo</span><span class="ie-role">STAFF</span><span class="chip mint">JOINED</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="roster">
-            <div class="rhead"><b>Members · 312 active</b><span class="chip">SORTED BY LAST WORKOUT</span></div>
-            <div class="rrow">
-              <div class="ravatar" style="background:rgba(216,255,62,.15); color:var(--volt);">AH</div>
-              <span class="rname">Ahmad Al-Sabbagh</span><span class="rmeta">Joined Feb 2026</span>
-              <span class="rstreak num">🔥 18</span><span class="grow" style="flex:1;"></span>
-              <span class="chip mint">ACTIVE · TODAY</span>
-            </div>
-            <div class="rrow">
-              <div class="ravatar" style="background:rgba(63,217,255,.15); color:var(--cyan);">LH</div>
-              <span class="rname">Lina Haddad</span><span class="rmeta">Joined Mar 2026</span>
-              <span class="rstreak num">🔥 9</span><span class="grow" style="flex:1;"></span>
-              <span class="chip mint">ACTIVE · TODAY</span>
-            </div>
-            <div class="rrow">
-              <div class="ravatar" style="background:rgba(255,95,86,.15); color:var(--coral);">YB</div>
-              <span class="rname">Yousef Btoush</span><span class="rmeta">Joined Jan 2026</span>
-              <span class="rstreak num">🔥 0</span><span class="grow" style="flex:1;"></span>
-              <span class="chip coral">AT RISK · 16D</span>
-            </div>
-            <div class="rrow">
-              <div class="ravatar" style="background:rgba(183,166,255,.15); color:var(--violet);">RQ</div>
-              <span class="rname">Rana Qasim</span><span class="rmeta">Joined Jun 2026</span>
-              <span class="rstreak num">🔥 4</span><span class="grow" style="flex:1;"></span>
-              <span class="chip mint">ACTIVE · YESTERDAY</span>
-            </div>
-            <div class="rrow">
-              <div class="ravatar" style="background:rgba(216,255,62,.15); color:var(--volt);">OF</div>
-              <span class="rname">Omar Freij</span><span class="rmeta">Joined Apr 2026</span>
-              <span class="rstreak num">🔥 31</span><span class="grow" style="flex:1;"></span>
-              <span class="chip mint">ACTIVE · TODAY</span>
-            </div>
-            <div class="rrow">
-              <div class="ravatar" style="background:rgba(235,240,245,.08); color:var(--faint);">DA</div>
-              <span class="rname">Dana Abu-Ghazaleh</span><span class="rmeta">Joined May 2026</span>
-              <span class="rstreak num">🔥 0</span><span class="grow" style="flex:1;"></span>
-              <span class="chip">INACTIVE · 29D</span>
-            </div>
-            <div class="rrow">
-              <div class="ravatar" style="background:rgba(63,217,255,.15); color:var(--cyan);">KN</div>
-              <span class="rname">Khaled Nimri</span><span class="rmeta">Joined Feb 2026</span>
-              <span class="rstreak num">🔥 2</span><span class="grow" style="flex:1;"></span>
-              <span class="chip mint">ACTIVE · 2D AGO</span>
-            </div>
-            <div class="rrow">
-              <div class="ravatar" style="background:rgba(61,220,151,.15); color:var(--mint);">SM</div>
-              <span class="rname">Sara Majali</span><span class="rmeta">Joined Jul 2026</span>
-              <span class="rstreak num">🔥 1</span><span class="grow" style="flex:1;"></span>
-              <span class="chip cyan">NEW · JOINED TODAY</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="dtab-panel" id="gtab-subs">
-          <div class="kpis">
-            <div class="kpi"><div class="kv num" style="color:var(--mint);"><span id="kpiSubsRev">12,840</span><small> JOD</small></div><div class="kl">Membership revenue · month</div></div>
-            <div class="kpi"><div class="kv num" id="kpiSubsActive">287</div><div class="kl">Active subscriptions</div></div>
-            <div class="kpi"><div class="kv num" style="color:var(--coral);">9</div><div class="kl">Past due</div></div>
-          </div>
-          <div class="plancards">
-            <div class="plancard"><div class="pname">Monthly</div><div class="pprice num">45 <small>JOD/MO</small></div><div class="pcount">182 MEMBERS</div></div>
-            <div class="plancard"><div class="pname">Quarterly</div><div class="pprice num">110 <small>JOD/3MO</small></div><div class="pcount">74 MEMBERS</div></div>
-            <div class="plancard"><div class="pname">Annual + PT</div><div class="pprice num">720 <small>JOD/YR</small></div><div class="pcount">31 MEMBERS</div></div>
-            <div class="plancard ghosted">+ New plan</div>
-          </div>
-          <div class="invitecard" style="gap:12px;">
-            <div class="invite-form" style="min-width:0;">
-              <b style="font-size:14px;">Assign a subscription</b>
-              <div class="emailrow">
-                <select id="subMember" style="flex:1; min-width:160px;">
-                  <option>Ahmad Al-Sabbagh</option><option>Lina Haddad</option><option>Yousef Btoush</option>
-                  <option>Rana Qasim</option><option>Omar Freij</option><option>Dana Abu-Ghazaleh</option>
-                  <option>Khaled Nimri</option><option>Sara Majali</option>
-                </select>
-                <select id="subPlan">
-                  <option value="monthly">MONTHLY · 45 JOD</option>
-                  <option value="quarterly">QUARTERLY · 110 JOD</option>
-                  <option value="annual">ANNUAL + PT · 720 JOD</option>
-                </select>
-                <button id="subAssignBtn">Assign</button>
-              </div>
-            </div>
-          </div>
-          <div class="roster">
-            <div class="rhead"><b>Member subscriptions</b><span class="chip">MEMBERS PAY THE GYM — NOT IRONMAP</span></div>
-            <div id="subsRows">
-              <div class="rrow"><span class="uw-name">Ahmad Al-Sabbagh</span><span class="chip">MONTHLY</span><span class="uw-pay num">45 JOD</span><span class="grow" style="flex:1;"></span><span class="chip mint">PAID</span><span class="rmeta num">RENEWS AUG 3</span></div>
-              <div class="rrow"><span class="uw-name">Omar Freij</span><span class="chip">ANNUAL + PT</span><span class="uw-pay num">720 JOD</span><span class="grow" style="flex:1;"></span><span class="chip mint">PAID</span><span class="rmeta num">RENEWS FEB 2027</span></div>
-              <div class="rrow"><span class="uw-name">Lina Haddad</span><span class="chip">QUARTERLY</span><span class="uw-pay num">110 JOD</span><span class="grow" style="flex:1;"></span><span class="chip mint">PAID</span><span class="rmeta num">RENEWS SEP 12</span></div>
-              <div class="rrow"><span class="uw-name">Rana Qasim</span><span class="chip">MONTHLY</span><span class="uw-pay num">45 JOD</span><span class="grow" style="flex:1;"></span><span class="chip volt">DUE IN 3D</span><span class="rmeta num">JUL 18</span></div>
-              <div class="rrow"><span class="uw-name">Yousef Btoush</span><span class="chip">MONTHLY</span><span class="uw-pay num">45 JOD</span><span class="grow" style="flex:1;"></span><span class="chip coral">PAST DUE · 9D</span><span class="rmeta num">JUL 6</span></div>
-              <div class="rrow"><span class="uw-name">Sara Majali</span><span class="chip">MONTHLY</span><span class="uw-pay num">45 JOD</span><span class="grow" style="flex:1;"></span><span class="chip mint">PAID</span><span class="rmeta num">RENEWS AUG 15</span></div>
-            </div>
-          </div>
-          <div class="invitecard" style="align-items:center;">
-            <div style="flex:1; min-width:220px;"><b style="font-size:13.5px;">Your IRONMAP plan is separate</b>
-              <div style="color:var(--muted); font-size:12px; margin-top:3px;">Member payments above go to the gym directly. IRONMAP bills the gym: Growth · $249/mo · 2,000 voice minutes pooled.</div></div>
-            <span class="chip volt">GROWTH</span><span class="chip cyan">UPGRADE TO PRO →</span>
-          </div>
-        </div>
-
-        <div class="dtab-panel" id="gtab-machines">
-          <div class="roster">
-            <div class="rhead"><b>Review queue — AI needs a human eye</b><span class="chip coral">EVERY CONFIRM TRAINS THE RECOGNIZER</span></div>
-            <div style="display:flex; flex-direction:column; gap:8px; padding:12px 14px;">
-              <div class="inviterow">
-                <div class="mthumb"><svg viewBox="0 0 30 30"><path d="M6 24V10q0-3 3-3h6M15 7l8 6M23 13v11M4 24h24"/><circle cx="15" cy="7" r="2.4"/></svg></div>
-                <div style="flex:1;"><b class="rev-guess" data-alt="Rear Delt Fly (reverse setup)">Pec Deck Fly</b>
-                  <div style="color:var(--faint); font-size:10.5px; font-family:var(--mono); margin-top:2px; letter-spacing:.05em;">CONFIDENCE 0.91 · UPLOADED 2H AGO · BY OMAR (STAFF)</div></div>
-                <button class="btn-sm ghost rev-correct">Correct</button>
-                <button class="btn-sm volt rev-confirm">Confirm</button>
-              </div>
-              <div class="inviterow">
-                <div class="mthumb"><svg viewBox="0 0 30 30"><path d="M4 22h22M8 22V12q0-2 2-2h6M16 10l7 4M23 14v8"/><circle cx="9" cy="7" r="2.2"/></svg></div>
-                <div style="flex:1;"><b class="rev-guess" data-alt="Lying Hamstring Curl">Seated Leg Curl</b>
-                  <div style="color:var(--faint); font-size:10.5px; font-family:var(--mono); margin-top:2px; letter-spacing:.05em;">CONFIDENCE 0.88 · UPLOADED 5H AGO · BY OMAR (STAFF)</div></div>
-                <button class="btn-sm ghost rev-correct">Correct</button>
-                <button class="btn-sm volt rev-confirm">Confirm</button>
-              </div>
-            </div>
-          </div>
-          <div class="hqgrid">
-            <div class="hqtable">
-              <div class="qhead"><b>Catalog by zone</b><span class="chip">47 MACHINES</span></div>
-              <div class="hqrow"><span class="rmeta">UPPER FLOOR</span><div class="gname"><b>Pull area</b><span>rows, pulldowns, cables</span></div><span class="grow" style="flex:1;"></span><span class="gcap num">11</span></div>
-              <div class="hqrow"><span class="rmeta">UPPER FLOOR</span><div class="gname"><b>Push area</b><span>presses, flys, dips</span></div><span class="grow" style="flex:1;"></span><span class="gcap num">9</span></div>
-              <div class="hqrow"><span class="rmeta">GROUND FLOOR</span><div class="gname"><b>Legs</b><span>squat, curls, extensions</span></div><span class="grow" style="flex:1;"></span><span class="gcap num">14</span></div>
-              <div class="hqrow"><span class="rmeta">GROUND FLOOR</span><div class="gname"><b>Cardio</b><span>treadmills, bikes, rowers</span></div><span class="grow" style="flex:1;"></span><span class="gcap num">8</span></div>
-              <div class="hqrow"><span class="rmeta">GROUND FLOOR</span><div class="gname"><b>Free weights</b><span>racks, benches, dumbbells</span></div><span class="grow" style="flex:1;"></span><span class="gcap num">5</span></div>
-            </div>
-            <div class="attnlist">
-              <div class="qhead"><b>Coverage</b></div>
-              <div class="attnrow"><span class="chip mint" style="flex:none;">9/10</span><div><b>Movement patterns covered</b><span>Push, pull, squat, lunge, carry, core…</span></div></div>
-              <div class="attnrow"><span class="chip coral" style="flex:none;">MISSING</span><div><b>Hip hinge machine</b><span>Plans substitute Romanian deadlifts with dumbbells</span></div></div>
-              <div class="attnrow"><span class="chip cyan" style="flex:none;">TIP</span><div><b>Walk-the-floor mode</b><span>Staff phone → snap each machine → AI catalogs it</span></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ================= IRONMAP HQ (PLATFORM) ================= -->
-    <div class="browser" id="platformFrame" hidden>
-      <div class="bbar">
-        <span class="bdot" style="background:#FF5F56;"></span><span class="bdot" style="background:#FFBD2E;"></span><span class="bdot" style="background:#27C93F;"></span>
-        <span class="burl">hq.ironmap.fit / admin</span>
-        <span class="bsession num" id="hqSession">admin@ironmap.fit</span>
-        <button class="bout" id="hqSignout">SIGN OUT</button>
-      </div>
-      <div class="dash">
-        <div class="dhead">
-          <h2>IRONMAP HQ</h2>
-          <span class="chip volt">INTERNAL · ALL GYMS</span>
-          <span class="grow" style="flex:1;"></span>
-          <span class="chip">Q3 2026</span>
-        </div>
-
-        <div class="dtabs" id="hqTabs">
-          <button class="on" data-htab="overview">Overview</button>
-          <button data-htab="accounts">Accounts &amp; users</button>
-        </div>
-
-        <div class="dtab-panel on" id="htab-overview">
-        <div class="kpis">
-          <div class="kpi"><div class="kv num" id="kpiGyms">34</div><div class="kl">Gyms on platform</div></div>
-          <div class="kpi"><div class="kv num" id="kpiMembers">9,842</div><div class="kl">Active members</div></div>
-          <div class="kpi"><div class="kv num" style="color:var(--volt);" id="kpiDirect">1,208</div><div class="kl">Direct users · no gym</div></div>
-          <div class="kpi"><div class="kv num" style="color:var(--mint);" id="kpiMrr">$14,220</div><div class="kl">MRR</div></div>
-          <div class="kpi"><div class="kv num" style="color:var(--cyan);">27,412</div><div class="kl">AI plans generated</div></div>
-          <div class="kpi"><div class="kv num" style="color:var(--coral);">2.1%</div><div class="kl">Logo churn · monthly</div></div>
-          <div class="kpi"><div class="kv num">$1,860<small>/$3,000</small></div><div class="kl">AI infra cost · budget</div></div>
-        </div>
-
-        <div class="util" style="padding:16px;">
-          <div class="row"><b style="font-size:14px;">MRR growth</b><span class="grow"></span><span class="chip mint">+18% Q/Q</span></div>
-          <svg viewBox="0 0 700 80" preserveAspectRatio="none" style="width:100%; height:70px; margin-top:8px; display:block;">
-            <polyline points="0,60 70,58 140,52 210,50 280,42 350,40 420,32 490,28 560,18 630,14 700,8"
-              fill="none" stroke="#3DDC97" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="700" cy="8" r="4" fill="#D8FF3E"/>
-          </svg>
-        </div>
-
-        <div class="hqgrid">
-          <div class="hqtable" id="hqGymsTable">
-            <div class="qhead"><b>Gyms</b><span class="chip cyan" id="hqGymsTotal">34 TOTAL</span></div>
-            <div class="colhead"><span style="width:7px;"></span><span style="width:170px;">NAME</span><span style="flex:1;"></span><span style="width:64px; text-align:right;">MEMBERS</span><span style="width:52px; text-align:right;">AI · MO</span><span style="width:52px; text-align:right;">MRR</span></div>
-            <div class="hqrow">
-              <span class="healthdot" style="background:var(--mint);"></span>
-              <div class="gname"><b>PowerZone Amman</b><span>Amman, JO</span></div>
-              <span class="chip volt">GROWTH</span><span class="grow" style="flex:1;"></span>
-              <span class="gcap num">312/400</span><span class="gai num">$212</span><span class="gmrr num">$249</span>
-            </div>
-            <div class="hqrow">
-              <span class="healthdot" style="background:var(--coral);"></span>
-              <div class="gname"><b>FitZone Zarqa</b><span>Zarqa, JO</span></div>
-              <span class="chip">STARTER</span><span class="grow" style="flex:1;"></span>
-              <span class="gcap num">61/150</span><span class="gai num">$38</span><span class="gmrr num">$99</span>
-            </div>
-            <div class="hqrow">
-              <span class="healthdot" style="background:var(--coral);"></span>
-              <div class="gname"><b>Momentum Irbid</b><span>Irbid, JO</span></div>
-              <span class="chip">STARTER</span><span class="grow" style="flex:1;"></span>
-              <span class="gcap num">88/150</span><span class="gai num">$51</span><span class="gmrr num">$99</span>
-            </div>
-            <div class="hqrow">
-              <span class="healthdot" style="background:var(--mint);"></span>
-              <div class="gname"><b>Dubai Fitness Hub</b><span>Dubai, AE</span></div>
-              <span class="chip cyan">PRO</span><span class="grow" style="flex:1;"></span>
-              <span class="gcap num">940/1000</span><span class="gai num">$604</span><span class="gmrr num">$599</span>
-            </div>
-            <div class="hqrow">
-              <span class="healthdot" style="background:var(--mint);"></span>
-              <div class="gname"><b>Riyadh Iron Club</b><span>Riyadh, SA</span></div>
-              <span class="chip volt">GROWTH</span><span class="grow" style="flex:1;"></span>
-              <span class="gcap num">275/400</span><span class="gai num">$186</span><span class="gmrr num">$249</span>
-            </div>
-            <div class="hqrow">
-              <span class="healthdot" style="background:var(--cyan);"></span>
-              <div class="gname"><b>Aqaba Coast Gym</b><span>Aqaba, JO</span></div>
-              <span class="chip">TRIAL</span><span class="grow" style="flex:1;"></span>
-              <span class="gcap num">22/50</span><span class="gai num">$9</span><span class="gmrr num">$0</span>
-            </div>
-          </div>
-
-          <div class="attnlist">
-            <div class="qhead"><b>Needs attention</b></div>
-            <div class="attnrow"><span class="chip coral" style="flex:none;">TRIAL</span><div><b>FitZone Zarqa</b><span>Trial ends in 2 days · no card on file</span></div></div>
-            <div class="attnrow"><span class="chip coral" style="flex:none;">CHURN RISK</span><div><b>Momentum Irbid</b><span>Engagement down 40% · 3 support tickets open</span></div></div>
-            <div class="attnrow"><span class="chip" style="flex:none;">REVIEW</span><div><b>Dubai Fitness Hub</b><span>14 machine photos awaiting staff confirmation</span></div></div>
-            <div class="attnrow"><span class="chip cyan" style="flex:none;">UPSELL</span><div><b>PowerZone Amman</b><span>71% of voice minutes used on Growth · offer Pro</span></div></div>
-          </div>
-        </div>
-
-        <p style="margin:0; color:var(--faint); font-size:12px; font-family:var(--mono); letter-spacing:.06em;">
-          SAME PRIVACY WALL APPLIES PLATFORM-WIDE — MEMBER HEALTH DATA IS NEVER QUERYABLE FROM HQ, EVEN BY IRONMAP STAFF.
-        </p>
-        </div>
-
-        <div class="dtab-panel" id="htab-accounts">
-          <div class="two-col">
-            <div class="invitecard" style="gap:12px;">
-              <div class="invite-form" style="min-width:0;">
-                <b style="font-size:14px;">Create a gym account</b>
-                <div class="emailrow">
-                  <input type="text" id="cgName" placeholder="Gym name">
-                  <input type="text" id="cgCity" placeholder="City, country" style="min-width:120px; max-width:150px;">
-                </div>
-                <div class="emailrow">
-                  <select id="cgTier"><option>TRIAL</option><option>STARTER</option><option selected>GROWTH</option><option>PRO</option></select>
-                  <button id="cgBtn">Create gym</button>
-                </div>
-                <div class="si-foot">Owner gets an email invite → lands on their gym dashboard at first sign-in.</div>
-              </div>
-            </div>
-            <div class="invitecard" style="gap:12px;">
-              <div class="invite-form" style="min-width:0;">
-                <b style="font-size:14px;">Create a user account</b>
-                <div class="emailrow">
-                  <input type="text" id="cuName" placeholder="Full name">
-                  <input type="email" id="cuEmail" placeholder="email@user.com" style="min-width:120px; max-width:170px;">
-                </div>
-                <div class="emailrow">
-                  <select id="cuGym">
-                    <option value="direct">NO GYM — DIRECT · $12/MO</option>
-                    <option>PowerZone Amman</option><option>FitZone Zarqa</option><option>Momentum Irbid</option>
-                    <option>Dubai Fitness Hub</option><option>Riyadh Iron Club</option><option>Aqaba Coast Gym</option>
-                  </select>
-                  <button id="cuBtn">Create user</button>
-                </div>
-                <div class="si-foot">Direct users pay IRONMAP $12/mo and train without a partner gym — generic-equipment plans.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="roster">
-            <div class="rhead"><b>All users — gym members + direct</b><span class="chip cyan">USAGE METADATA ONLY · NO HEALTH DATA</span></div>
-            <div class="colhead"><span style="width:30px;"></span><span style="width:150px;">NAME</span><span style="width:150px;">GYM</span><span style="width:64px; text-align:right;">PAYS</span><span style="width:58px; text-align:right;">AI · MO</span><span style="width:50px; text-align:right;">PLANS</span><span style="flex:1;"></span><span>STATUS</span></div>
-            <div id="usersRows">
-              <div class="rrow"><div class="ravatar" style="background:rgba(216,255,62,.15); color:var(--volt);">FA</div><span class="uw-name">Faris Al-Omari</span><span class="chip volt">DIRECT</span><span class="uw-pay num">$12/mo</span><span class="uw-ai num">$1.10</span><span class="uw-plans num">9</span><span class="grow" style="flex:1;"></span><span class="chip mint">ACTIVE · TODAY</span></div>
-              <div class="rrow"><div class="ravatar" style="background:rgba(255,95,86,.15); color:var(--coral);">MS</div><span class="uw-name">Maha Shdeifat</span><span class="chip volt">DIRECT</span><span class="uw-pay num">$12/mo</span><span class="uw-ai num" style="color:var(--coral);">$3.60</span><span class="uw-plans num">22</span><span class="grow" style="flex:1;"></span><span class="chip coral">HEAVY VOICE</span></div>
-              <div class="rrow"><div class="ravatar" style="background:rgba(216,255,62,.15); color:var(--volt);">AH</div><span class="uw-name">Ahmad Al-Sabbagh</span><span class="rmeta">PowerZone Amman</span><span class="uw-pay num">$0 · gym</span><span class="uw-ai num">$0.22</span><span class="uw-plans num">4</span><span class="grow" style="flex:1;"></span><span class="chip mint">ACTIVE · TODAY</span></div>
-              <div class="rrow"><div class="ravatar" style="background:rgba(63,217,255,.15); color:var(--cyan);">LH</div><span class="uw-name">Lina Haddad</span><span class="rmeta">PowerZone Amman</span><span class="uw-pay num">$0 · gym</span><span class="uw-ai num">$0.14</span><span class="uw-plans num">3</span><span class="grow" style="flex:1;"></span><span class="chip mint">ACTIVE · TODAY</span></div>
-              <div class="rrow"><div class="ravatar" style="background:rgba(183,166,255,.15); color:var(--violet);">TM</div><span class="uw-name">Tariq Masri</span><span class="rmeta">Dubai Fitness Hub</span><span class="uw-pay num">$0 · gym</span><span class="uw-ai num">$0.31</span><span class="uw-plans num">6</span><span class="grow" style="flex:1;"></span><span class="chip mint">ACTIVE · 2D AGO</span></div>
-              <div class="rrow"><div class="ravatar" style="background:rgba(255,95,86,.15); color:var(--coral);">YB</div><span class="uw-name">Yousef Btoush</span><span class="rmeta">PowerZone Amman</span><span class="uw-pay num">$0 · gym</span><span class="uw-ai num">$0.02</span><span class="uw-plans num">1</span><span class="grow" style="flex:1;"></span><span class="chip coral">AT RISK · 16D</span></div>
-              <div class="rrow"><div class="ravatar" style="background:rgba(61,220,151,.15); color:var(--mint);">NK</div><span class="uw-name">Noor Katbi</span><span class="rmeta">Riyadh Iron Club</span><span class="uw-pay num">$0 · gym</span><span class="uw-ai num">$0.09</span><span class="uw-plans num">2</span><span class="grow" style="flex:1;"></span><span class="chip mint">ACTIVE · TODAY</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <p class="caption" id="caption"><b>Welcome / Login.</b> The first thing a member sees — their gym's name is already on it if they came via the QR poster.</p>
-  </main>
-</div>
-
-<script>
-(function(){
-  "use strict";
-
-  /* ---------- i18n ---------- */
-  var STR = {
-    r_welcome:["Welcome / Login","الترحيب / الدخول"], r_today:["Today — home","اليوم — الرئيسية"],
-    r_workout:["Workout player","مشغّل التمرين"], r_coach:["Coach — voice orb","المدرب — الصوت"],
-    r_food:["Food Dr.","دكتور الأكل"], r_progress:["Progress","التقدّم"],
-    w_eyebrow:["POWERZONE GYM · AMMAN","نادي باورزون · عمّان"],
-    w_tagline:["Your gym, digitized. Your coach, personal. Every workout mapped to the exact machines on your floor.","ناديك صار رقمي، ومدربك شخصي. كل تمرين مبني على نفس الأجهزة الموجودة عندك بالنادي."],
-    w_start:["Get started","يلا نبدأ"], w_code:["I have a gym code","عندي كود النادي"],
-    w_qr:["New here? Scan the IRONMAP QR poster at your gym's front desk — your floor loads automatically.","جديد هون؟ امسح ملصق IRONMAP عند استقبال النادي — أجهزة ناديك بتنزل تلقائياً."],
-    t_date:["TUESDAY · JUL 15","الثلاثاء · ١٥ تموز"], t_greet:["Evening, Ahmed","مساء الخير يا أحمد"],
-    t_ready:["How's the body today?","كيف حاسس بجسمك اليوم؟"],
-    t_ready2:["Quads flagged sore yesterday — tap to update.","سجّلت وجع بالفخذ مبارح — اضغط للتحديث."],
-    t_30s:["30-SEC CHECK-IN","تشيك سريع ٣٠ ثانية"], t_adj:["ADJUSTED FOR SORENESS","معدّل حسب العضلات المشدودة"],
-    t_push:["Pull Day","يوم السحب"], t_meta:["6 EXERCISES · ~52 MIN · UPPER FLOOR","٦ تمارين · ~٥٢ دقيقة · الطابق العلوي"],
-    t_e1:["Iso-Lateral Row","تجديف آيزو"], t_e2:["Lat Pulldown #2","سحب أمامي #٢"], t_e3:["Seated Cable Row","تجديف كيبل"],
-    t_e4:["Rear Delt Fly","كتف خلفي"], t_e5:["+2","+٢"], t_start:["Start workout","ابدأ التمرين"],
-    t_sets:["Hard sets this week","مجموعات قوية هالأسبوع"], t_protein:["Protein today","بروتين اليوم"], t_scan:["To next scan","للفحص الجاي"],
-    t_coach:["COACH · 6:10 PM","المدرب · ٦:١٠ م"],
-    t_msg:["Quads still at 6/10 soreness, so today became a pull session — squats moved to Thursday. The Iso-Lateral Row is free right now.","فخذك لسا تعبان (٦/١٠)، فخليت اليوم سحب — والسكوات نقلته للخميس. جهاز التجديف فاضي هلأ."],
-    k_step:["EXERCISE 2 OF 6 · PULL DAY","تمرين ٢ من ٦ · يوم السحب"], k_name:["Iso-Lateral Row","تجديف آيزو لاترال"],
-    k_tut:["▶ TUTORIAL","▶ شرح"], k_live:["YOUR GYM · UPPER FLOOR · PULL AREA","ناديك · الطابق العلوي · منطقة السحب"],
-    k_mname:["Hammer Strength · Iso-Lateral Row #1","هامر سترينجث · تجديف آيزو #١"],
-    k_mset:["SEAT 4 · CHEST PAD 2 · NEUTRAL GRIP","المقعد ٤ · مسند الصدر ٢ · قبضة محايدة"],
-    k_rir1:["RIR 3","RIR 3"], k_rir2:["TARGET RIR 2","الهدف RIR 2"], k_rest:["REST","استراحة"],
-    k_busy:["Machine busy?","الجهاز مشغول؟"], k_next:["Done — next","خلصت — التالي"],
-    k_alt:["CLOSEST ALTERNATIVE · SAME MUSCLES","أقرب بديل · نفس العضلات"],
-    k_altname:["Seated Cable Row — Station 3","تجديف كيبل — محطة ٣"],
-    k_altmeta:["8 m away · lats + mid-back · V-grip on the rack","على بعد ٨ متر · ظهر · قبضة V عالرف"],
-    k_free:["FREE NOW","فاضي هلأ"], k_swap:["Swap this exercise","بدّل التمرين"],
-    c_head:["COACH · ALWAYS ON · AR / EN","المدرب · متاح دايماً · عربي / EN"],
-    c_u1:["My lower back feels tight today","ظهري شادد شوي اليوم"],
-    c_a1:["Understood — nothing alarming in your logs, but we won't load the spine today. I'm swapping Romanian deadlifts for back extensions and adding 5 minutes of hip mobility to your warm-up.","تمام — ما في شي مقلق بسجلاتك، بس اليوم ما رح نحمّل عالعمود الفقري. بدّلت الرفعة الرومانية بتمديد الظهر وضفت ٥ دقايق إحماء للورك."],
-    c_tool:["plan.swap_exercise → back_extension · plan.add_warmup","plan.swap_exercise → back_extension · plan.add_warmup"],
-    c_a2:["If it's a sharp pain rather than tightness, stop and tell me — that's a different protocol.","إذا الوجع حاد مش بس شد — وقّف وخبرني فوراً، هاد إجراء مختلف."],
-    c_field:["Message your coach…","اكتب لمدربك…"],
-    f_head:["FOOD DR. · WEEK 3","دكتور الأكل · الأسبوع ٣"], f_title:["Today's fuel","وقود اليوم"],
-    f_mode:["MID HEALTHY · 80/20","صحي متوازن · ٨٠/٢٠"],
-    f_kcal:["KCAL / 2300","سعرة / ٢٣٠٠"], f_prot:["PROTEIN / 145G","بروتين / ١٤٥غ"], f_carb:["CARBS / 260G","كارب / ٢٦٠غ"], f_fat:["FAT / 72G","دهون / ٧٢غ"],
-    f_s1:["7 AM","٧ ص"], f_s2:["1 PM","١ م"], f_s3:["5 PM","٥ م"], f_s4:["8 PM","٨ م"],
-    f_m1:["Labneh, za'atar toast + eggs","لبنة وزعتر مع توست وبيض"], f_m1k:["420 kcal · 28g protein","٤٢٠ سعرة · ٢٨غ بروتين"],
-    f_m2:["Chicken shawarma bowl, freekeh","بول شاورما دجاج مع فريكة"], f_m2k:["640 kcal · 46g protein","٦٤٠ سعرة · ٤٦غ بروتين"],
-    f_m3:["Pre-workout: dates + espresso","قبل التمرين: تمر + اسبريسو"], f_m3k:["180 kcal · timed for 6 PM session","١٨٠ سعرة · موقّت لتمرين ٦ م"],
-    f_m4:["Salmon, roast potato + salad","سلمون وبطاطا مشوية مع سلطة"], f_m4k:["600 kcal · swap → grilled kofta","٦٠٠ سعرة · بديل → كفتة مشوية"],
-    f_now:["NOW","هلأ"], f_swap:["⇄ SWAP","⇄ بدّل"], f_dr:["FOOD DR.","دكتور الأكل"],
-    f_note:["Friday is mansaf at your mom's — I've already banked 350 kcal across Thursday and Saturday. Enjoy it guilt-free.","الجمعة منسف عند أمك — حجزتلك ٣٥٠ سعرة من الخميس والسبت. استمتع فيه بلا ذنب."],
-    p_head:["INBODY · JUN 2 → JUL 12","إن بودي · ٢ حزيران ← ١٢ تموز"], p_title:["Your body, measured","جسمك بالأرقام"],
-    p_scan:["SCAN IN 41 D","الفحص بعد ٤١ يوم"],
-    p_muscle:["Skeletal muscle","عضل هيكلي"], p_fat:["Body fat","دهون"], p_bmr:["Measured BMR","معدل الحرق المقاس"],
-    p_l1:["Chest — strongest gain (+4.1%)","الصدر — أعلى تقدم (+٤٫١٪)"],
-    p_l2:["Back & right arm — on track","الظهر والذراع اليمين — عالمسار"],
-    p_l3:["Left arm −4% lean vs right → unilateral work added","الذراع الشمال −٤٪ عن اليمين ← ضفنا تمارين جانب واحد"],
-    p_l4:["Quads — sore, volume pulled this week","الفخذ — تعبان، خففنا الحجم هالأسبوع"],
-    p_trend:["Weight trend","منحنى الوزن"],
-    tb_today:["TODAY","اليوم"], tb_train:["TRAIN","تمرين"], tb_food:["FOOD","أكل"], tb_prog:["BODY","جسمي"],
-    cap_welcome:["<b>Welcome / Login.</b> The first thing a member sees — their gym's name is already on it if they came via the QR poster.","<b>الترحيب / الدخول.</b> أول شاشة يشوفها العضو — اسم ناديه جاهز إذا دخل عن طريق ملصق QR."],
-    cap_today:["<b>Today.</b> Readiness check-in, the adjusted session, streak, live protein — and the coach explains every change it makes.","<b>اليوم.</b> جاهزيتك، الجلسة المعدّلة، الستريك والبروتين — والمدرب بيشرح كل تغيير بيعمله."],
-    cap_workout:["<b>Workout player.</b> The exact machine in YOUR gym — photo, zone, seat settings — with set logging, rest ring, and a one-tap alternative when it's busy.","<b>مشغّل التمرين.</b> نفس الجهاز الموجود بناديك — صورة ومكان وإعدادات — مع تسجيل المجموعات وعدّاد الراحة وبديل بكبسة لما يكون مشغول."],
-    cap_coach:["<b>Coach.</b> Tap the orb — voice with barge-in, and every promise becomes a real tool-call into the plan engine (the green chip).","<b>المدرب.</b> اضغط الكرة — صوت بمقاطعة فورية، وكل وعد بيتحول لأمر حقيقي بمحرك الخطة (الشريحة الخضراء)."],
-    cap_food:["<b>Food Dr.</b> Macro rings from your measured BMR, Levantine food by default, and the 80/20 mode that banks calories for Friday mansaf.","<b>دكتور الأكل.</b> حلقات ماكروز من معدل حرقك المقاس، أكل شامي افتراضياً، ونظام ٨٠/٢٠ بيحجزلك سعرات لمنسف الجمعة."],
-    cap_progress:["<b>Progress.</b> Scan-to-scan deltas, per-limb heat map from InBody segmental data — including the left/right asymmetry the plan already corrects for.","<b>التقدّم.</b> فرق بين فحص وفحص، وخريطة حرارية لكل طرف من بيانات إن بودي — مع فرق اليمين/الشمال اللي الخطة بتصححه."],
-    cap_gym:["<b>Gym dashboard.</b> Four tabs: overview analytics, members &amp; invites, member subscriptions (what members pay the gym), and the machine review queue. Health data never appears here.","<b>لوحة النادي.</b> أربع صفحات: نظرة عامة، الأعضاء والدعوات، اشتراكات الأعضاء (شو بيدفعوا للنادي)، وطابور مراجعة الأجهزة. البيانات الصحية ما بتظهر هون أبداً."],
-    cap_platform:["<b>IRONMAP HQ.</b> The company's control room — every gym, MRR, AI cost per gym, plans generated, plus account creation for gyms and users (including direct users with no gym).","<b>IRONMAP HQ.</b> غرفة تحكم الشركة — كل نادي، الإيرادات، كلفة الذكاء لكل نادي، عدد الخطط، وكمان إنشاء حسابات للنوادي والمستخدمين (حتى المستخدمين بلا نادي)."],
-    cap_signin:["<b>Sign in.</b> One portal, role-based routing — a gym owner's email lands on their gym dashboard, an IRONMAP email lands on HQ. Members never see this page; the mobile app is theirs.","<b>تسجيل الدخول.</b> بوابة وحدة وتوجيه حسب الدور — إيميل صاحب النادي بوديه للوحة ناديه، وإيميل IRONMAP بوديه لـ HQ. الأعضاء ما بيشوفوا هالصفحة — تطبيق الموبايل إلهم."],
-    k_reftag:["REFERENCE TUTORIAL · 3D MODEL","فيديو مرجعي · نموذج ثلاثي الأبعاد"],
-    k_loop:["LOOP · 2.4S","تكرار · ٢٫٤ث"],
-    k_angF:["FRONT","أمامي"], k_angS:["SIDE","جانبي"], k_angC:["CLOSE-UP","قريب"],
-    k_angcap_front:["Front angle — watch shoulder blades squeeze together","من الأمام — راقب انقباض لوحي الكتف"],
-    k_angcap_side:["Side angle — track the elbow path","من الجانب — تابع مسار المرفق"],
-    k_angcap_close:["Close-up — grip and wrist alignment","قريب — وضعية القبضة والمعصم"],
-    k_cue1:["Drive elbows back and down — not up","ادفع مرفقيك للخلف وللأسفل — مو لفوق"],
-    k_cue2:["Pause 1 second at full contraction","وقفة ثانية عند أقصى انقباض"],
-    k_cue3:["3-second controlled negative","انزال متحكم فيه لمدة ٣ ثواني"]
-  };
-  var lang = "en";
-  function applyLang(){
-    var i = lang === "ar" ? 1 : 0;
-    document.querySelectorAll("[data-i18n]").forEach(function(el){
-      var k = el.getAttribute("data-i18n");
-      if (STR[k]) el.textContent = STR[k][i];
-    });
-    document.getElementById("app").dir = lang === "ar" ? "rtl" : "ltr";
-    setCaption(current);
-  }
-
-  /* ---------- screen router ---------- */
-  var current = "welcome";
-  var railBtns = document.querySelectorAll(".rail button");
-  var tabBtns = document.querySelectorAll(".tabbar button");
-  function setCaption(name){
-    var i = lang === "ar" ? 1 : 0;
-    var k = "cap_" + name;
-    if (STR[k]) document.getElementById("caption").innerHTML = STR[k][i];
-  }
-  function show(name){
-    current = name;
-    document.querySelectorAll(".screen").forEach(function(s){ s.classList.toggle("active", s.id === "scr-" + name); });
-    railBtns.forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-scr") === name); });
-    tabBtns.forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-scr") === name); });
-    setCaption(name);
-    if (name === "progress") runCounts();
-  }
-  railBtns.forEach(function(b){ b.addEventListener("click", function(){ setView("member"); show(b.getAttribute("data-scr")); }); });
-  tabBtns.forEach(function(b){ b.addEventListener("click", function(){ show(b.getAttribute("data-scr")); }); });
-  document.querySelectorAll("[data-goto]").forEach(function(b){ b.addEventListener("click", function(){ show(b.getAttribute("data-goto")); }); });
-  document.getElementById("loginBtn").addEventListener("click", function(){ show("today"); });
-
-  /* ---------- member / gym / platform / signin view ---------- */
-  var view = "member";
-  function setView(v){
-    view = v;
-    document.getElementById("rail").style.display = v === "member" ? "" : "none";
-    document.getElementById("phoneWrap").style.display = v === "member" ? "" : "none";
-    document.getElementById("gymFrame").hidden = v !== "gym";
-    document.getElementById("platformFrame").hidden = v !== "platform";
-    document.getElementById("signinFrame").hidden = v !== "signin";
-    document.querySelectorAll("#viewToggle button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-view") === v); });
-    if (v !== "member") setCaption(v); else setCaption(current);
-  }
-  document.querySelectorAll("#viewToggle button").forEach(function(b){
-    b.addEventListener("click", function(){ setView(b.getAttribute("data-view")); });
-  });
-  document.querySelectorAll("#langToggle button").forEach(function(b){
-    b.addEventListener("click", function(){
-      lang = b.getAttribute("data-lang");
-      document.querySelectorAll("#langToggle button").forEach(function(x){ x.classList.toggle("on", x === b); });
-      applyLang();
-      updateTutCaption();
-    });
-  });
-
-  /* ---------- phone scale to fit ---------- */
-  function fit(){
-    var ph = document.getElementById("phone");
-    var avail = window.innerHeight - 170;
-    var s = Math.min(1, avail / 844);
-    ph.style.transform = "scale(" + s + ")";
-    document.getElementById("phoneWrap").style.height = (844 * s) + "px";
-    document.getElementById("phoneWrap").style.width = (390 * Math.min(1, s + .02)) + "px";
-  }
-  window.addEventListener("resize", fit); fit();
-
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  /* ---------- welcome sky (dot field) ---------- */
-  var sky = document.getElementById("skyCanvas");
-  var sctx = sky.getContext("2d");
-  var dots = [];
-  function skySize(){
-    sky.width = 390 * 2; sky.height = 844 * 2;
-    sky.style.width = "390px"; sky.style.height = "844px";
-  }
-  skySize();
-  for (var d = 0; d < 90; d++){
-    dots.push({x: Math.random()*780, y: Math.random()*1100, r: Math.random()*2.2+.6,
-      v: Math.random()*.22+.06, c: Math.random() < .18 ? "216,255,62" : (Math.random() < .4 ? "63,217,255" : "154,163,173")});
-  }
-  function skyTick(){
-    sctx.clearRect(0,0,780,1688);
-    var g = sctx.createRadialGradient(390,420,60,390,420,700);
-    g.addColorStop(0,"rgba(63,217,255,.05)"); g.addColorStop(1,"rgba(0,0,0,0)");
-    sctx.fillStyle = g; sctx.fillRect(0,0,780,1688);
-    dots.forEach(function(p){
-      p.y -= p.v; if (p.y < -6) p.y = 1200;
-      sctx.beginPath(); sctx.arc(p.x, p.y, p.r, 0, 6.283);
-      sctx.fillStyle = "rgba(" + p.c + ",.5)"; sctx.fill();
-    });
-    if (!reduced) requestAnimationFrame(skyTick);
-  }
-  skyTick();
-
-  /* ---------- coach orb ---------- */
-  var orb = document.getElementById("orbCanvas");
-  var octx = orb.getContext("2d");
-  var ostate = 0; /* 0 idle · 1 listening · 2 speaking */
-  var ONAMES = ["IDLE — TAP THE ORB","LISTENING…","SPEAKING — TAP TO BARGE IN"];
-  var parts = [];
-  for (var i2 = 0; i2 < 300; i2++){
-    parts.push({a: Math.random()*6.283, r: 70 + Math.random()*38, s: (Math.random()*.008)+.002,
-      z: Math.random(), c: Math.random() < .3 ? "216,255,62" : "63,217,255"});
-  }
-  var tGlobal = 0;
-  function orbTick(){
-    tGlobal += .016;
-    octx.clearRect(0,0,460,460);
-    var cx = 230, cy = 230;
-    var breathe = 1 + Math.sin(tGlobal*1.4)*.03;
-    parts.forEach(function(p){
-      p.a += p.s * (ostate === 2 ? 2.4 : 1);
-      var rr = p.r * breathe;
-      if (ostate === 1) rr = p.r * .78 + Math.sin(tGlobal*6 + p.z*9)*5;
-      if (ostate === 2) rr = p.r + Math.sin(tGlobal*9 + p.z*14)*13;
-      var x = cx + Math.cos(p.a)*rr;
-      var y = cy + Math.sin(p.a)*rr*.86;
-      var al = .22 + p.z*.55;
-      octx.beginPath(); octx.arc(x, y, 1.1 + p.z*2.1, 0, 6.283);
-      octx.fillStyle = "rgba(" + p.c + "," + al + ")"; octx.fill();
-    });
-    var g2 = octx.createRadialGradient(cx,cy,4,cx,cy,120);
-    g2.addColorStop(0, ostate === 1 ? "rgba(216,255,62,.32)" : "rgba(63,217,255,.26)");
-    g2.addColorStop(1, "rgba(0,0,0,0)");
-    octx.fillStyle = g2; octx.beginPath(); octx.arc(cx,cy,120,0,6.283); octx.fill();
-    if (!reduced) requestAnimationFrame(orbTick);
-  }
-  orbTick();
-  orb.addEventListener("click", function(){
-    ostate = (ostate + 1) % 3;
-    document.getElementById("orbState").textContent = ONAMES[ostate];
-  });
-
-  /* ---------- rest timer ---------- */
-  var restLeft = 90, restTotal = 90;
-  var arc = document.getElementById("restArc"), restT = document.getElementById("restT");
-  var CIRC = 439.8;
-  setInterval(function(){
-    restLeft -= 1; if (restLeft < 0) restLeft = restTotal;
-    var m = Math.floor(restLeft/60), s = restLeft % 60;
-    restT.textContent = "0" + m + ":" + (s < 10 ? "0" + s : s);
-    arc.style.strokeDashoffset = (CIRC * (1 - restLeft/restTotal)).toFixed(1);
-    document.getElementById("restRing").classList.toggle("pulsing", restLeft <= 5 && !reduced);
-  }, 1000);
-
-  /* ---------- busy sheet + set log ---------- */
-  var sheet = document.getElementById("busySheet");
-  document.getElementById("busyBtn").addEventListener("click", function(){ sheet.classList.toggle("open"); });
-  sheet.querySelector(".btn").addEventListener("click", function(){ sheet.classList.remove("open"); });
-  document.getElementById("logSet").addEventListener("click", function(){
-    var row = this.closest(".setrow");
-    row.classList.remove("now"); row.classList.add("done");
-    restLeft = restTotal;
-  });
-
-  /* ---------- progress count-ups ---------- */
-  function runCounts(){
-    document.querySelectorAll("[data-count]").forEach(function(el){
-      var target = parseFloat(el.getAttribute("data-count"));
-      var dec = (String(el.getAttribute("data-count")).indexOf(".") > -1) ? 1 : 0;
-      if (reduced){ el.textContent = target.toFixed(dec); return; }
-      var t0 = performance.now();
-      function step(t){
-        var k = Math.min(1, (t - t0) / 650);
-        el.textContent = (target * (1 - Math.pow(1 - k, 3))).toFixed(dec);
-        if (k < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    });
-  }
-
-  /* ---------- dashboard tabs (gym + HQ) ---------- */
-  function wireTabs(navId, prefix){
-    document.querySelectorAll("#" + navId + " button").forEach(function(b){
-      b.addEventListener("click", function(){
-        document.querySelectorAll("#" + navId + " button").forEach(function(x){ x.classList.remove("on"); });
-        b.classList.add("on");
-        var t = b.getAttribute("data-" + prefix);
-        document.querySelectorAll("[id^='" + prefix + "-']").forEach(function(p){
-          p.classList.toggle("on", p.id === prefix + "-" + t);
-        });
-      });
-    });
-  }
-  wireTabs("gymTabs", "gtab");
-  wireTabs("hqTabs", "htab");
-
-  /* ---------- shared helpers ---------- */
-  function fmt(n){ return n.toLocaleString("en-US"); }
-  function flick(btn, txt){ var o = btn.textContent; btn.textContent = txt; setTimeout(function(){ btn.textContent = o; }, 1400); }
-  function mk(cls, txt){ var s = document.createElement("span"); s.className = cls; s.textContent = txt; return s; }
-
-  /* ---------- sign-in / role routing ---------- */
-  var SI_NOTE_DEFAULT = "Role-based routing: gym staff land on their gym dashboard, IRONMAP staff on HQ. Members use the mobile app.";
-  var siEmail = document.getElementById("siEmail");
-  var siNote = document.getElementById("siNote");
-  function doSignIn(email){
-    var em = (email || siEmail.value || "").trim().toLowerCase();
-    if (!em){ siEmail.focus(); return; }
-    var isHQ = em.indexOf("@ironmap") > -1 || em.indexOf("admin") > -1;
-    siNote.textContent = isHQ ? "Signed in ✓ — routing to IRONMAP HQ…" : "Signed in ✓ — routing to your gym dashboard…";
-    if (isHQ){ document.getElementById("hqSession").textContent = em; }
-    else { document.getElementById("gymSession").textContent = em; }
-    setTimeout(function(){
-      setView(isHQ ? "platform" : "gym");
-      siNote.textContent = SI_NOTE_DEFAULT;
-      siEmail.value = "";
-    }, 650);
-  }
-  document.getElementById("siSubmit").addEventListener("click", function(){ doSignIn(); });
-  siEmail.addEventListener("keydown", function(e){ if (e.key === "Enter") doSignIn(); });
-  document.querySelectorAll(".si-demo button").forEach(function(b){
-    b.addEventListener("click", function(){ doSignIn(b.getAttribute("data-email")); });
-  });
-  document.getElementById("gymSignout").addEventListener("click", function(){ setView("signin"); });
-  document.getElementById("hqSignout").addEventListener("click", function(){ setView("signin"); });
-
-  /* ---------- machines: review queue ---------- */
-  var reviewLeft = 2, catN = 47;
-  var reviewChip = document.getElementById("reviewChip");
-  function paintReview(){
-    if (reviewLeft > 0){
-      reviewChip.textContent = reviewLeft + (reviewLeft === 1 ? " PHOTO NEEDS REVIEW" : " PHOTOS NEED REVIEW");
-    } else {
-      reviewChip.textContent = "ALL PHOTOS REVIEWED ✓";
-      reviewChip.classList.remove("coral"); reviewChip.classList.add("mint");
-    }
-    document.getElementById("gymCatChip").textContent = "CATALOG · " + catN + " MACHINES · 9/10 PATTERNS";
-  }
-  reviewChip.addEventListener("click", function(){
-    var b = document.querySelector('#gymTabs button[data-gtab="machines"]');
-    if (b) b.click();
-  });
-  document.querySelectorAll(".rev-correct").forEach(function(b){
-    b.addEventListener("click", function(){
-      var g = b.closest(".inviterow").querySelector(".rev-guess");
-      var alt = g.getAttribute("data-alt");
-      g.setAttribute("data-alt", g.textContent);
-      g.textContent = alt;
-    });
-  });
-  document.querySelectorAll(".rev-confirm").forEach(function(b){
-    b.addEventListener("click", function(){
-      var row = b.closest(".inviterow");
-      row.querySelector(".rev-correct").remove();
-      var chip = mk("chip mint", "CONFIRMED · IN CATALOG");
-      b.parentNode.replaceChild(chip, b);
-      reviewLeft -= 1; catN += 1; paintReview();
-    });
-  });
-
-  /* ---------- subscriptions: assign to member ---------- */
-  var PLANS = {
-    monthly:   {label:"MONTHLY",     price:45,  renews:"RENEWS AUG 15"},
-    quarterly: {label:"QUARTERLY",   price:110, renews:"RENEWS OCT 15"},
-    annual:    {label:"ANNUAL + PT", price:720, renews:"RENEWS JUL 2027"}
-  };
-  var revenueJOD = 12840, subsActive = 287;
-  var subAssignBtn = document.getElementById("subAssignBtn");
-  subAssignBtn.addEventListener("click", function(){
-    var name = document.getElementById("subMember").value;
-    var p = PLANS[document.getElementById("subPlan").value];
-    var row = document.createElement("div"); row.className = "rrow";
-    row.appendChild(mk("uw-name", name));
-    row.appendChild(mk("chip", p.label));
-    row.appendChild(mk("uw-pay num", p.price + " JOD"));
-    var grow = mk("grow", ""); grow.style.flex = "1"; row.appendChild(grow);
-    row.appendChild(mk("chip volt", "PAID · JUST NOW"));
-    row.appendChild(mk("rmeta num", p.renews));
-    var host = document.getElementById("subsRows");
-    host.insertBefore(row, host.firstChild);
-    revenueJOD += p.price; subsActive += 1;
-    document.getElementById("kpiSubsRev").textContent = fmt(revenueJOD);
-    document.getElementById("kpiSubsActive").textContent = fmt(subsActive);
-    flick(subAssignBtn, "ASSIGNED ✓");
-  });
-
-  /* ---------- HQ: create gym / user accounts ---------- */
-  var gymsN = 34, membersN = 9842, directN = 1208, mrrN = 14220;
-  var TIER = { TRIAL:{mrr:0, cap:50}, STARTER:{mrr:99, cap:150}, GROWTH:{mrr:249, cap:400}, PRO:{mrr:599, cap:1000} };
-  var cgBtn = document.getElementById("cgBtn");
-  cgBtn.addEventListener("click", function(){
-    var nameEl = document.getElementById("cgName");
-    var name = nameEl.value.trim();
-    if (!name){ nameEl.focus(); return; }
-    var city = document.getElementById("cgCity").value.trim() || "Amman, JO";
-    var tier = document.getElementById("cgTier").value;
-    var t = TIER[tier];
-    var row = document.createElement("div"); row.className = "hqrow";
-    var dot = mk("healthdot", ""); dot.style.background = "var(--cyan)";
-    var gn = document.createElement("div"); gn.className = "gname";
-    var gb = document.createElement("b"); gb.textContent = name;
-    var gc = document.createElement("span"); gc.textContent = city;
-    gn.appendChild(gb); gn.appendChild(gc);
-    var tc = mk("chip" + (tier === "GROWTH" ? " volt" : (tier === "PRO" ? " cyan" : "")), tier);
-    var grow2 = mk("grow", ""); grow2.style.flex = "1";
-    [dot, gn, tc, grow2, mk("gcap num", "0/" + t.cap), mk("gai num", "$0"), mk("gmrr num", "$" + t.mrr)]
-      .forEach(function(el){ row.appendChild(el); });
-    var table = document.getElementById("hqGymsTable");
-    table.insertBefore(row, table.querySelector(".hqrow"));
-    gymsN += 1; mrrN += t.mrr;
-    document.getElementById("kpiGyms").textContent = fmt(gymsN);
-    document.getElementById("hqGymsTotal").textContent = gymsN + " TOTAL";
-    document.getElementById("kpiMrr").textContent = "$" + fmt(mrrN);
-    nameEl.value = ""; document.getElementById("cgCity").value = "";
-    flick(cgBtn, "CREATED ✓");
-  });
-
-  var cuBtn = document.getElementById("cuBtn");
-  cuBtn.addEventListener("click", function(){
-    var nameEl = document.getElementById("cuName");
-    var name = nameEl.value.trim();
-    if (!name){ nameEl.focus(); return; }
-    var gymSel = document.getElementById("cuGym").value;
-    var direct = gymSel === "direct";
-    var row = document.createElement("div"); row.className = "rrow";
-    var initials = name.split(/\s+/).map(function(w){ return w.charAt(0); }).join("").slice(0, 2).toUpperCase();
-    var av = document.createElement("div"); av.className = "ravatar"; av.textContent = initials;
-    av.style.background = "rgba(63,217,255,.15)"; av.style.color = "var(--cyan)";
-    row.appendChild(av);
-    row.appendChild(mk("uw-name", name));
-    row.appendChild(direct ? mk("chip volt", "DIRECT") : mk("rmeta", gymSel));
-    row.appendChild(mk("uw-pay num", direct ? "$12/mo" : "$0 · gym"));
-    row.appendChild(mk("uw-ai num", "$0.00"));
-    row.appendChild(mk("uw-plans num", "0"));
-    var grow3 = mk("grow", ""); grow3.style.flex = "1"; row.appendChild(grow3);
-    row.appendChild(mk("chip cyan", "NEW · JUST NOW"));
-    var host = document.getElementById("usersRows");
-    host.insertBefore(row, host.firstChild);
-    membersN += 1;
-    document.getElementById("kpiMembers").textContent = fmt(membersN);
-    if (direct){ directN += 1; document.getElementById("kpiDirect").textContent = fmt(directN); }
-    nameEl.value = ""; document.getElementById("cuEmail").value = "";
-    flick(cuBtn, "CREATED ✓");
-  });
-
-  /* ---------- invite: copy link + send invite ---------- */
-  var copyBtn = document.getElementById("copyLinkBtn");
-  if (copyBtn){
-    copyBtn.addEventListener("click", function(){
-      var link = document.getElementById("joinLink").textContent.trim();
-      if (navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(link).catch(function(){});
-      }
-      var old = copyBtn.textContent;
-      copyBtn.textContent = "COPIED ✓";
-      setTimeout(function(){ copyBtn.textContent = old; }, 1500);
-    });
-  }
-  var inviteEmail = document.getElementById("inviteEmail");
-  var inviteRole = document.getElementById("inviteRole");
-  var pendingInvites = document.getElementById("pendingInvites");
-  function sendInvite(){
-    var val = inviteEmail.value.trim();
-    if (!val){ inviteEmail.focus(); return; }
-    var row = document.createElement("div");
-    row.className = "inviterow";
-    var em = document.createElement("span"); em.className = "ie-email"; em.textContent = val;
-    var rl = document.createElement("span"); rl.className = "ie-role"; rl.textContent = inviteRole.value;
-    var st = document.createElement("span"); st.className = "chip volt"; st.textContent = "SENT · JUST NOW";
-    row.appendChild(em); row.appendChild(rl); row.appendChild(st);
-    pendingInvites.insertBefore(row, pendingInvites.firstChild);
-    inviteEmail.value = "";
-  }
-  var sendInviteBtn = document.getElementById("sendInviteBtn");
-  if (sendInviteBtn){
-    sendInviteBtn.addEventListener("click", sendInvite);
-    inviteEmail.addEventListener("keydown", function(e){ if (e.key === "Enter") sendInvite(); });
-  }
-
-  /* ---------- workout tutorial video modal ---------- */
-  function updateTutCaption(){
-    var el = document.getElementById("tutCaption");
-    if (!el) return;
-    var activeBtn = document.querySelector(".anglebtn.on");
-    var ang = activeBtn ? activeBtn.getAttribute("data-angle") : "side";
-    var k = "k_angcap_" + ang;
-    if (STR[k]) el.textContent = STR[k][lang === "ar" ? 1 : 0];
-  }
-  var tutModal = document.getElementById("tutModal");
-  if (tutModal){
-    var tutPoseState = 0, tutInterval = null, tutPlaying = true;
-    function tutTick(){
-      tutPoseState = 1 - tutPoseState;
-      document.querySelector(".pose-a").style.opacity = tutPoseState === 0 ? "1" : "0";
-      document.querySelector(".pose-b").style.opacity = tutPoseState === 0 ? "0" : "1";
-      var bar = document.getElementById("tutbarFill");
-      if (bar) bar.style.width = tutPoseState === 0 ? "46%" : "100%";
-    }
-    function tutReset(){
-      tutPoseState = 0;
-      document.querySelector(".pose-a").style.opacity = "";
-      document.querySelector(".pose-b").style.opacity = "";
-      var bar = document.getElementById("tutbarFill");
-      if (bar) bar.style.width = "";
-    }
-    var openTut = function(){
-      tutModal.classList.add("open");
-      tutReset();
-      clearInterval(tutInterval);
-      if (tutPlaying) tutInterval = setInterval(tutTick, 1200);
-    };
-    var closeTut = function(){
-      tutModal.classList.remove("open");
-      clearInterval(tutInterval);
-    };
-    document.getElementById("tutorialChip").addEventListener("click", openTut);
-    document.getElementById("playOverlay").addEventListener("click", openTut);
-    document.getElementById("tutCloseBtn").addEventListener("click", closeTut);
-    document.getElementById("tutScrim").addEventListener("click", closeTut);
-
-    document.getElementById("tutPlayBtn").addEventListener("click", function(){
-      tutPlaying = !tutPlaying;
-      if (tutPlaying){ clearInterval(tutInterval); tutInterval = setInterval(tutTick, 1200); }
-      else { clearInterval(tutInterval); }
-      this.querySelector(".ic-pause").hidden = !tutPlaying;
-      this.querySelector(".ic-play").hidden = tutPlaying;
-    });
-
-    document.querySelectorAll(".anglebtn").forEach(function(b){
-      b.addEventListener("click", function(){
-        document.querySelectorAll(".anglebtn").forEach(function(x){ x.classList.remove("on"); });
-        b.classList.add("on");
-        document.getElementById("tutStage").setAttribute("data-angle", b.getAttribute("data-angle"));
-        updateTutCaption();
-      });
-    });
-  }
-  updateTutCaption();
-})();
-</script>
+  <!-- HQ (platform admin) -->
+  <section class="view" id="hq"><div class="wrap">
+    <div class="eyebrow">IRONMAP HQ · INTERNAL</div>
+    <h1>Platform control</h1>
+    <p class="sub">Every gym and user on the platform, live from Supabase.</p>
+    <div class="kpis" id="hqKpis"></div>
+    <h2>Gyms</h2>
+    <div id="hqGyms"></div>
+    <div class="foot">Aggregates only — member health data is never queryable from HQ.</div>
+  </div></section>
+</main>
 
 <script src="/app/ironmap-data.js"></script>
-<script>
-/* Wire the prototype to REAL engine output (window.IRONMAP from scripts/build-web.mjs). */
-(function(){
-  if(!window.IRONMAP){ return; }
-  var c = window.IRONMAP.counts;
-  var b = document.getElementById("brandLabel");
-  if(b){ b.innerHTML = 'IRON<b>MAP</b> · APP · V0.4 · <span style="color:#3FD9FF">'+c.machines+' MACHINES · '+c.exercises+' EXERCISES · LIVE ENGINE</span>'; }
-  document.querySelectorAll("[data-ironmap]").forEach(function(el){
-    var v = el.getAttribute("data-ironmap").split(".").reduce(function(o,k){ return o && o[k]; }, window.IRONMAP);
-    if(v!=null) el.textContent = v;
-  });
-  console.log("IRONMAP engine data loaded — v"+window.IRONMAP.version, c);
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const SUPABASE_URL = "https://hhghymfvtynltzvtwhco.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoZ2h5bWZ2dHlubHR6dnR3aGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzODA2MzQsImV4cCI6MjA5OTk1NjYzNH0.IRCw6Sv8I0UzMGj5CaodsazDYaJAC3ho0gtKExJPyu4";
+const ADMIN_EMAILS = ["ahmedfahad9000@gmail.com", "admin@ironmap.fit"];
+const IM = window.IRONMAP || { counts:{machines:60,exercises:86}, exercises:[], demoProgram:null };
+
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+const $ = (s) => document.querySelector(s);
+const show = (id) => { document.querySelectorAll(".view").forEach(v => v.classList.remove("on")); $("#" + id).classList.add("on"); };
+const bar = (on) => $("#bar").classList.toggle("on", on);
+
+// ---------- auth UI ----------
+let mode = "in";
+$("#tabIn").onclick = () => setMode("in");
+$("#tabUp").onclick = () => setMode("up");
+function setMode(m){ mode = m; $("#tabIn").classList.toggle("on", m==="in"); $("#tabUp").classList.toggle("on", m==="up");
+  $("#authBtn").textContent = m==="in" ? "Sign in" : "Create account"; $("#password").autocomplete = m==="in"?"current-password":"new-password"; $("#authMsg").textContent=""; }
+
+$("#authBtn").onclick = async () => {
+  const email = $("#email").value.trim(), password = $("#password").value;
+  const msg = $("#authMsg"); msg.className = "msg"; msg.textContent = "";
+  if (!email || !password){ msg.className="msg err"; msg.textContent="Enter email and password."; return; }
+  $("#authBtn").disabled = true; $("#authBtn").textContent = "…";
+  try {
+    if (mode === "up"){
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) throw error;
+      if (!data.session){ msg.className="msg ok"; msg.textContent="Account created — check your email to confirm, then sign in."; setMode("in"); }
+      else { await afterAuth(data.session); }
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      await afterAuth(data.session);
+    }
+  } catch(e){ msg.className="msg err"; msg.textContent = e.message || String(e); }
+  finally { $("#authBtn").disabled = false; $("#authBtn").textContent = mode==="in"?"Sign in":"Create account"; }
+};
+$("#signOut").onclick = async () => { await sb.auth.signOut(); bar(false); show("auth"); };
+
+// ---------- onboarding ----------
+let chosen = null, pkg = "growth";
+document.querySelectorAll("#paths .path").forEach(p => p.onclick = () => {
+  document.querySelectorAll("#paths .path").forEach(x => x.classList.remove("sel"));
+  document.querySelectorAll(".extra").forEach(x => x.classList.remove("on"));
+  p.classList.add("sel"); chosen = p.dataset.path;
+  if (chosen==="member") $("#ex-member").classList.add("on");
+  if (chosen==="gym_owner") $("#ex-gym").classList.add("on");
+  const b = $("#onboardBtn"); b.disabled = false;
+  b.textContent = chosen==="direct" ? "Subscribe — $20/mo (demo)" : chosen==="gym_owner" ? "Create gym & subscribe (demo)" : "Join my gym";
+});
+document.querySelectorAll("#pkgs .pkg").forEach(k => k.onclick = () => {
+  document.querySelectorAll("#pkgs .pkg").forEach(x=>x.classList.remove("sel")); k.classList.add("sel"); pkg = k.dataset.pkg;
+});
+
+$("#onboardBtn").onclick = async () => {
+  const msg = $("#onboardMsg"); msg.className="msg"; msg.textContent="";
+  const { data:{ user } } = await sb.auth.getUser();
+  if (!user) return show("auth");
+  $("#onboardBtn").disabled = true; const orig = $("#onboardBtn").textContent; $("#onboardBtn").textContent="…";
+  try {
+    if (chosen === "direct"){
+      await sb.from("user_subscriptions").upsert({ user_id:user.id, plan:"personal", price_usd:20, status:"active" });
+      await sb.from("profiles").update({ role:"direct", onboarded:true }).eq("user_id", user.id);
+      route("direct");
+    } else if (chosen === "member"){
+      const code = $("#joinCode").value.trim().toUpperCase();
+      if (!code){ throw new Error("Enter your gym's code."); }
+      const { data:gym } = await sb.from("gyms").select("id,name").eq("join_code", code).maybeSingle();
+      if (!gym){ throw new Error("No gym found with that code. Ask your gym, or pick Personal."); }
+      await sb.from("memberships").upsert({ user_id:user.id, gym_id:gym.id, status:"active", joined_via:"code" }, { onConflict:"user_id,gym_id" });
+      await sb.from("profiles").update({ role:"member", onboarded:true }).eq("user_id", user.id);
+      route("member");
+    } else if (chosen === "gym_owner"){
+      const name = $("#gymName").value.trim(); if (!name) throw new Error("Enter a gym name.");
+      const city = $("#gymCity").value.trim() || "Amman, JO";
+      const caps = { starter:150, growth:400, pro:1000 };
+      const { data:org, error:oe } = await sb.from("orgs").insert({ name, owner_user_id:user.id, plan_tier:pkg, member_cap:caps[pkg], status:"active" }).select().single();
+      if (oe) throw oe;
+      const code = (name.replace(/[^a-z]/gi,"").slice(0,8).toUpperCase() || "IRONGYM") + Math.floor(10+Math.random()*89);
+      const { error:ge } = await sb.from("gyms").insert({ org_id:org.id, name, city, join_code:code });
+      if (ge) throw ge;
+      await sb.from("subscriptions").upsert({ org_id:org.id, tier:pkg, member_cap:caps[pkg], features:{voice:pkg!=="starter"}, provider:"demo", status:"active" }, { onConflict:"org_id" });
+      await sb.from("profiles").update({ role:"gym_owner", onboarded:true }).eq("user_id", user.id);
+      route("gym_owner");
+    }
+  } catch(e){ msg.className="msg err"; msg.textContent = e.message || String(e); $("#onboardBtn").disabled=false; $("#onboardBtn").textContent=orig; }
+};
+
+// ---------- routing ----------
+let session = null;
+async function afterAuth(s){ session = s; await routeUser(); }
+
+async function routeUser(){
+  const email = (session.user.email||"").toLowerCase();
+  bar(true); $("#barEmail").textContent = email;
+  if (ADMIN_EMAILS.includes(email)){ return route("platform_admin"); }
+  let prof = null;
+  try { const { data } = await sb.from("profiles").select("role,onboarded,display_name").eq("user_id", session.user.id).maybeSingle(); prof = data; } catch(e){}
+  if (!prof){ try { await sb.from("profiles").insert({ user_id:session.user.id, display_name:email.split("@")[0], role:"direct", onboarded:false }); } catch(e){} prof = { role:"direct", onboarded:false }; }
+  if (!prof.onboarded){ bar(false); return show("onboard"); }
+  route(prof.role);
+}
+
+function setRoleChip(role){
+  const c = $("#roleChip"); const label = {platform_admin:"IRONMAP HQ",gym_owner:"Gym owner",member:"Member",direct:"Personal"}[role]||role;
+  c.textContent = label; c.className = "rolechip " + (role==="platform_admin"?"admin":role==="gym_owner"?"owner":"member");
+  $("#adminSwitch").style.display = role==="platform_admin" ? "flex" : "none";
+}
+async function route(role){
+  bar(true); setRoleChip(role);
+  if (role==="platform_admin"){ await renderHQ(); show("hq"); }
+  else if (role==="gym_owner"){ await renderGym(); show("gym"); }
+  else { await renderMember(role); show("member"); }
+}
+// admin view switcher
+document.querySelectorAll("#adminSwitch button").forEach(b => b.onclick = async () => {
+  document.querySelectorAll("#adminSwitch button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  const v = b.dataset.v;
+  if (v==="hq"){ await renderHQ(); show("hq"); } else if (v==="gym"){ await renderGym(true); show("gym"); } else { await renderMember("direct", true); show("member"); }
+});
+
+// ---------- renderers ----------
+function macroKpis(p){
+  if (!p) return "";
+  const e=p.energy, m=p.macros;
+  return `<div class="kpi"><div class="v num">${e.target}</div><div class="l">kcal / day</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--mint)">${m.protein_g}g</div><div class="l">Protein</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--cyan)">${m.carbs_g}g</div><div class="l">Carbs</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--volt)">${m.fat_g}g</div><div class="l">Fat</div></div>`;
+}
+function workoutHtml(p){
+  if (!p || !p.workout) return "";
+  const d = p.workout.days[0];
+  return `<div class="card" style="margin-top:6px"><b style="font-size:14px">Day 1 · ${d.focus}</b>
+    ${d.items.slice(0,5).map(it=>`<div class="row"><span class="grow">${it.name}</span><span class="m num" style="font-family:var(--mono);font-size:11px;color:var(--faint)">${it.sets}×${it.repRange[0]}–${it.repRange[1]}</span></div>`).join("")}</div>`;
+}
+async function renderMember(role, demo){
+  const email = session ? session.user.email : "you@email.com";
+  const first = (email.split("@")[0]||"there").replace(/^\w/,c=>c.toUpperCase());
+  $("#mGreet").innerHTML = `Welcome, ${first}`;
+  // gym name if member
+  let gymName = null;
+  if (role==="member" && !demo){
+    try { const { data } = await sb.from("memberships").select("gym_id, gyms(name)").eq("user_id",session.user.id).eq("status","active").maybeSingle(); gymName = data?.gyms?.name; } catch(e){}
+  }
+  $("#mEyebrow").textContent = gymName ? gymName.toUpperCase() : "PERSONAL · TODAY";
+  $("#mSub").textContent = gymName ? "Your workouts are mapped to the machines in your gym." : "Personal coaching with generic-equipment plans.";
+  // plan/subscription
+  if (role==="direct"){ $("#mPlanTitle").textContent="Personal plan"; $("#mPlanSub").textContent="$20/mo · billed by IRONMAP"; }
+  else { $("#mPlanTitle").textContent="Gym membership"; $("#mPlanSub").textContent=(gymName||"Your gym")+" · billed by your gym"; }
+  const p = IM.demoProgram;
+  $("#mMacros").innerHTML = macroKpis(p);
+  $("#mWorkout").innerHTML = workoutHtml(p);
+  const exs = (IM.exercises||[]).filter(e=>e.machine).slice(0,6);
+  $("#mExercises").innerHTML = exs.length ? exs.map(e=>`<div class="ex"><span class="grow">${e.name}</span><span class="m">${e.pattern||""}</span></div>`).join("")
+    : `<div class="ex"><span class="grow">${IM.counts.exercises} exercises across ${IM.counts.machines} machines</span></div>`;
+}
+async function renderGym(demo){
+  let gym=null, org=null, members=0;
+  if (!demo && session){
+    try {
+      const { data:o } = await sb.from("orgs").select("*").eq("owner_user_id",session.user.id).limit(1).maybeSingle();
+      org=o;
+      if (o){ const { data:g } = await sb.from("gyms").select("*").eq("org_id",o.id).limit(1).maybeSingle(); gym=g;
+        if (g){ const { count } = await sb.from("memberships").select("*",{count:"exact",head:true}).eq("gym_id",g.id).eq("status","active"); members=count||0; } }
+    } catch(e){}
+  }
+  if (!gym){ gym={name:"PowerZone Amman (demo)",city:"Amman, JO",join_code:"DEMO"}; org={plan_tier:"growth",member_cap:400}; }
+  $("#gName").textContent = gym.name;
+  $("#gSub").textContent = gym.city + " · " + (org?.plan_tier||"growth").toUpperCase() + " package";
+  $("#gKpis").innerHTML = `<div class="kpi"><div class="v num">${members}<span style="color:var(--faint);font-size:14px">/${org?.member_cap||400}</span></div><div class="l">Active members</div></div>
+    <div class="kpi"><div class="v num">${IM.counts.machines}</div><div class="l">Machine types</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--mint)">${IM.counts.exercises}</div><div class="l">Exercises mapped</div></div>`;
+  $("#gCode").textContent = gym.join_code;
+  $("#gCatalog").innerHTML = (IM.exercises||[]).filter(e=>e.machine).slice(0,5).map(e=>`<div class="ex"><span class="grow">${e.name}</span><span class="m">${e.pattern||""}</span></div>`).join("")
+    || `<div class="ex"><span class="grow">${IM.counts.machines} machines catalogued</span></div>`;
+}
+$("#copyCode").onclick = () => { const t=$("#gCode").textContent; navigator.clipboard?.writeText(t).catch(()=>{}); $("#copyCode").textContent="COPIED ✓"; setTimeout(()=>$("#copyCode").textContent="COPY",1400); };
+
+async function renderHQ(){
+  let s = null;
+  try { const { data } = await sb.rpc("hq_stats"); s = data; } catch(e){}
+  s = s || {gyms:0,members:0,direct_users:0,mrr_usd:0};
+  $("#hqKpis").innerHTML = `<div class="kpi"><div class="v num">${s.gyms}</div><div class="l">Gyms</div></div>
+    <div class="kpi"><div class="v num">${s.members}</div><div class="l">Gym members</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--volt)">${s.direct_users}</div><div class="l">Direct users</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--mint)">$${Number(s.mrr_usd).toLocaleString()}</div><div class="l">MRR</div></div>`;
+  let gyms=[];
+  try { const { data } = await sb.from("gyms").select("name,city,join_code,created_at").order("created_at",{ascending:false}).limit(20); gyms=data||[]; } catch(e){}
+  $("#hqGyms").innerHTML = gyms.length ? gyms.map(g=>`<div class="row"><span class="grow"><b>${g.name}</b></span><span class="m" style="font-family:var(--mono);font-size:11px;color:var(--faint)">${g.city||""}</span><span class="chip">${g.join_code}</span></div>`).join("")
+    : `<p class="sub">No gyms registered yet — register one from the “I run a gym” sign-up path.</p>`;
+}
+
+// ---------- init ----------
+(async () => {
+  const { data:{ session:s } } = await sb.auth.getSession();
+  if (s){ session = s; await routeUser(); } else { show("auth"); }
+  sb.auth.onAuthStateChange((_e, ns) => { if (!ns){ bar(false); show("auth"); } });
 })();
 </script>
