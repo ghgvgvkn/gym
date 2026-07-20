@@ -288,16 +288,17 @@ $("#authBtn").onclick = async () => {
   $("#authBtn").disabled = true; $("#authBtn").textContent = "…";
   try {
     if (mode === "up"){
-      const { data, error } = await sb.auth.signUp({ email, password });
-      if (error) throw error;
-      // Users are auto-confirmed (DB trigger). If no session came back, sign in now.
-      let session = data.session;
-      if (!session){
-        const r = await sb.auth.signInWithPassword({ email, password });
-        if (r.error) throw new Error("Account created. " + r.error.message);
-        session = r.data.session;
+      // Create the account directly in the DB (no confirmation email → no rate limit),
+      // then sign in. The RPC returns {ok:true} or {error:"..."}.
+      const { data:res, error:rerr } = await sb.rpc("app_signup", { p_email: email, p_password: password });
+      if (rerr) throw rerr;
+      if (res && res.error){
+        const map = { already_registered:"That email already has an account — switch to Sign in.", invalid_email:"That email doesn't look valid.", weak_password:"Password must be at least 6 characters." };
+        throw new Error(map[res.error] || res.error);
       }
-      await afterAuth(session);
+      const r = await sb.auth.signInWithPassword({ email, password });
+      if (r.error) throw r.error;
+      await afterAuth(r.data.session);
     } else {
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
