@@ -1,0 +1,20 @@
+{
+  "name": "ironmap",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "Dual-sided AI fitness SaaS — canonical gym knowledge, deterministic engines, and the app prototype. Powered by the Claude 5 family (Fable 5).",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "check": "node packages/core/selfcheck.mjs",
+    "check:data": "node scripts/data-integrity.mjs",
+    "check:sql": "node scripts/validate-sql.mjs",
+    "gen": "node scripts/gen-sql.mjs",
+    "build:web": "node scripts/build-web.mjs",
+    "example": "node scripts/build-example.mjs",
+    "verify": "npm run check:data && npm run gen && npm run check && npm run check:sql && npm run build:web && npm run example",
+    "app": "node scripts/serve.mjs"
+  },
+  "keywords": ["fitness", "ai", "saas", "supabase", "biomechanics", "nutrition", "computer-vision"],
+  "license": "UNLICENSED"
+}

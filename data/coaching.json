@@ -1,0 +1,10 @@
+{
+  "_source": "Research brief 4 §Behavioral Psychology (Transtheoretical Model + MI/SFBT).",
+  "coaching_stages": [
+    { "id": "precontemplation", "ordinal": 1, "label": "Precontemplation", "label_ar": "ما قبل التفكير", "technique": "MI", "strategy": "Motivational Interviewing — open questions, explore ambivalence, no prescriptions yet." },
+    { "id": "contemplation", "ordinal": 2, "label": "Contemplation", "label_ar": "التفكير", "technique": "MI", "strategy": "Surface pros/cons; build discrepancy between values and current behaviour." },
+    { "id": "preparation", "ordinal": 3, "label": "Preparation", "label_ar": "التحضير", "technique": "SFBT", "strategy": "Solution-Focused — co-design one small concrete first step this week." },
+    { "id": "action", "ordinal": 4, "label": "Action", "label_ar": "الفعل", "technique": "behavioral_activation", "strategy": "Specific programming + strong positive reinforcement on adherence." },
+    { "id": "maintenance", "ordinal": 5, "label": "Maintenance", "label_ar": "الاستمرار", "technique": "behavioral_activation", "strategy": "Relapse-proofing, habit stacking, celebrate streaks; re-entry plan on lapse." }
+  ]
+}

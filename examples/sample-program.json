@@ -1,0 +1,1155 @@
+{
+  "engineVersion": "0.4.0",
+  "goal": "recomp",
+  "dietMode": "mid_healthy",
+  "energy": {
+    "equation": "katch_mcardle",
+    "lbmKg": 67.2,
+    "bmr": 1822,
+    "tdee": 2825,
+    "goal": "recomp",
+    "target": 2825,
+    "floorApplied": false
+  },
+  "macros": {
+    "mode": "mid_healthy",
+    "kcal": 2825,
+    "protein_g": 191,
+    "carbs_g": 304,
+    "fat_g": 94,
+    "proteinSource": "percent_split",
+    "rules": {
+      "flex_kcal_share": 0.2,
+      "baseline": "whole_food",
+      "fiber_g_per_1000kcal": 14
+    }
+  },
+  "meals": {
+    "mode": "mid_healthy",
+    "target": {
+      "mode": "mid_healthy",
+      "kcal": 2825,
+      "protein_g": 191,
+      "carbs_g": 304,
+      "fat_g": 94,
+      "proteinSource": "percent_split",
+      "rules": {
+        "flex_kcal_share": 0.2,
+        "baseline": "whole_food",
+        "fiber_g_per_1000kcal": 14
+      }
+    },
+    "items": [
+      {
+        "food": "Whey protein isolate",
+        "name_ar": "واي بروتين",
+        "grams": 134,
+        "role": "protein"
+      },
+      {
+        "food": "Oats, dry",
+        "name_ar": "شوفان",
+        "grams": 432,
+        "role": "carb"
+      },
+      {
+        "food": "Olive oil",
+        "name_ar": "زيت زيتون",
+        "grams": 60,
+        "role": "fat"
+      },
+      {
+        "food": "Broccoli, cooked",
+        "name_ar": "بروكلي",
+        "grams": 150,
+        "role": "veg"
+      }
+    ],
+    "meals": [
+      {
+        "slot": "breakfast",
+        "items": [
+          {
+            "food": "Whey protein isolate",
+            "name_ar": "واي بروتين",
+            "grams": 134,
+            "role": "protein"
+          }
+        ]
+      },
+      {
+        "slot": "lunch",
+        "items": [
+          {
+            "food": "Oats, dry",
+            "name_ar": "شوفان",
+            "grams": 432,
+            "role": "carb"
+          }
+        ]
+      },
+      {
+        "slot": "snack",
+        "items": [
+          {
+            "food": "Olive oil",
+            "name_ar": "زيت زيتون",
+            "grams": 60,
+            "role": "fat"
+          }
+        ]
+      },
+      {
+        "slot": "dinner",
+        "items": [
+          {
+            "food": "Broccoli, cooked",
+            "name_ar": "بروكلي",
+            "grams": 150,
+            "role": "veg"
+          }
+        ]
+      }
+    ],
+    "totals": {
+      "protein_g": 191,
+      "carbs_g": 304,
+      "fat_g": 94,
+      "kcal": 2826
+    },
+    "deviationPct": 0,
+    "within5pct": true,
+    "prioritized": []
+  },
+  "workout": {
+    "goal": "recomp",
+    "split": [
+      "upper",
+      "lower",
+      "upper",
+      "lower"
+    ],
+    "daysPerWeek": 4,
+    "days": [
+      {
+        "day": 1,
+        "focus": "upper",
+        "groups": [
+          "chest",
+          "back",
+          "delts",
+          "biceps",
+          "triceps"
+        ],
+        "items": [
+          {
+            "exercise": "machine_chest_press",
+            "name": "Machine Chest Press",
+            "machine": "chest_press",
+            "machineName": "Chest Press",
+            "compound": true,
+            "sets": 3,
+            "repRange": [
+              8,
+              12
+            ],
+            "restSec": 150,
+            "primeMovers": [
+              "pecs_lower"
+            ],
+            "alternatives": [
+              {
+                "exercise": "pec_deck_fly",
+                "name": "Pec Deck Fly",
+                "machine": "pec_deck"
+              },
+              {
+                "exercise": "cable_fly_high",
+                "name": "High-to-Low Cable Fly",
+                "machine": "cable_crossover"
+              }
+            ],
+            "ord": 1,
+            "warmup": true
+          },
+          {
+            "exercise": "wide_grip_pulldown",
+            "name": "Wide-Grip Lat Pulldown",
+            "machine": "lat_pulldown",
+            "machineName": "Lat Pulldown",
+            "compound": true,
+            "sets": 3,
+            "repRange": [
+              8,
+              12
+            ],
+            "restSec": 150,
+            "primeMovers": [
+              "lats"
+            ],
+            "alternatives": [
+              {
+                "exercise": "close_grip_pulldown",
+                "name": "Close-Grip Pulldown",
+                "machine": "lat_pulldown"
+              },
+              {
+                "exercise": "reverse_grip_pulldown",
+                "name": "Reverse-Grip Pulldown",
+                "machine": "lat_pulldown"
+              }
+            ],
+            "ord": 2
+          },
+          {
+            "exercise": "upright_row",
+            "name": "Upright Row",
+            "machine": "ez_curl_bar",
+            "machineName": "EZ Curl Bar",
+            "compound": true,
+            "sets": 3,
+            "repRange": [
+              8,
+              12
+            ],
+            "restSec": 150,
+            "primeMovers": [
+              "side_delts",
+              "upper_traps"
+            ],
+            "alternatives": [
+              {
+                "exercise": "machine_shoulder_press",
+                "name": "Machine Shoulder Press",
+                "machine": "shoulder_press"
+              },
+              {
+                "exercise": "lateral_raise_db",
+                "name": "Dumbbell Lateral Raise",
+                "machine": "dumbbell_rack"
+              }
+            ],
+            "ord": 3
+          },
+          {
+            "exercise": "hammer_curl",
+            "name": "Hammer Curl",
+            "machine": "dumbbell_rack",
+            "machineName": "Dumbbell Rack",
+            "compound": true,
+            "sets": 3,
+            "repRange": [
+              8,
+              12
+            ],
+            "restSec": 150,
+            "primeMovers": [
+              "brachialis",
+              "brachioradialis"
+            ],
+            "alternatives": [
+              {
+                "exercise": "barbell_curl",
+                "name": "Barbell Curl",
+                "machine": "ez_curl_bar"
+              },
+              {
+                "exercise": "dumbbell_curl",
+                "name": "Dumbbell Curl",
+                "machine": "dumbbell_rack"
+              }
+            ],
+            "ord": 4
+          },
+          {
+            "exercise": "tricep_pushdown",
+            "name": "Triceps Pushdown",
+            "machine": "tricep_pushdown_station",
+            "machineName": "Triceps Pushdown Station",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "triceps_lateral"
+            ],
+            "alternatives": [
+              {
+                "exercise": "overhead_tricep_ext",
+                "name": "Overhead Triceps Extension",
+                "machine": "cable_column"
+              },
+              {
+                "exercise": "skull_crusher",
+                "name": "Skull Crusher",
+                "machine": "ez_curl_bar"
+              }
+            ],
+            "ord": 5
+          },
+          {
+            "exercise": "cable_fly_high",
+            "name": "High-to-Low Cable Fly",
+            "machine": "cable_crossover",
+            "machineName": "Cable Crossover",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "pecs_lower"
+            ],
+            "alternatives": [
+              {
+                "exercise": "pec_deck_fly",
+                "name": "Pec Deck Fly",
+                "machine": "pec_deck"
+              },
+              {
+                "exercise": "cable_fly_low",
+                "name": "Low-to-High Cable Fly",
+                "machine": "cable_crossover"
+              }
+            ],
+            "ord": 6
+          },
+          {
+            "exercise": "straight_arm_pulldown",
+            "name": "Straight-Arm Pulldown",
+            "machine": "cable_column",
+            "machineName": "Adjustable Cable Column",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "lats"
+            ],
+            "alternatives": [
+              {
+                "exercise": "close_grip_pulldown",
+                "name": "Close-Grip Pulldown",
+                "machine": "lat_pulldown"
+              },
+              {
+                "exercise": "reverse_grip_pulldown",
+                "name": "Reverse-Grip Pulldown",
+                "machine": "lat_pulldown"
+              }
+            ],
+            "ord": 7
+          }
+        ],
+        "estMinutes": 56
+      },
+      {
+        "day": 2,
+        "focus": "lower",
+        "groups": [
+          "quads",
+          "hamstrings",
+          "glutes",
+          "calves",
+          "abs"
+        ],
+        "items": [
+          {
+            "exercise": "walking_lunge",
+            "name": "Walking Lunge",
+            "machine": "dumbbell_rack",
+            "machineName": "Dumbbell Rack",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "quads_vastus",
+              "glute_max"
+            ],
+            "alternatives": [
+              {
+                "exercise": "leg_press_ex",
+                "name": "Leg Press",
+                "machine": "leg_press"
+              },
+              {
+                "exercise": "goblet_squat",
+                "name": "Goblet Squat",
+                "machine": "dumbbell_rack"
+              }
+            ],
+            "ord": 1
+          },
+          {
+            "exercise": "seated_leg_curl_ex",
+            "name": "Seated Leg Curl",
+            "machine": "leg_curl_seated",
+            "machineName": "Seated Leg Curl",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "hamstrings"
+            ],
+            "alternatives": [],
+            "ord": 2
+          },
+          {
+            "exercise": "cable_pull_through",
+            "name": "Cable Pull-Through",
+            "machine": "cable_column",
+            "machineName": "Adjustable Cable Column",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "glute_max"
+            ],
+            "alternatives": [
+              {
+                "exercise": "abductor_machine_ex",
+                "name": "Hip Abduction",
+                "machine": "hip_abductor"
+              }
+            ],
+            "ord": 3
+          },
+          {
+            "exercise": "standing_calf_raise_ex",
+            "name": "Standing Calf Raise",
+            "machine": "calf_raise_standing",
+            "machineName": "Standing Calf Raise",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "gastrocnemius"
+            ],
+            "alternatives": [
+              {
+                "exercise": "calf_press",
+                "name": "Calf Press on Leg Press",
+                "machine": "leg_press"
+              }
+            ],
+            "ord": 4
+          },
+          {
+            "exercise": "plank",
+            "name": "Plank",
+            "machine": null,
+            "machineName": "bodyweight/free",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "transverse_abdominis",
+              "rectus_abdominis"
+            ],
+            "alternatives": [
+              {
+                "exercise": "ab_wheel",
+                "name": "Ab Wheel Rollout",
+                "machine": null
+              }
+            ],
+            "ord": 5
+          },
+          {
+            "exercise": "cable_crunch",
+            "name": "Cable Crunch",
+            "machine": "cable_column",
+            "machineName": "Adjustable Cable Column",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "rectus_abdominis"
+            ],
+            "alternatives": [
+              {
+                "exercise": "ab_wheel",
+                "name": "Ab Wheel Rollout",
+                "machine": null
+              }
+            ],
+            "ord": 6
+          },
+          {
+            "exercise": "goblet_squat",
+            "name": "Goblet Squat",
+            "machine": "dumbbell_rack",
+            "machineName": "Dumbbell Rack",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "quads_vastus"
+            ],
+            "alternatives": [
+              {
+                "exercise": "leg_press_ex",
+                "name": "Leg Press",
+                "machine": "leg_press"
+              },
+              {
+                "exercise": "smith_squat",
+                "name": "Smith Machine Squat",
+                "machine": "smith_machine"
+              }
+            ],
+            "ord": 7
+          }
+        ],
+        "estMinutes": 56
+      },
+      {
+        "day": 3,
+        "focus": "upper",
+        "groups": [
+          "chest",
+          "back",
+          "delts",
+          "biceps",
+          "triceps"
+        ],
+        "items": [
+          {
+            "exercise": "machine_chest_press",
+            "name": "Machine Chest Press",
+            "machine": "chest_press",
+            "machineName": "Chest Press",
+            "compound": true,
+            "sets": 3,
+            "repRange": [
+              8,
+              12
+            ],
+            "restSec": 150,
+            "primeMovers": [
+              "pecs_lower"
+            ],
+            "alternatives": [
+              {
+                "exercise": "pec_deck_fly",
+                "name": "Pec Deck Fly",
+                "machine": "pec_deck"
+              },
+              {
+                "exercise": "cable_fly_high",
+                "name": "High-to-Low Cable Fly",
+                "machine": "cable_crossover"
+              }
+            ],
+            "ord": 1,
+            "warmup": true
+          },
+          {
+            "exercise": "wide_grip_pulldown",
+            "name": "Wide-Grip Lat Pulldown",
+            "machine": "lat_pulldown",
+            "machineName": "Lat Pulldown",
+            "compound": true,
+            "sets": 3,
+            "repRange": [
+              8,
+              12
+            ],
+            "restSec": 150,
+            "primeMovers": [
+              "lats"
+            ],
+            "alternatives": [
+              {
+                "exercise": "close_grip_pulldown",
+                "name": "Close-Grip Pulldown",
+                "machine": "lat_pulldown"
+              },
+              {
+                "exercise": "reverse_grip_pulldown",
+                "name": "Reverse-Grip Pulldown",
+                "machine": "lat_pulldown"
+              }
+            ],
+            "ord": 2
+          },
+          {
+            "exercise": "upright_row",
+            "name": "Upright Row",
+            "machine": "ez_curl_bar",
+            "machineName": "EZ Curl Bar",
+            "compound": true,
+            "sets": 3,
+            "repRange": [
+              8,
+              12
+            ],
+            "restSec": 150,
+            "primeMovers": [
+              "side_delts",
+              "upper_traps"
+            ],
+            "alternatives": [
+              {
+                "exercise": "machine_shoulder_press",
+                "name": "Machine Shoulder Press",
+                "machine": "shoulder_press"
+              },
+              {
+                "exercise": "lateral_raise_db",
+                "name": "Dumbbell Lateral Raise",
+                "machine": "dumbbell_rack"
+              }
+            ],
+            "ord": 3
+          },
+          {
+            "exercise": "hammer_curl",
+            "name": "Hammer Curl",
+            "machine": "dumbbell_rack",
+            "machineName": "Dumbbell Rack",
+            "compound": true,
+            "sets": 3,
+            "repRange": [
+              8,
+              12
+            ],
+            "restSec": 150,
+            "primeMovers": [
+              "brachialis",
+              "brachioradialis"
+            ],
+            "alternatives": [
+              {
+                "exercise": "barbell_curl",
+                "name": "Barbell Curl",
+                "machine": "ez_curl_bar"
+              },
+              {
+                "exercise": "dumbbell_curl",
+                "name": "Dumbbell Curl",
+                "machine": "dumbbell_rack"
+              }
+            ],
+            "ord": 4
+          },
+          {
+            "exercise": "tricep_pushdown",
+            "name": "Triceps Pushdown",
+            "machine": "tricep_pushdown_station",
+            "machineName": "Triceps Pushdown Station",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "triceps_lateral"
+            ],
+            "alternatives": [
+              {
+                "exercise": "overhead_tricep_ext",
+                "name": "Overhead Triceps Extension",
+                "machine": "cable_column"
+              },
+              {
+                "exercise": "skull_crusher",
+                "name": "Skull Crusher",
+                "machine": "ez_curl_bar"
+              }
+            ],
+            "ord": 5
+          },
+          {
+            "exercise": "cable_fly_high",
+            "name": "High-to-Low Cable Fly",
+            "machine": "cable_crossover",
+            "machineName": "Cable Crossover",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "pecs_lower"
+            ],
+            "alternatives": [
+              {
+                "exercise": "pec_deck_fly",
+                "name": "Pec Deck Fly",
+                "machine": "pec_deck"
+              },
+              {
+                "exercise": "cable_fly_low",
+                "name": "Low-to-High Cable Fly",
+                "machine": "cable_crossover"
+              }
+            ],
+            "ord": 6
+          },
+          {
+            "exercise": "straight_arm_pulldown",
+            "name": "Straight-Arm Pulldown",
+            "machine": "cable_column",
+            "machineName": "Adjustable Cable Column",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "lats"
+            ],
+            "alternatives": [
+              {
+                "exercise": "close_grip_pulldown",
+                "name": "Close-Grip Pulldown",
+                "machine": "lat_pulldown"
+              },
+              {
+                "exercise": "reverse_grip_pulldown",
+                "name": "Reverse-Grip Pulldown",
+                "machine": "lat_pulldown"
+              }
+            ],
+            "ord": 7
+          }
+        ],
+        "estMinutes": 56
+      },
+      {
+        "day": 4,
+        "focus": "lower",
+        "groups": [
+          "quads",
+          "hamstrings",
+          "glutes",
+          "calves",
+          "abs"
+        ],
+        "items": [
+          {
+            "exercise": "walking_lunge",
+            "name": "Walking Lunge",
+            "machine": "dumbbell_rack",
+            "machineName": "Dumbbell Rack",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "quads_vastus",
+              "glute_max"
+            ],
+            "alternatives": [
+              {
+                "exercise": "leg_press_ex",
+                "name": "Leg Press",
+                "machine": "leg_press"
+              },
+              {
+                "exercise": "goblet_squat",
+                "name": "Goblet Squat",
+                "machine": "dumbbell_rack"
+              }
+            ],
+            "ord": 1
+          },
+          {
+            "exercise": "seated_leg_curl_ex",
+            "name": "Seated Leg Curl",
+            "machine": "leg_curl_seated",
+            "machineName": "Seated Leg Curl",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "hamstrings"
+            ],
+            "alternatives": [],
+            "ord": 2
+          },
+          {
+            "exercise": "cable_pull_through",
+            "name": "Cable Pull-Through",
+            "machine": "cable_column",
+            "machineName": "Adjustable Cable Column",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "glute_max"
+            ],
+            "alternatives": [
+              {
+                "exercise": "abductor_machine_ex",
+                "name": "Hip Abduction",
+                "machine": "hip_abductor"
+              }
+            ],
+            "ord": 3
+          },
+          {
+            "exercise": "standing_calf_raise_ex",
+            "name": "Standing Calf Raise",
+            "machine": "calf_raise_standing",
+            "machineName": "Standing Calf Raise",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "gastrocnemius"
+            ],
+            "alternatives": [
+              {
+                "exercise": "calf_press",
+                "name": "Calf Press on Leg Press",
+                "machine": "leg_press"
+              }
+            ],
+            "ord": 4
+          },
+          {
+            "exercise": "plank",
+            "name": "Plank",
+            "machine": null,
+            "machineName": "bodyweight/free",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "transverse_abdominis",
+              "rectus_abdominis"
+            ],
+            "alternatives": [
+              {
+                "exercise": "ab_wheel",
+                "name": "Ab Wheel Rollout",
+                "machine": null
+              }
+            ],
+            "ord": 5
+          },
+          {
+            "exercise": "cable_crunch",
+            "name": "Cable Crunch",
+            "machine": "cable_column",
+            "machineName": "Adjustable Cable Column",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "rectus_abdominis"
+            ],
+            "alternatives": [
+              {
+                "exercise": "ab_wheel",
+                "name": "Ab Wheel Rollout",
+                "machine": null
+              }
+            ],
+            "ord": 6
+          },
+          {
+            "exercise": "goblet_squat",
+            "name": "Goblet Squat",
+            "machine": "dumbbell_rack",
+            "machineName": "Dumbbell Rack",
+            "compound": false,
+            "sets": 3,
+            "repRange": [
+              10,
+              15
+            ],
+            "restSec": 75,
+            "primeMovers": [
+              "quads_vastus"
+            ],
+            "alternatives": [
+              {
+                "exercise": "leg_press_ex",
+                "name": "Leg Press",
+                "machine": "leg_press"
+              },
+              {
+                "exercise": "smith_squat",
+                "name": "Smith Machine Squat",
+                "machine": "smith_machine"
+              }
+            ],
+            "ord": 7
+          }
+        ],
+        "estMinutes": 56
+      }
+    ],
+    "volume": {
+      "pecs_lower": 10,
+      "triceps_lateral": 8.6,
+      "front_delts": 4.8,
+      "lats": 10.5,
+      "teres_major": 5.7,
+      "biceps": 9,
+      "rhomboids": 2.7,
+      "side_delts": 4.5,
+      "upper_traps": 4.3,
+      "brachialis": 4.8,
+      "brachioradialis": 4.5,
+      "triceps_long": 3.3,
+      "quads_vastus": 9.7,
+      "glute_max": 12.9,
+      "hamstrings": 8.7,
+      "gastrocnemius": 6.9,
+      "soleus": 3,
+      "transverse_abdominis": 4.5,
+      "rectus_abdominis": 9.5,
+      "external_obliques": 2.7
+    },
+    "landmarks": [
+      {
+        "muscle": "lats",
+        "label": "Latissimus dorsi",
+        "sets": 10.5,
+        "mev": 10,
+        "mav": 18,
+        "mrv": 25,
+        "status": "in_range"
+      },
+      {
+        "muscle": "upper_traps",
+        "label": "Upper trapezius",
+        "sets": 4.3,
+        "mev": 0,
+        "mav": 20,
+        "mrv": 40,
+        "status": "in_range"
+      },
+      {
+        "muscle": "mid_traps",
+        "label": "Middle trapezius",
+        "sets": 0,
+        "mev": 8,
+        "mav": 16,
+        "mrv": 25,
+        "status": "under"
+      },
+      {
+        "muscle": "spinal_erectors",
+        "label": "Erector spinae",
+        "sets": 0,
+        "mev": 4,
+        "mav": 10,
+        "mrv": 16,
+        "status": "under"
+      },
+      {
+        "muscle": "pecs_upper",
+        "label": "Upper pectoralis (clavicular)",
+        "sets": 0,
+        "mev": 6,
+        "mav": 12,
+        "mrv": 18,
+        "status": "under"
+      },
+      {
+        "muscle": "pecs_lower",
+        "label": "Lower pectoralis (sternal)",
+        "sets": 10,
+        "mev": 10,
+        "mav": 16,
+        "mrv": 22,
+        "status": "in_range"
+      },
+      {
+        "muscle": "front_delts",
+        "label": "Anterior deltoid",
+        "sets": 4.8,
+        "mev": 0,
+        "mav": 8,
+        "mrv": 12,
+        "status": "in_range"
+      },
+      {
+        "muscle": "side_delts",
+        "label": "Lateral deltoid",
+        "sets": 4.5,
+        "mev": 8,
+        "mav": 18,
+        "mrv": 26,
+        "status": "under"
+      },
+      {
+        "muscle": "rear_delts",
+        "label": "Posterior deltoid",
+        "sets": 0,
+        "mev": 6,
+        "mav": 16,
+        "mrv": 30,
+        "status": "under"
+      },
+      {
+        "muscle": "biceps",
+        "label": "Biceps brachii",
+        "sets": 9,
+        "mev": 8,
+        "mav": 16,
+        "mrv": 26,
+        "status": "in_range"
+      },
+      {
+        "muscle": "triceps_long",
+        "label": "Triceps long head",
+        "sets": 3.3,
+        "mev": 6,
+        "mav": 14,
+        "mrv": 30,
+        "status": "under"
+      },
+      {
+        "muscle": "forearm_flexors",
+        "label": "Forearm flexors",
+        "sets": 0,
+        "mev": 4,
+        "mav": 10,
+        "mrv": 20,
+        "status": "under"
+      },
+      {
+        "muscle": "quads_rectus",
+        "label": "Rectus femoris",
+        "sets": 0,
+        "mev": 8,
+        "mav": 16,
+        "mrv": 20,
+        "status": "under"
+      },
+      {
+        "muscle": "hamstrings",
+        "label": "Hamstrings",
+        "sets": 8.7,
+        "mev": 6,
+        "mav": 13,
+        "mrv": 20,
+        "status": "in_range"
+      },
+      {
+        "muscle": "glute_max",
+        "label": "Gluteus maximus",
+        "sets": 12.9,
+        "mev": 4,
+        "mav": 12,
+        "mrv": 16,
+        "status": "in_range"
+      },
+      {
+        "muscle": "adductors",
+        "label": "Hip adductors",
+        "sets": 0,
+        "mev": 0,
+        "mav": 8,
+        "mrv": 16,
+        "status": "in_range"
+      },
+      {
+        "muscle": "gastrocnemius",
+        "label": "Gastrocnemius",
+        "sets": 6.9,
+        "mev": 8,
+        "mav": 14,
+        "mrv": 20,
+        "status": "under"
+      },
+      {
+        "muscle": "rectus_abdominis",
+        "label": "Rectus abdominis",
+        "sets": 9.5,
+        "mev": 0,
+        "mav": 16,
+        "mrv": 25,
+        "status": "in_range"
+      }
+    ]
+  },
+  "asymmetry": {
+    "weaker": "left",
+    "gapPct": 6,
+    "recommendation": "add unilateral work to close the gap"
+  },
+  "coaching": {
+    "stage": "preparation",
+    "systemPrompt": "You are IRONMAP's coach — personal trainer + registered dietitian; TTM-guided; never diagnoses or prescribes for acute injury/disease.\nThe user is in the \"Preparation\" stage. Solution-Focused — co-design one small concrete first step this week.\nReply in English, concise and TTS-ready (no bullet dumps).\nSafety: stop-now message + refer to professional; conservative auto-adjust. Never diagnose or prescribe for acute injury/disease.\nYou may call: get_today_workout, log_set, swap_exercise, adjust_for_soreness, get_meal, swap_meal, log_checkin, explain_machine, get_progress.\nModel: claude-fable-5 (escalate to claude-opus-4-8 on safety_trigger/plan_change/medical_question)."
+  },
+  "rationale": [
+    "Energy from your InBody lean mass (Katch-McArdle): BMR 1822, TDEE 2825, target 2825 kcal for recomp.",
+    "Macros (Mid Healthy (80/20)): 191g protein / 304g carbs / 94g fat.",
+    "Meals land within 0.0% of target.",
+    "upper/lower/upper/lower split, 4×/week.",
+    "Your left arm is 6% behind — added unilateral work.",
+    "Note: Middle trapezius, Erector spinae, Upper pectoralis (clavicular), Lateral deltoid, Posterior deltoid, Triceps long head, Forearm flexors, Rectus femoris, Gastrocnemius sit below their minimum landmark with your current equipment/time — consider an extra day."
+  ]
+}

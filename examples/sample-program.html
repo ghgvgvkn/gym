@@ -1,0 +1,224 @@
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IRONMAP — Sample Program</title>
+<style>
+:root{color-scheme:dark;--bg:#0B0C0E;--surf:#14161A;--line:rgba(235,240,245,.09);--text:#EDF0F2;--muted:#98A1AC;--volt:#D8FF3E;--cyan:#3FD9FF;--mint:#3DDC97;--coral:#FF5F56;--mono:"SF Mono",ui-monospace,Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.55}
+.wrap{max-width:900px;margin:0 auto;padding:40px 22px 80px}
+h1{font-size:30px;font-weight:850;letter-spacing:-.03em;margin:0 0 4px}h1 i{font-style:normal;color:var(--volt)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+h2{font-size:15px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:34px 0 12px;border-top:1px solid var(--line);padding-top:18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:18px 0}
+.kpi{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi .v{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}.kpi .l{font-family:var(--mono);font-size:9px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:680px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.dh{display:flex;justify-content:space-between;margin-bottom:8px}.dh span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.row{display:flex;align-items:center;gap:12px;padding:7px 0;border-top:1px solid var(--line)}.row:first-of-type{border-top:0}
+.ord{font-family:var(--mono);font-size:10px;color:var(--muted);width:16px}.grow{flex:1}.sub{color:var(--muted);font-size:12px}
+.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.tag{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--volt);border:1px solid rgba(216,255,62,.4);border-radius:5px;padding:1px 5px;margin-left:8px}
+.lrow{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}
+.badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:99px}
+.badge.in_range{color:var(--mint);border:1px solid rgba(61,220,151,.4)}.badge.under{color:var(--coral);border:1px solid rgba(255,95,86,.4)}.badge.over{color:var(--cyan);border:1px solid rgba(63,217,255,.4)}
+.rat{background:var(--surf);border-left:2px solid var(--volt);border-radius:0 10px 10px 0;padding:12px 16px;margin:8px 0;color:var(--text);font-size:14px}
+.note{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:24px}
+</style>
+<div class="wrap">
+  <div class="eyebrow">IRONMAP · SAMPLE PROGRAM · ENGINE v0.4.0 · GENERATED</div>
+  <h1>IRON<i>MAP</i> — your program</h1>
+  <p style="color:var(--muted)">Recomp · 4 days/week · Mid Healthy · demo InBody (82 kg, 18% BF)</p>
+
+  <h2>Energy &amp; macros</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v num">1822</div><div class="l">BMR (katch_mcardle)</div></div>
+    <div class="kpi"><div class="v num">2825</div><div class="l">TDEE</div></div>
+    <div class="kpi"><div class="v num">2825</div><div class="l">Target kcal</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--mint)">191g</div><div class="l">Protein</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--cyan)">304g</div><div class="l">Carbs</div></div>
+    <div class="kpi"><div class="v num" style="color:var(--volt)">94g</div><div class="l">Fat</div></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <h2>Today's meals (0.0% off target)</h2>
+      <div class="card"><div class="row"><div class="grow"><b>Whey protein isolate</b>
+  <div class="sub">protein</div></div><span class="num">134 g</span></div><div class="row"><div class="grow"><b>Oats, dry</b>
+  <div class="sub">carb</div></div><span class="num">432 g</span></div><div class="row"><div class="grow"><b>Olive oil</b>
+  <div class="sub">fat</div></div><span class="num">60 g</span></div><div class="row"><div class="grow"><b>Broccoli, cooked</b>
+  <div class="sub">veg</div></div><span class="num">150 g</span></div></div>
+    </div>
+    <div>
+      <h2>Weekly volume vs landmark</h2>
+      <div class="card"><div class="lrow">
+  <span class="grow">Latissimus dorsi</span><span class="num">10.5</span>
+  <span class="badge in_range">in range</span>
+  <span class="sub">MEV 10 · MAV 18 · MRV 25</span></div><div class="lrow">
+  <span class="grow">Upper trapezius</span><span class="num">4.3</span>
+  <span class="badge in_range">in range</span>
+  <span class="sub">MEV 0 · MAV 20 · MRV 40</span></div><div class="lrow">
+  <span class="grow">Lower pectoralis (sternal)</span><span class="num">10</span>
+  <span class="badge in_range">in range</span>
+  <span class="sub">MEV 10 · MAV 16 · MRV 22</span></div><div class="lrow">
+  <span class="grow">Anterior deltoid</span><span class="num">4.8</span>
+  <span class="badge in_range">in range</span>
+  <span class="sub">MEV 0 · MAV 8 · MRV 12</span></div><div class="lrow">
+  <span class="grow">Lateral deltoid</span><span class="num">4.5</span>
+  <span class="badge under">under</span>
+  <span class="sub">MEV 8 · MAV 18 · MRV 26</span></div><div class="lrow">
+  <span class="grow">Biceps brachii</span><span class="num">9</span>
+  <span class="badge in_range">in range</span>
+  <span class="sub">MEV 8 · MAV 16 · MRV 26</span></div><div class="lrow">
+  <span class="grow">Triceps long head</span><span class="num">3.3</span>
+  <span class="badge under">under</span>
+  <span class="sub">MEV 6 · MAV 14 · MRV 30</span></div><div class="lrow">
+  <span class="grow">Hamstrings</span><span class="num">8.7</span>
+  <span class="badge in_range">in range</span>
+  <span class="sub">MEV 6 · MAV 13 · MRV 20</span></div><div class="lrow">
+  <span class="grow">Gluteus maximus</span><span class="num">12.9</span>
+  <span class="badge in_range">in range</span>
+  <span class="sub">MEV 4 · MAV 12 · MRV 16</span></div><div class="lrow">
+  <span class="grow">Gastrocnemius</span><span class="num">6.9</span>
+  <span class="badge under">under</span>
+  <span class="sub">MEV 8 · MAV 14 · MRV 20</span></div><div class="lrow">
+  <span class="grow">Rectus abdominis</span><span class="num">9.5</span>
+  <span class="badge in_range">in range</span>
+  <span class="sub">MEV 0 · MAV 16 · MRV 25</span></div></div>
+    </div>
+  </div>
+
+  <h2>Workout — upper / lower / upper / lower</h2>
+  
+  <div class="card">
+    <div class="dh"><b>Day 1 · upper</b><span>56 min</span></div>
+    <div class="row">
+      <span class="ord">1</span>
+      <div class="grow"><b>Machine Chest Press</b><span class="tag">warm-up</span>
+        <div class="sub">Chest Press · 3×8–12 · rest 150s</div></div>
+    </div><div class="row">
+      <span class="ord">2</span>
+      <div class="grow"><b>Wide-Grip Lat Pulldown</b>
+        <div class="sub">Lat Pulldown · 3×8–12 · rest 150s</div></div>
+    </div><div class="row">
+      <span class="ord">3</span>
+      <div class="grow"><b>Upright Row</b>
+        <div class="sub">EZ Curl Bar · 3×8–12 · rest 150s</div></div>
+    </div><div class="row">
+      <span class="ord">4</span>
+      <div class="grow"><b>Hammer Curl</b>
+        <div class="sub">Dumbbell Rack · 3×8–12 · rest 150s</div></div>
+    </div><div class="row">
+      <span class="ord">5</span>
+      <div class="grow"><b>Triceps Pushdown</b>
+        <div class="sub">Triceps Pushdown Station · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">6</span>
+      <div class="grow"><b>High-to-Low Cable Fly</b>
+        <div class="sub">Cable Crossover · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">7</span>
+      <div class="grow"><b>Straight-Arm Pulldown</b>
+        <div class="sub">Adjustable Cable Column · 3×10–15 · rest 75s</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="dh"><b>Day 2 · lower</b><span>56 min</span></div>
+    <div class="row">
+      <span class="ord">1</span>
+      <div class="grow"><b>Walking Lunge</b>
+        <div class="sub">Dumbbell Rack · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">2</span>
+      <div class="grow"><b>Seated Leg Curl</b>
+        <div class="sub">Seated Leg Curl · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">3</span>
+      <div class="grow"><b>Cable Pull-Through</b>
+        <div class="sub">Adjustable Cable Column · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">4</span>
+      <div class="grow"><b>Standing Calf Raise</b>
+        <div class="sub">Standing Calf Raise · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">5</span>
+      <div class="grow"><b>Plank</b>
+        <div class="sub">bodyweight/free · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">6</span>
+      <div class="grow"><b>Cable Crunch</b>
+        <div class="sub">Adjustable Cable Column · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">7</span>
+      <div class="grow"><b>Goblet Squat</b>
+        <div class="sub">Dumbbell Rack · 3×10–15 · rest 75s</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="dh"><b>Day 3 · upper</b><span>56 min</span></div>
+    <div class="row">
+      <span class="ord">1</span>
+      <div class="grow"><b>Machine Chest Press</b><span class="tag">warm-up</span>
+        <div class="sub">Chest Press · 3×8–12 · rest 150s</div></div>
+    </div><div class="row">
+      <span class="ord">2</span>
+      <div class="grow"><b>Wide-Grip Lat Pulldown</b>
+        <div class="sub">Lat Pulldown · 3×8–12 · rest 150s</div></div>
+    </div><div class="row">
+      <span class="ord">3</span>
+      <div class="grow"><b>Upright Row</b>
+        <div class="sub">EZ Curl Bar · 3×8–12 · rest 150s</div></div>
+    </div><div class="row">
+      <span class="ord">4</span>
+      <div class="grow"><b>Hammer Curl</b>
+        <div class="sub">Dumbbell Rack · 3×8–12 · rest 150s</div></div>
+    </div><div class="row">
+      <span class="ord">5</span>
+      <div class="grow"><b>Triceps Pushdown</b>
+        <div class="sub">Triceps Pushdown Station · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">6</span>
+      <div class="grow"><b>High-to-Low Cable Fly</b>
+        <div class="sub">Cable Crossover · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">7</span>
+      <div class="grow"><b>Straight-Arm Pulldown</b>
+        <div class="sub">Adjustable Cable Column · 3×10–15 · rest 75s</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="dh"><b>Day 4 · lower</b><span>56 min</span></div>
+    <div class="row">
+      <span class="ord">1</span>
+      <div class="grow"><b>Walking Lunge</b>
+        <div class="sub">Dumbbell Rack · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">2</span>
+      <div class="grow"><b>Seated Leg Curl</b>
+        <div class="sub">Seated Leg Curl · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">3</span>
+      <div class="grow"><b>Cable Pull-Through</b>
+        <div class="sub">Adjustable Cable Column · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">4</span>
+      <div class="grow"><b>Standing Calf Raise</b>
+        <div class="sub">Standing Calf Raise · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">5</span>
+      <div class="grow"><b>Plank</b>
+        <div class="sub">bodyweight/free · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">6</span>
+      <div class="grow"><b>Cable Crunch</b>
+        <div class="sub">Adjustable Cable Column · 3×10–15 · rest 75s</div></div>
+    </div><div class="row">
+      <span class="ord">7</span>
+      <div class="grow"><b>Goblet Squat</b>
+        <div class="sub">Dumbbell Rack · 3×10–15 · rest 75s</div></div>
+    </div>
+  </div>
+
+  <h2>Coach rationale</h2>
+  <div class="rat">Energy from your InBody lean mass (Katch-McArdle): BMR 1822, TDEE 2825, target 2825 kcal for recomp.</div><div class="rat">Macros (Mid Healthy (80/20)): 191g protein / 304g carbs / 94g fat.</div><div class="rat">Meals land within 0.0% of target.</div><div class="rat">upper/lower/upper/lower split, 4×/week.</div><div class="rat">Your left arm is 6% behind — added unilateral work.</div><div class="rat">Note: Middle trapezius, Erector spinae, Upper pectoralis (clavicular), Lateral deltoid, Posterior deltoid, Triceps long head, Forearm flexors, Rectus femoris, Gastrocnemius sit below their minimum landmark with your current equipment/time — consider an extra day.</div>
+
+  <div class="note">Every number above is deterministic engine output (metabolic · nutrition · mealplan · planner · program). Regenerate: npm run example</div>
+</div>

@@ -1,0 +1,50 @@
+{
+  "_source": "Research brief 2 (biomechanics) + volume landmarks (MEV/MAV/MRV weekly hard sets, Renaissance Periodization). landmarks are on group representatives; null = accrues indirectly.",
+  "muscles": [
+    { "id": "lats", "label": "Latissimus dorsi", "label_ar": "الظهرية العريضة", "region": "back", "group": "back", "prime": true, "landmarks": { "mev": 10, "mav": 18, "mrv": 25 } },
+    { "id": "upper_traps", "label": "Upper trapezius", "label_ar": "شبه المنحرف العلوي", "region": "back", "group": "traps", "prime": true, "landmarks": { "mev": 0, "mav": 20, "mrv": 40 } },
+    { "id": "mid_traps", "label": "Middle trapezius", "label_ar": "شبه المنحرف الأوسط", "region": "back", "group": "upper_back", "prime": true, "landmarks": { "mev": 8, "mav": 16, "mrv": 25 } },
+    { "id": "lower_traps", "label": "Lower trapezius", "label_ar": "شبه المنحرف السفلي", "region": "back", "group": "upper_back", "prime": true, "landmarks": null },
+    { "id": "rhomboids", "label": "Rhomboids", "label_ar": "المعينية", "region": "back", "group": "upper_back", "prime": true, "landmarks": null },
+    { "id": "spinal_erectors", "label": "Erector spinae", "label_ar": "الناصبة للفقار", "region": "back", "group": "lower_back", "prime": true, "landmarks": { "mev": 4, "mav": 10, "mrv": 16 } },
+    { "id": "teres_major", "label": "Teres major", "label_ar": "المدورة الكبيرة", "region": "back", "group": "back", "prime": false, "landmarks": null },
+    { "id": "teres_minor", "label": "Teres minor", "label_ar": "المدورة الصغيرة", "region": "back", "group": "rotator_cuff", "prime": false, "landmarks": null },
+    { "id": "infraspinatus", "label": "Infraspinatus", "label_ar": "تحت الشوكة", "region": "back", "group": "rotator_cuff", "prime": false, "landmarks": null },
+    { "id": "serratus_anterior", "label": "Serratus anterior", "label_ar": "المنشارية الأمامية", "region": "back", "group": "upper_back", "prime": false, "landmarks": null },
+
+    { "id": "pecs_upper", "label": "Upper pectoralis (clavicular)", "label_ar": "الصدرية العلوية", "region": "chest", "group": "chest", "prime": true, "landmarks": { "mev": 6, "mav": 12, "mrv": 18 } },
+    { "id": "pecs_lower", "label": "Lower pectoralis (sternal)", "label_ar": "الصدرية السفلية", "region": "chest", "group": "chest", "prime": true, "landmarks": { "mev": 10, "mav": 16, "mrv": 22 } },
+    { "id": "pec_minor", "label": "Pectoralis minor", "label_ar": "الصدرية الصغرى", "region": "chest", "group": "chest", "prime": false, "landmarks": null },
+
+    { "id": "front_delts", "label": "Anterior deltoid", "label_ar": "الدالية الأمامية", "region": "shoulders", "group": "delts", "prime": true, "landmarks": { "mev": 0, "mav": 8, "mrv": 12 } },
+    { "id": "side_delts", "label": "Lateral deltoid", "label_ar": "الدالية الجانبية", "region": "shoulders", "group": "delts", "prime": true, "landmarks": { "mev": 8, "mav": 18, "mrv": 26 } },
+    { "id": "rear_delts", "label": "Posterior deltoid", "label_ar": "الدالية الخلفية", "region": "shoulders", "group": "delts", "prime": true, "landmarks": { "mev": 6, "mav": 16, "mrv": 30 } },
+
+    { "id": "biceps", "label": "Biceps brachii", "label_ar": "ذات الرأسين", "region": "arms", "group": "biceps", "prime": true, "landmarks": { "mev": 8, "mav": 16, "mrv": 26 } },
+    { "id": "brachialis", "label": "Brachialis", "label_ar": "العضدية", "region": "arms", "group": "biceps", "prime": false, "landmarks": null },
+    { "id": "brachioradialis", "label": "Brachioradialis", "label_ar": "العضدية الكعبرية", "region": "arms", "group": "forearms", "prime": false, "landmarks": null },
+    { "id": "triceps_long", "label": "Triceps long head", "label_ar": "الرأس الطويل للثلاثية", "region": "arms", "group": "triceps", "prime": true, "landmarks": { "mev": 6, "mav": 14, "mrv": 30 } },
+    { "id": "triceps_lateral", "label": "Triceps lateral/medial head", "label_ar": "الرأس الجانبي للثلاثية", "region": "arms", "group": "triceps", "prime": true, "landmarks": null },
+    { "id": "forearm_flexors", "label": "Forearm flexors", "label_ar": "قابضات الساعد", "region": "arms", "group": "forearms", "prime": false, "landmarks": { "mev": 4, "mav": 10, "mrv": 20 } },
+    { "id": "forearm_extensors", "label": "Forearm extensors", "label_ar": "باسطات الساعد", "region": "arms", "group": "forearms", "prime": false, "landmarks": null },
+
+    { "id": "quads_rectus", "label": "Rectus femoris", "label_ar": "المستقيمة الفخذية", "region": "legs", "group": "quads", "prime": true, "landmarks": { "mev": 8, "mav": 16, "mrv": 20 } },
+    { "id": "quads_vastus", "label": "Vastus lateralis/medialis", "label_ar": "المتسعة الوحشية/الإنسية", "region": "legs", "group": "quads", "prime": true, "landmarks": null },
+    { "id": "hamstrings", "label": "Hamstrings", "label_ar": "أوتار الركبة", "region": "legs", "group": "hamstrings", "prime": true, "landmarks": { "mev": 6, "mav": 13, "mrv": 20 } },
+    { "id": "glute_max", "label": "Gluteus maximus", "label_ar": "الألوية الكبرى", "region": "legs", "group": "glutes", "prime": true, "landmarks": { "mev": 4, "mav": 12, "mrv": 16 } },
+    { "id": "glute_med", "label": "Gluteus medius", "label_ar": "الألوية المتوسطة", "region": "legs", "group": "glutes", "prime": true, "landmarks": null },
+    { "id": "glute_min", "label": "Gluteus minimus", "label_ar": "الألوية الصغرى", "region": "legs", "group": "glutes", "prime": false, "landmarks": null },
+    { "id": "adductors", "label": "Hip adductors", "label_ar": "المقربات", "region": "legs", "group": "adductors", "prime": true, "landmarks": { "mev": 0, "mav": 8, "mrv": 16 } },
+    { "id": "gastrocnemius", "label": "Gastrocnemius", "label_ar": "التوأمية", "region": "legs", "group": "calves", "prime": true, "landmarks": { "mev": 8, "mav": 14, "mrv": 20 } },
+    { "id": "soleus", "label": "Soleus", "label_ar": "النعلية", "region": "legs", "group": "calves", "prime": true, "landmarks": null },
+    { "id": "tibialis_anterior", "label": "Tibialis anterior", "label_ar": "الظنبوبية الأمامية", "region": "legs", "group": "shins", "prime": false, "landmarks": null },
+    { "id": "hip_flexors", "label": "Hip flexors (iliopsoas)", "label_ar": "قابضات الورك", "region": "legs", "group": "hip_flexors", "prime": false, "landmarks": null },
+
+    { "id": "rectus_abdominis", "label": "Rectus abdominis", "label_ar": "المستقيمة البطنية", "region": "core", "group": "abs", "prime": true, "landmarks": { "mev": 0, "mav": 16, "mrv": 25 } },
+    { "id": "external_obliques", "label": "External obliques", "label_ar": "المائلة الخارجية", "region": "core", "group": "obliques", "prime": true, "landmarks": null },
+    { "id": "internal_obliques", "label": "Internal obliques", "label_ar": "المائلة الداخلية", "region": "core", "group": "obliques", "prime": false, "landmarks": null },
+    { "id": "transverse_abdominis", "label": "Transverse abdominis", "label_ar": "المستعرضة البطنية", "region": "core", "group": "core_stability", "prime": false, "landmarks": null },
+    { "id": "quadratus_lumborum", "label": "Quadratus lumborum", "label_ar": "المربعة القطنية", "region": "core", "group": "core_stability", "prime": false, "landmarks": null },
+    { "id": "multifidus", "label": "Multifidus", "label_ar": "المتعددة الفلقات", "region": "core", "group": "core_stability", "prime": false, "landmarks": null }
+  ]
+}

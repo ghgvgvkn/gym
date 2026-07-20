@@ -1,0 +1,25 @@
+{
+  "_source": "Research brief 3 §Dynamic Macronutrient Partitioning + Module 3. The 5 product modes with macro splits (fraction of kcal) + LBM protein floor (g/kg) + engine query rules.",
+  "diet_modes": [
+    { "id": "full_healthy", "label": "Full Healthy", "label_ar": "صحي كامل",
+      "protein": 0.30, "fat": 0.30, "carbs": 0.40, "protein_per_kg_lbm": 2.2,
+      "rules": { "whitelist": "whole_food", "added_sugar": 0, "fiber_g_per_1000kcal": 14, "processed_share": 0, "exclude_tags": ["ultra_processed", "added_sugar", "fried"] },
+      "basis": "Whole-food clean baseline; fiber & MUFA/PUFA emphasis (Mediterranean-informed)." },
+    { "id": "mid_healthy", "label": "Mid Healthy (80/20)", "label_ar": "صحي متوازن",
+      "protein": 0.27, "fat": 0.30, "carbs": 0.43, "protein_per_kg_lbm": 2.0,
+      "rules": { "flex_kcal_share": 0.20, "baseline": "whole_food", "fiber_g_per_1000kcal": 14 },
+      "basis": "Sustainable 80/20; Mediterranean ratios with flexibility." },
+    { "id": "iifym", "label": "Junk Food Allowed (IIFYM)", "label_ar": "مرن IIFYM",
+      "protein": 0.30, "fat": 0.25, "carbs": 0.45, "protein_per_kg_lbm": 2.0,
+      "rules": { "any_food": true, "protein_floor": true, "fiber_floor_g_per_1000kcal": 10, "kcal_ceiling": true, "show_tradeoff": true },
+      "basis": "Flexible dieting — any food passes if protein+fiber floors and kcal ceiling hold." },
+    { "id": "aggressive_recomp", "label": "Aggressive Recomp", "label_ar": "إعادة تشكيل قوية",
+      "protein": 0.35, "fat": 0.25, "carbs": 0.40, "protein_per_kg_lbm": 2.6,
+      "rules": { "weekly_cycle_kcal": [-150, 150], "fat_floor_g_per_kg": 0.6, "training_day_carb_bias": true },
+      "basis": "High-protein, adaptive surplus/deficit; TEF-leveraged. Uses InBody LBM for protein floor." },
+    { "id": "therapeutic", "label": "Therapeutic / Recovery", "label_ar": "علاجي / تعافي",
+      "protein": 0.25, "fat": 0.30, "carbs": 0.45, "protein_per_kg_lbm": 1.9,
+      "rules": { "prioritize_tags": ["anti_inflammatory", "fermented", "omega3"], "optional": "low_fodmap", "exclude_tags": ["fried", "alcohol"], "framing": "wellness_only" },
+      "basis": "Anti-inflammatory / joint / digestion focus. Wellness framing only — no treatment claims." }
+  ]
+}

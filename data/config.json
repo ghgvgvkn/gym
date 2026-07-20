@@ -1,0 +1,66 @@
+{
+  "_source": "Engine constants (research 3) + model/pipeline config (research 1,2,4). One place to audit every tunable. Model stack upgraded to the Claude 5 family with Fable 5 as the primary conversational + perception tier (2026-07).",
+
+  "metabolic_equations": {
+    "mifflin_st_jeor": { "basis": "total_mass", "margin_err": "~5%", "coeffs": { "weight": 10, "height": 6.25, "age": -5, "const": { "male": 5, "female": -161 } }, "note": "Default when body-fat/LBM unknown." },
+    "harris_benedict": { "basis": "total_mass", "margin_err": "5-15%", "coeffs": { "male": { "weight": 13.397, "height": 4.799, "age": -5.677, "const": 88.362 }, "female": { "weight": 9.247, "height": 3.098, "age": -4.33, "const": 447.593 } }, "note": "Cross-validation only." },
+    "katch_mcardle": { "basis": "lean_body_mass", "margin_err": "<5%", "coeffs": { "const": 370, "lbm": 21.6 }, "note": "PRIMARY when InBody LBM present." },
+    "cunningham": { "basis": "lean_body_mass", "margin_err": "<5%", "coeffs": { "const": 500, "lbm": 22 } }
+  },
+  "activity_multipliers": { "sedentary": 1.2, "light": 1.375, "moderate": 1.55, "very": 1.725, "extreme": 1.9 },
+  "goal_deltas": { "fat_loss": { "kcal_per_day": [-500, -250], "max_rate_kg_wk": 1.0, "floor": "never below BMR" }, "recomp": { "kcal_per_day": [0, 0] }, "muscle_gain": { "surplus_pct": [0.1, 0.15], "kcal_per_lb_bw": [10, 12] }, "energy_per_kg_fat": 7700, "energy_per_lb_fat": 3500 },
+  "atwater_factors": { "protein": 4, "carbs": 4, "fat": 9 },
+
+  "coach_model": {
+    "family": "claude-5",
+    "router": { "default": "claude-fable-5", "escalate_on": ["safety_trigger", "plan_change", "medical_question"], "escalate_to": "claude-opus-4-8" },
+    "why_fable_5": "Fast, high-quality conversational + on-device-friendly perception tier for the always-on daily coach; escalate the hard safety/planning turns to a deeper reasoning model.",
+    "fine_tuning": { "method": "QLoRA", "rank": 16, "alpha": 32, "nf4": true, "double_quant": true, "paged_optimizer": true, "learning_rate": 1e-5, "top_p": 0.9, "temperature": 0.8 },
+    "alignment": { "sft_examples": "200-300 high-quality min", "dpo": "chosen=concise/empathetic/TTS-ready, rejected=verbose/robotic/bulleted", "safe_lora": true },
+    "persona": "personal trainer + registered dietitian; TTM-guided; never diagnoses or prescribes for acute injury/disease"
+  },
+  "voice_pipeline": {
+    "latency_budget_ms": 300,
+    "transport": ["websocket", "webrtc"],
+    "stt": { "models": ["Deepgram Nova-3 Arabic (17 variants)", "Speechmatics AR-EN bilingual (6.3% WER medical)"], "features": ["semantic_vad", "keyterm_prompting", "incremental_partials"] },
+    "tts": { "models": ["SILMA (MSA + Najdi)", "AnySpeech", "VOBOX"], "dialects": ["jordanian", "levantine", "egyptian"], "text_chunker": { "p5": "sentence-ending punctuation", "p4_2": "semantic break words", "p1": "word-count fallback" }, "arabic": ["infer tashkeel from context", "sun/moon-letter assimilation", "hamza + numeral handling"] },
+    "code_switching": { "metric": "Code Mixing Index (CMI)", "datasets": ["Mixat (Emirati-EN)", "lahgtna-levantine-tts", "DEAST (AR-EN scientific)"], "normalize": ["unify Alef أإآ→ا", "ى→ي", "ة→ه"] }
+  },
+  "vision_pipeline": {
+    "architecture": "YOLO26n",
+    "nms_free": true, "dfl_removed": true, "params_m": 2.5,
+    "optimizer": "MuSGD", "losses": ["ProgLoss", "STAL"],
+    "export": { "ios": "CoreML .mlpackage (nms=false → clean on Apple Neural Engine)", "android": ["TFLite/LiteRT", "MNN (~400KB)", "NCNN"] },
+    "latency": { "iphone17pro_single_ms": 3.8, "iphone17pro_live_ms": 11.3, "target_fps": 30, "cpu_vs_yolo11": "+43% faster" },
+    "quantization": { "strategy": "QAT for INT8", "reason": "PTQ INT8 can drop >25% acc on FGVC detail; QAT recovers near-FP32", "fp16": "minimal loss" },
+    "annotation": { "platform": "CVAT", "auto_label": ["Grounding DINO", "SAM", "CLIP zero-shot filter"], "video": ["FFmpeg/OpenCV frame extract", "DeepSORT/ByteTrack"], "active_learning": "route split-confidence frames to humans; auto-label the confident ones" },
+    "public_seed_datasets": ["Roboflow gym-equipment (6620)", "all-gym-equipment (4717)", "gym-equipment-ycu8l (698)"]
+  },
+  "biomech_pipeline": {
+    "engine": "OpenSim", "models": ["Gait2392", "Rajagopal"],
+    "pipeline": ["scale", "inverse_kinematics", "inverse_dynamics", "static_optimization / Moco direct-collocation"],
+    "input": "3D pose keypoints + external resistance vector (angle + load)",
+    "output": "per-muscle force + joint torque (redundancy solved by minimizing sum of squared activations)",
+    "realtime": "pose→vector on-device (MediaPipe); OpenSim refinement offline for dataset generation"
+  },
+  "progression": {
+    "one_rep_max": { "epley": "w*(1 + reps/30)", "brzycki": "w*36/(37-reps)" },
+    "double_progression": "hit top of rep range on all sets → add load; else add reps",
+    "rir_autoregulation": { "target_rir": 2, "if_rir_ge_4": "increase load ~5%", "if_rir_le_0": "decrease load ~5-10%" },
+    "deload": { "every_weeks": [4, 6], "volume_pct": 0.5, "intensity_pct": 0.9 },
+    "load_increment_pct": { "upper_isolation": 0.025, "upper_compound": 0.05, "lower_compound": 0.05 }
+  },
+  "safety_guardrails": {
+    "pain_redflags": ["sharp joint pain", "sharp pain", "chest pain", "numbness", "numb", "joint locking", "can't breathe", "dizzy"],
+    "on_redflag": "stop-now message + refer to professional; conservative auto-adjust",
+    "eating_disorder_signals": ["purge", "make myself sick", "throw up after", "starve", "stop eating", "laxative", "hate my body"],
+    "on_ed_signal": "supportive redirect; NEVER prescribe a stricter plan",
+    "therapeutic_mode": "wellness framing only — no treatment claims",
+    "logging": "event kind + severity only, never message content"
+  },
+  "food_databases": {
+    "usda_fdc": { "endpoints": ["/foods/search", "/food/{fdcId}", "/foods", "/foods/list"], "rate_limit_per_hour": 1000, "cache": "required", "watch_headers": ["X-RateLimit-Remaining"] },
+    "regional": ["EMFID", "Jordanian Food Composition Table", "myfood24 Arabic (~2100 products)"],
+    "switch_rule": "geolocation / cultural preference selects USDA vs regional"
+  }
+}

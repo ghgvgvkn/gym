@@ -1,0 +1,250 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IRONMAP — your gym, digitized. your coach, personal.</title>
+<meta name="description" content="AI fitness platform: gyms photograph their floor once, members get a voice + text coach whose every workout maps to the exact machines in their gym.">
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#08090B; --surf:#131519; --elev:#1B1E24; --line:rgba(235,240,245,.08); --line2:rgba(235,240,245,.16);
+    --text:#EDF0F2; --muted:#98A1AC; --faint:#69727D;
+    --volt:#D8FF3E; --cyan:#3FD9FF; --mint:#3DDC97; --coral:#FF5F56; --violet:#B7A6FF;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:var(--mono)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(8,9,11,.72);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:26px;height:60px}
+  .brand{font-weight:900;letter-spacing:-.04em;font-size:20px}.brand i{font-style:normal;color:var(--volt)}
+  nav .links{display:flex;gap:22px;margin-left:auto;font-size:14px;color:var(--muted)}
+  nav .links a:hover{color:var(--text)}
+  .cta{background:var(--volt);color:#1A2000;font-weight:700;padding:9px 16px;border-radius:11px;font-size:14px}
+  @media(max-width:720px){nav .links{display:none}}
+
+  /* hero */
+  .hero{position:relative;padding:90px 0 70px;overflow:hidden}
+  .hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.5}
+  .hero .wrap{position:relative;z-index:2}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .eyebrow b{color:var(--volt);font-weight:600}
+  h1{font-size:clamp(2.6rem,7vw,5rem);font-weight:900;letter-spacing:-.045em;line-height:1.02;margin:14px 0 20px;text-wrap:balance}
+  h1 i{font-style:normal;color:var(--volt)}
+  .lede{font-size:clamp(1.05rem,2.2vw,1.35rem);color:var(--muted);max-width:60ch;line-height:1.5}
+  .lede b{color:var(--text)}
+  .herocta{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px}
+  .btn{padding:14px 22px;border-radius:14px;font-weight:700;font-size:15px;border:1px solid var(--line2)}
+  .btn.volt{background:var(--volt);color:#1A2000;border-color:var(--volt)}
+  .btn.ghost{color:var(--text)}
+  .stats{display:flex;gap:36px;flex-wrap:wrap;margin-top:48px}
+  .stat .v{font-size:34px;font-weight:850;letter-spacing:-.03em}
+  .stat .v.volt{color:var(--volt)}.stat .v.cyan{color:var(--cyan)}.stat .v.mint{color:var(--mint)}
+  .stat .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-top:2px}
+
+  /* sections */
+  section{padding:70px 0;border-top:1px solid var(--line)}
+  .sec-label{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt)}
+  h2{font-size:clamp(1.8rem,4vw,2.7rem);font-weight:850;letter-spacing:-.03em;margin:10px 0 14px;text-wrap:balance}
+  .sec-sub{color:var(--muted);max-width:62ch;font-size:1.05rem}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:36px}
+  @media(max-width:760px){.split{grid-template-columns:1fr}}
+  .panel{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:26px}
+  .panel .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;padding:5px 11px;border-radius:99px;margin-bottom:14px}
+  .panel.gyms .tag{color:var(--cyan);border:1px solid rgba(63,217,255,.35)}
+  .panel.members .tag{color:var(--volt);border:1px solid rgba(216,255,62,.4)}
+  .panel h3{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;margin-bottom:12px}
+  .panel ul{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:8px}
+  .panel li{display:flex;gap:11px;font-size:15px;color:var(--muted);line-height:1.45}
+  .panel li b{color:var(--text);font-weight:600}
+  .panel li::before{content:"";flex:none;width:16px;height:16px;margin-top:3px;border-radius:5px;background:linear-gradient(135deg,var(--volt),var(--cyan));opacity:.85}
+
+  .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:36px}
+  .feat{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:22px}
+  .feat .ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;border:1px solid var(--line2)}
+  .feat .ic svg{width:20px;height:20px;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .feat h4{font-size:1.05rem;font-weight:750;margin-bottom:7px;letter-spacing:-.01em}
+  .feat p{color:var(--muted);font-size:14px;line-height:1.5}
+  .feat .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--faint);margin-top:12px;display:block}
+
+  /* how it works */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:36px;counter-reset:s}
+  .step{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:20px;position:relative}
+  .step::before{counter-increment:s;content:"0" counter(s);font-family:var(--mono);font-size:13px;color:var(--volt);letter-spacing:.1em}
+  .step h4{margin:10px 0 6px;font-size:1.05rem;font-weight:750}
+  .step p{color:var(--muted);font-size:14px}
+
+  /* pricing */
+  .prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:36px}
+  .price{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:24px}
+  .price.anchor{border-color:rgba(216,255,62,.45);box-shadow:0 0 0 1px rgba(216,255,62,.15)}
+  .price .name{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .price .amt{font-size:38px;font-weight:850;letter-spacing:-.03em;margin:8px 0}.price .amt small{font-size:14px;color:var(--faint);font-weight:600}
+  .price .cap{color:var(--muted);font-size:13px;font-family:var(--mono)}
+  .price ul{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;color:var(--muted)}
+  .price li::before{content:"✓ ";color:var(--mint)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:#1A2000;background:var(--volt);padding:3px 8px;border-radius:99px;margin-left:8px;vertical-align:middle}
+
+  footer{padding:56px 0;border-top:1px solid var(--line);color:var(--faint)}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+  footer .mono{font-size:12px;letter-spacing:.06em}
+  .badge-ai{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:99px;padding:7px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--volt);box-shadow:0 0 10px var(--volt)}
+  @media(prefers-reduced-motion:reduce){.hero canvas{display:none}}
+</style>
+
+<nav><div class="wrap">
+  <span class="brand">IRON<i>MAP</i></span>
+  <div class="links">
+    <a href="#gyms">For gyms</a><a href="#members">For members</a><a href="#ai">The AI</a><a href="#pricing">Pricing</a>
+  </div>
+  <a href="#pricing" class="cta">Start free</a>
+</div></nav>
+
+<header class="hero">
+  <canvas id="sky"></canvas>
+  <div class="wrap">
+    <div class="eyebrow">AI FITNESS PLATFORM · <b>POWERED BY CLAUDE&nbsp;5 · FABLE&nbsp;5</b></div>
+    <h1>Your gym, digitized.<br>Your coach, <i>personal.</i></h1>
+    <p class="lede">Gyms photograph their floor once and get a living digital twin of every machine.
+      Members get a voice-and-text AI coach whose every workout is built from their InBody data and
+      mapped to the <b>exact machines standing in their gym</b> — not a generic PDF.</p>
+    <div class="herocta">
+      <a href="#pricing" class="btn volt">Digitize your gym</a>
+      <a href="#ai" class="btn ghost">See how the AI works →</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v volt num">60</div><div class="l">Machines classified</div></div>
+      <div class="stat"><div class="v cyan num">86</div><div class="l">Exercises mapped</div></div>
+      <div class="stat"><div class="v mint num">5</div><div class="l">Nutrition modes</div></div>
+      <div class="stat"><div class="v num">AR / EN</div><div class="l">Bilingual voice</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="thesis"><div class="wrap">
+  <div class="sec-label">The moat</div>
+  <h2>The machine map nobody else has.</h2>
+  <p class="sec-sub">Every fitness app can generate "a push day." None of them know that <i>your</i> gym's
+    lat pulldown is a plate-loaded unit on the second floor next to the cable crossover. IRONMAP's
+    defensible asset is the <b>per-gym machine graph</b> — real photos, classified against a canonical
+    taxonomy, joined to a biomechanics-grade exercise library. Workouts stop being PDFs and become
+    turn-by-turn navigation of a physical room.</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-label">Two sides, one platform</div>
+  <h2>Built for the gym and the member.</h2>
+  <div class="split">
+    <div class="panel gyms"><span class="tag">FOR GYM OWNERS · B2B</span>
+      <h3>A retention weapon, not another app.</h3>
+      <ul>
+        <li><b>Walk the floor once.</b> Staff photograph each machine; computer vision catalogs it in ~10 seconds.</li>
+        <li><b>Utilization intel no gym has today</b> — which machines actually get programmed and logged.</li>
+        <li><b>Members, invites, subscriptions</b> and an at-risk list, all in one dashboard.</li>
+        <li><b>Member health data is never shown</b> — engagement aggregates only. A selling point you can print.</li>
+      </ul>
+    </div>
+    <div class="panel members"><span class="tag">FOR MEMBERS · B2C</span>
+      <h3>A 24/7 coach that knows your gym.</h3>
+      <ul>
+        <li><b>Upload your InBody</b> — the plan is built from your measured lean mass, not a guess.</li>
+        <li><b>Every exercise shows your gym's actual machine</b> — photo, zone, seat settings.</li>
+        <li><b>Machine busy?</b> One tap swaps to the closest free alternative in <i>your</i> gym.</li>
+        <li><b>Voice coaching mid-set</b>, a nutritionist that knows mansaf, and progress from scan to scan.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="ai"><div class="wrap">
+  <div class="sec-label">The AI</div>
+  <h2>Deterministic where it counts. Intelligent at the edges.</h2>
+  <p class="sec-sub">Engines own the numbers — sets, volume, calories, macros — so nothing is hallucinated.
+    The models own language, perception, and judgment. Grounded in four research pillars.</p>
+  <div class="grid4">
+    <div class="feat">
+      <div class="ic" style="color:var(--cyan)"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M3 9l9-6 9 6-9 6-9-6zM3 15l9 6 9-6"/></svg></div>
+      <h4>Machine vision</h4>
+      <p>Fine-grained recognition tells a lat pulldown from a seated row — the hard cases — and learns from every staff confirmation.</p>
+      <span class="k">YOLO26 · edge · on-device</span>
+    </div>
+    <div class="feat">
+      <div class="ic" style="color:var(--volt)"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M6 3v6a6 6 0 0 0 12 0V3M4 21h16"/></svg></div>
+      <h4>Biomechanics</h4>
+      <p>Maps each machine's resistance vector to muscle recruitment, then builds plans that hit real weekly volume landmarks.</p>
+      <span class="k">EMG-grounded · 86 exercises</span>
+    </div>
+    <div class="feat">
+      <div class="ic" style="color:var(--mint)"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M4 11h16a8 8 0 0 1-16 0zM9 11V7M12 11V5M15 11V7"/></svg></div>
+      <h4>Food Dr.</h4>
+      <p>Calories from your measured BMR, macros partitioned across five modes, meals assembled from Levantine-first foods.</p>
+      <span class="k">InBody · USDA + regional</span>
+    </div>
+    <div class="feat">
+      <div class="ic" style="color:var(--violet)"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M12 2a9 9 0 0 0-9 9c0 4 3 7 6 8l3 3 3-3c3-1 6-4 6-8a9 9 0 0 0-9-9z"/></svg></div>
+      <h4>Voice coach</h4>
+      <p>Bilingual, sub-300ms conversation with barge-in — coaches you mid-set and adapts the plan when you're sore.</p>
+      <span class="k">AR/EN · Fable 5</span>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-label">How it works</div>
+  <h2>From a photo to a coached workout.</h2>
+  <div class="steps">
+    <div class="step"><h4>Digitize</h4><p>Staff photograph the floor; the AI catalogs every machine and its muscle map.</p></div>
+    <div class="step"><h4>Onboard</h4><p>Members scan the gym QR, upload their InBody, and set a goal in 90 seconds.</p></div>
+    <div class="step"><h4>Generate</h4><p>The engine builds a machine-bound weekly plan and a macro-matched meal plan.</p></div>
+    <div class="step"><h4>Coach</h4><p>Voice + text guidance mid-set, daily check-ins, and progress that adapts every scan.</p></div>
+  </div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <div class="sec-label">Pricing</div>
+  <h2>Gyms pay. Members don't.</h2>
+  <p class="sec-sub">Tiered by the two things that cost money and make gyms money: member cap and AI depth.
+    Launch pricing for the Jordan / GCC market — 14-day full trial, no card.</p>
+  <div class="prices">
+    <div class="price"><div class="name">Starter</div><div class="amt">$99<small>/mo</small></div><div class="cap num">150 members</div>
+      <ul><li>CV cataloging</li><li>Machine-mapped plans</li><li>Text assistant</li><li>All 5 nutrition modes</li></ul></div>
+    <div class="price anchor"><div class="name">Growth <span class="pill">POPULAR</span></div><div class="amt">$249<small>/mo</small></div><div class="cap num">400 members</div>
+      <ul><li>Everything in Starter</li><li>Voice coach (2,000 min)</li><li>Utilization analytics</li><li>At-risk member list</li></ul></div>
+    <div class="price"><div class="name">Pro</div><div class="amt">$599<small>/mo</small></div><div class="cap num">1,000+ members</div>
+      <ul><li>Multi-location</li><li>LookinBody sync</li><li>API / white-label</li><li>Custom voice persona</li></ul></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <span class="brand">IRON<i>MAP</i></span>
+  <span class="badge-ai"><span class="dot"></span>Powered by the Claude 5 family · Fable 5</span>
+  <span style="flex:1"></span>
+  <span class="mono">© 2026 IRONMAP · Amman → GCC</span>
+</div></footer>
+
+<script>
+(function(){
+  var c = document.getElementById("sky"); if(!c) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var x = c.getContext("2d"), W, H, dots = [];
+  function size(){ W = c.width = c.offsetWidth * 2; H = c.height = c.offsetHeight * 2; }
+  size(); window.addEventListener("resize", size);
+  for (var i=0;i<70;i++) dots.push({x:Math.random(),y:Math.random(),r:Math.random()*2.4+.6,v:Math.random()*.0004+.0001,
+    c: Math.random()<.2?"216,255,62":(Math.random()<.5?"63,217,255":"150,160,170")});
+  function tick(){
+    x.clearRect(0,0,W,H);
+    var g=x.createRadialGradient(W*.5,H*.1,40,W*.5,H*.1,W*.7); g.addColorStop(0,"rgba(63,217,255,.06)"); g.addColorStop(1,"rgba(0,0,0,0)");
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+    dots.forEach(function(p){ p.y-=p.v; if(p.y<-.02)p.y=1.02; x.beginPath(); x.arc(p.x*W,p.y*H,p.r,0,6.283); x.fillStyle="rgba("+p.c+",.5)"; x.fill(); });
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>

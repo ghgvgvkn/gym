@@ -1,0 +1,11 @@
+{
+  "_source": "Research brief 2 §Taxonomy of Force Vectors — the coordinate system the biomechanics engine reasons in.",
+  "force_vectors": [
+    { "id": "axial_si", "label": "Axial · superoinferior", "plane": "longitudinal", "description": "Force along the long axis of the body, top→bottom.", "example": "Squat, vertical press, lat pulldown" },
+    { "id": "axial_is", "label": "Axial · inferosuperior", "plane": "longitudinal", "description": "Force along the long axis, bottom→top.", "example": "Deadlift, calf raise, overhead press" },
+    { "id": "anteroposterior", "label": "Anteroposterior", "plane": "sagittal", "description": "Force from front→back of the body.", "example": "Hip thrust, glute bridge, inverted row" },
+    { "id": "posteroanterior", "label": "Posteroanterior", "plane": "sagittal", "description": "Force from back→front; user pulls rearward.", "example": "Seated row, horizontal cable press" },
+    { "id": "lateromedial", "label": "Lateromedial", "plane": "frontal", "description": "Force from outside→midline or vice versa.", "example": "Lateral raise, hip abduction/adduction" },
+    { "id": "torsional", "label": "Torsional", "plane": "transverse", "description": "Rotational force around the longitudinal axis.", "example": "Cable woodchop, Russian twist, Pallof press" }
+  ]
+}
