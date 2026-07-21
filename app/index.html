@@ -294,7 +294,7 @@
   });
   setTimeout(function(){
     if (!window.__ironmapBooted) showBootError("This is taking too long — likely blocked by your network, VPN, or a browser extension.");
-  }, 7000);
+  }, 12000);
 })();
 </script>
 <script src="/app/ironmap-data.js"></script>
@@ -313,7 +313,8 @@ const IM = window.IRONMAP || { counts:{machines:60,exercises:86}, exercises:[], 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 window.__ironmapBooted = true; // module + Supabase client loaded successfully
 const $ = (s) => document.querySelector(s);
-const show = (id) => { document.querySelectorAll(".view").forEach(v => v.classList.remove("on")); $("#" + id).classList.add("on"); };
+const show = (id) => { document.querySelectorAll(".view").forEach(v => v.classList.remove("on")); $("#" + id).classList.add("on");
+  const be = document.getElementById("bootError"); if (be && be.style.display === "flex") be.style.display = "none"; };
 const bar = (on) => $("#bar").classList.toggle("on", on);
 const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
 
