@@ -127,6 +127,18 @@
   <button class="btn-out" id="signOut">SIGN OUT</button>
 </header>
 
+<div id="bootError" style="display:none;position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--text);align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
+  <div style="max-width:440px">
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--coral);text-transform:uppercase;margin-bottom:10px">Couldn't load IRONMAP</div>
+    <p style="color:var(--muted);font-size:15px;line-height:1.5" id="bootErrorMsg">Something on this page failed to load. This is usually a network or browser-extension issue.</p>
+    <ul style="text-align:left;color:var(--muted);font-size:13.5px;line-height:1.7;margin:16px auto 0;max-width:360px">
+      <li>Try disabling ad-blockers / privacy extensions for this site</li>
+      <li>Try a different network or browser</li>
+      <li>Refresh the page</li>
+    </ul>
+    <button onclick="location.reload()" style="margin-top:18px;background:var(--volt);color:#1A2000;border:0;border-radius:12px;padding:12px 22px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit">Reload</button>
+  </div>
+</div>
 <main>
   <section class="view on" id="v-loading"><div class="spin"></div></section>
 
@@ -259,9 +271,39 @@
   </div></section>
 </main>
 
+<script>
+// Independent watchdog — runs BEFORE the app module, so if that module fails to
+// load or throws (bad network, ad-blocker, extension, anything), the user sees
+// a real message instead of a page that silently does nothing.
+(function(){
+  window.__ironmapBooted = false;
+  function showBootError(msg){
+    var el = document.getElementById("bootError");
+    if (!el || el.style.display === "flex") return;
+    el.style.display = "flex";
+    var m = document.getElementById("bootErrorMsg");
+    if (m && msg) m.textContent = msg;
+  }
+  window.addEventListener("error", function(e){
+    // capture:true (below) also catches <script src> / resource load failures,
+    // which never bubble and would otherwise leave the page silently inert.
+    if (!window.__ironmapBooted) showBootError(e.message ? ("Error: " + e.message) : "A required file failed to load.");
+  }, true);
+  window.addEventListener("unhandledrejection", function(e){
+    if (!window.__ironmapBooted) showBootError(e.reason && e.reason.message ? ("Error: " + e.reason.message) : undefined);
+  });
+  setTimeout(function(){
+    if (!window.__ironmapBooted) showBootError("This is taking too long — likely blocked by your network, VPN, or a browser extension.");
+  }, 7000);
+})();
+</script>
 <script src="/app/ironmap-data.js"></script>
+<script src="/app/vendor/supabase-js.umd.js" onerror="window.__vendorFailed=true; var m=document.getElementById('bootErrorMsg'); if(m) m.textContent='A required file failed to load. Please reload the page.'; var b=document.getElementById('bootError'); if(b) b.style.display='flex';"></script>
 <script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const { createClient } = window.supabase || {};
+if (typeof createClient !== "function"){
+  throw new Error("Supabase library did not load (window.supabase missing)");
+}
 
 const SUPABASE_URL = "https://hhghymfvtynltzvtwhco.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoZ2h5bWZ2dHlubHR6dnR3aGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzODA2MzQsImV4cCI6MjA5OTk1NjYzNH0.IRCw6Sv8I0UzMGj5CaodsazDYaJAC3ho0gtKExJPyu4";
@@ -269,6 +311,7 @@ const ADMIN_EMAILS = ["ahmedfahad9000@gmail.com", "admin@ironmap.fit"];
 const IM = window.IRONMAP || { counts:{machines:60,exercises:86}, exercises:[], demoProgram:null };
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+window.__ironmapBooted = true; // module + Supabase client loaded successfully
 const $ = (s) => document.querySelector(s);
 const show = (id) => { document.querySelectorAll(".view").forEach(v => v.classList.remove("on")); $("#" + id).classList.add("on"); };
 const bar = (on) => $("#bar").classList.toggle("on", on);
@@ -306,7 +349,10 @@ $("#authBtn").onclick = async () => {
     }
   } catch(e){
     msg.className="msg err";
-    msg.textContent = /rate limit/i.test(e.message||"") ? "Email limit reached on this project — the owner needs to turn OFF “Confirm email” in Supabase Auth settings. Try again shortly." : (e.message || String(e));
+    const raw = e.message || String(e);
+    if (/rate limit/i.test(raw)) msg.textContent = "Email limit reached on this project — try again shortly.";
+    else if (/failed to fetch|network|load failed/i.test(raw)) msg.textContent = "Can't reach the sign-in server — check your internet connection (or try disabling an ad-blocker/VPN) and try again.";
+    else msg.textContent = raw;
   } finally { $("#authBtn").disabled=false; $("#authBtn").textContent = mode==="in"?"Sign in":"Create account"; }
 };
 $("#signOut").onclick = async () => { await sb.auth.signOut(); bar(false); show("auth"); };
@@ -511,9 +557,28 @@ async function renderHQ(){
 })();
 
 // ---------- init ----------
+// Never hang on the loading spinner: race the initial session check against a
+// timeout so a slow/unreachable Supabase falls back to the sign-in screen
+// instead of leaving the page stuck (this is the "no home screen" failure mode).
+function withTimeout(promise, ms, fallback){
+  return Promise.race([ promise, new Promise((resolve) => setTimeout(() => resolve(fallback), ms)) ]);
+}
 (async () => {
-  const { data:{ session:s } } = await sb.auth.getSession();
-  if (s){ session=s; await routeUser(); } else { show("auth"); }
-  sb.auth.onAuthStateChange((_e, ns) => { if (!ns){ bar(false); show("auth"); } });
+  try {
+    const result = await withTimeout(sb.auth.getSession(), 6000, { data:{ session:null }, __timedOut:true });
+    if (result.__timedOut){
+      document.getElementById("bootErrorMsg").textContent = "Couldn't reach the sign-in server in time. Check your connection and reload.";
+      document.getElementById("bootError").style.display = "flex";
+      show("auth");
+    } else {
+      const s = result.data.session;
+      if (s){ session=s; await routeUser(); } else { show("auth"); }
+    }
+    sb.auth.onAuthStateChange((_e, ns) => { if (!ns){ bar(false); show("auth"); } });
+  } catch (e){
+    document.getElementById("bootErrorMsg").textContent = "Startup error: " + (e && e.message ? e.message : e);
+    document.getElementById("bootError").style.display = "flex";
+    show("auth");
+  }
 })();
 </script>
