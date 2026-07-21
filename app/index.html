@@ -576,7 +576,13 @@ function withTimeout(promise, ms, fallback){
       const s = result.data.session;
       if (s){ session=s; await routeUser(); } else { show("auth"); }
     }
-    sb.auth.onAuthStateChange((_e, ns) => { if (!ns){ bar(false); show("auth"); } });
+    // Only react to a REAL sign-out. Supabase also replays the session state that
+    // was current at the moment this listener was registered (an "INITIAL_SESSION"
+    // event) — for a fresh visitor that's a null session, and it can fire AFTER a
+    // fast sign-up/sign-in finishes, which used to slam the screen back to "auth"
+    // right after a successful login (this was the "bounces back after signing up"
+    // bug — signup worked, but the stale initial-session replay stomped it).
+    sb.auth.onAuthStateChange((event, ns) => { if (event === "SIGNED_OUT"){ bar(false); show("auth"); } });
   } catch (e){
     document.getElementById("bootErrorMsg").textContent = "Startup error: " + (e && e.message ? e.message : e);
     document.getElementById("bootError").style.display = "flex";
