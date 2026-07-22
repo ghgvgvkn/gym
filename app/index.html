@@ -227,6 +227,29 @@
   .mapp .memberpanel .subgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
   .mapp .memberpanel .subgrid .l{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
   .mapp .memberpanel .subgrid .v{font-size:13px;font-weight:600;margin-top:3px}
+  /* schedule / plan */
+  .mapp .planday{background:var(--surf);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .mapp .planday .dhead{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+  .mapp .planday .dnum{width:36px;height:36px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:800;background:var(--inset);border:1px solid var(--line);color:var(--volt)}
+  .mapp .planday .dfocus{font-size:15px;font-weight:700;text-transform:capitalize}
+  .mapp .planday .dmeta{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.06em;margin-top:2px}
+  .mapp .planday .dchev{margin-left:auto;color:var(--faint);transition:transform .2s;font-size:20px}
+  .mapp .planday.open .dchev{transform:rotate(90deg)}
+  .mapp .planday .dbody{display:none;padding:0 16px 10px}
+  .mapp .planday.open .dbody{display:block}
+  .mapp .exrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+  .mapp .exrow .exn{flex:1;font-size:13.5px;font-weight:600;min-width:0}
+  .mapp .exrow .exm{font-family:var(--mono);font-size:10px;color:var(--cyan);margin-top:2px;display:block;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mapp .exrow .exm.generic{color:var(--faint)}
+  .mapp .exrow .exsets{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}
+  .mapp .exrow .howto{flex:none;background:none;border:1px solid var(--line2);color:var(--muted);border-radius:8px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:5px 7px;cursor:pointer}
+  .mapp #figure #fArm{transform-origin:70px 74px;animation:mvArm 2.4s ease-in-out infinite}
+  .mapp #figure #fLeg1,.mapp #figure #fLeg2{transform-origin:70px 104px;animation:mvLeg 2.4s ease-in-out infinite}
+  @keyframes mvArm{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-28deg)}}
+  @keyframes mvLeg{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @media (prefers-reduced-motion:reduce){.mapp #figure #fArm,.mapp #figure #fLeg1,.mapp #figure #fLeg2{animation:none}}
+  .mapp .cuerow{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--text);line-height:1.45}
+  .mapp .cuerow .cdot{color:var(--mint);flex:none}
 </style>
 
 <header class="bar" id="bar">
@@ -359,7 +382,10 @@
           <span class="ex">Iso-Lateral Row</span><span class="ex">Lat Pulldown #2</span>
           <span class="ex">Seated Cable Row</span><span class="ex">Rear Delt Fly</span><span class="ex num">+2</span>
         </div>
-        <button class="btn volt" data-goto="workout">Start workout</button>
+        <div class="row" style="gap:10px">
+          <button class="btn volt" data-goto="workout" style="flex:1">Start workout</button>
+          <button class="btn ghost" data-goto="plan" style="flex:none;width:auto;padding:15px 16px;font-size:14px">Your week ›</button>
+        </div>
       </div>
 
       <div class="statrow">
@@ -479,6 +505,42 @@
       <div class="card spark">
         <div class="row"><b style="font-size:14px">Weight trend</b><span class="grow"></span><span class="chip num">83.4 → 82.1 kg</span></div>
         <svg viewBox="0 0 340 70" preserveAspectRatio="none"><polyline points="0,18 34,22 68,20 102,28 136,26 170,34 204,31 238,40 272,38 306,46 340,44" fill="none" stroke="#3FD9FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="340" cy="44" r="4" fill="#D8FF3E"/></svg>
+      </div>
+    </div>
+
+    <!-- PLAN / SCHEDULE (reached from Today → "Your week") -->
+    <div class="mscreen" id="m-plan">
+      <div class="row" style="margin-bottom:4px">
+        <button class="chip" id="planBack" style="cursor:pointer">‹ TODAY</button><span class="grow"></span>
+        <span class="chip cyan" id="planFloor">GENERIC KIT</span>
+      </div>
+      <h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:6px 0 0">Your training week</h1>
+      <div class="eyebrow num" id="planMeta" style="margin-top:4px">4-DAY SPLIT · UPPER / LOWER</div>
+      <div id="mPlanDays" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+      <div class="coachnote" style="margin-top:16px"><div class="dot"></div><div><div class="who">COACH</div>
+        <p id="planNote">This is your week. Tap any day to see every machine, and “how to” on an exercise for the movement demo. The plan re-tunes as you log.</p></div></div>
+    </div>
+
+    <!-- MOVEMENT DEMO MODAL -->
+    <div id="moveModal" style="display:none;position:absolute;inset:0;z-index:80;background:rgba(6,7,9,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:24px 18px;overflow-y:auto">
+      <div class="card" style="max-width:400px;margin:24px auto 0;border-color:var(--line2)">
+        <div class="row"><span class="chip mint" id="moveTag">MOVEMENT · 2D DEMO</span><span class="grow"></span><button class="chip" id="moveClose" style="cursor:pointer">✕</button></div>
+        <h1 style="font-size:20px;font-weight:850;letter-spacing:-.02em;margin:12px 0 2px" id="moveName">Exercise</h1>
+        <div class="eyebrow num" id="moveMachine">MACHINE</div>
+        <div style="margin:14px 0;border-radius:16px;border:1px solid var(--line);background:#0E1013;display:flex;justify-content:center;padding:10px">
+          <svg viewBox="0 0 200 170" width="200" height="170" aria-hidden="true">
+            <g stroke="var(--line2)" stroke-width="1.5" fill="none"><path d="M20 150 h160"/><rect x="150" y="60" width="26" height="90" rx="3"/><path d="M154 74h18M154 86h18M154 98h18"/></g>
+            <g id="figure" stroke="var(--volt)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <circle id="fHead" cx="70" cy="52" r="9" fill="var(--volt)" fill-opacity=".2"/>
+              <path id="fTorso" d="M70 61 L70 104"/>
+              <path id="fArm" d="M70 74 L150 92"/>
+              <path id="fLeg1" d="M70 104 L52 150"/>
+              <path id="fLeg2" d="M70 104 L92 150"/>
+            </g>
+          </svg>
+        </div>
+        <div class="cuelist" id="moveCues" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div class="foot" style="margin-top:14px;font-size:10px">2D reference now. Per-machine 3D + live camera form-check (rep counting + form score) is on the roadmap.</div>
       </div>
     </div>
 
@@ -753,9 +815,50 @@ function workoutHtml(p){ if(!p||!p.workout) return ""; const d=p.workout.days[0]
 // is wired where it exists; the richer screens keep the designed sample content until their
 // backends (workout logging, coach voice, InBody scans, food tracking) are built.
 function showMScreen(name){
+  const mm = document.getElementById("moveModal"); if (mm) mm.style.display = "none";
   document.querySelectorAll("#mapp .mscreen").forEach(s => s.classList.toggle("on", s.id === "m-" + name));
   document.querySelectorAll("#mtab button").forEach(b => b.classList.toggle("on", b.dataset.scr === name));
   const sc = document.getElementById("m-" + name); if (sc) sc.scrollTop = 0;
+}
+// map an exercise's machine slug to its real machine name from the engine catalog
+function machineName(slug){
+  if (!slug || slug === "free") return null;
+  const m = (IM.machines || []).find(x => x.slug === slug);
+  return m ? m.name : slug.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+// Build the weekly schedule (Day 1..N) from the real engine plan. Gym members see their gym's
+// machines by name; solo members see the same movements framed as generic kit.
+function renderPlan(p, gymName){
+  $("#planFloor").textContent = gymName ? gymName.toUpperCase() : "GENERIC KIT";
+  const days = (p && p.workout && p.workout.days) ? p.workout.days : [];
+  if (p && p.workout) $("#planMeta").textContent = `${p.workout.daysPerWeek}-DAY SPLIT · ${(p.workout.split||[]).join(" / ").toUpperCase()}`;
+  const host = $("#mPlanDays");
+  if (!days.length){ host.innerHTML = `<div class="card" style="color:var(--muted)">Your plan is being generated…</div>`; return; }
+  host.innerHTML = days.map((d, i) => {
+    const rows = (d.items || []).map(it => {
+      const mn = machineName(it.machine); const mlabel = mn || "Free weight / bodyweight";
+      const gen = gymName ? "" : " generic"; const rr = it.repRange ? it.repRange.join("–") : "";
+      const payload = encodeURIComponent(JSON.stringify({ n: it.name, m: mlabel, g: !!gymName }));
+      return `<div class="exrow"><div class="exn">${it.name}<span class="exm${gen}">${gymName?"◉ ":"○ "}${mlabel}</span></div><span class="exsets num">${it.sets}×${rr}</span><button class="howto" data-move="${payload}">HOW TO</button></div>`;
+    }).join("");
+    const focus = (d.focus || d.template || "Session").replace(/_/g, " ");
+    const mins = Math.max(30, (d.items||[]).length * 9);
+    return `<div class="planday${i===0?" open":""}"><div class="dhead"><div class="dnum">D${i+1}</div><div><div class="dfocus">${focus}</div><div class="dmeta">${(d.items||[]).length} EXERCISES · ~${mins} MIN</div></div><div class="dchev">›</div></div><div class="dbody">${rows}</div></div>`;
+  }).join("");
+  host.querySelectorAll(".dhead").forEach(h => h.onclick = () => h.closest(".planday").classList.toggle("open"));
+  host.querySelectorAll(".howto").forEach(b => b.onclick = () => openMove(JSON.parse(decodeURIComponent(b.dataset.move))));
+}
+function openMove(x){
+  $("#moveName").textContent = x.n;
+  $("#moveMachine").textContent = (x.g ? "◉ " : "○ ") + x.m;
+  $("#moveTag").textContent = x.g ? "MOVEMENT · YOUR MACHINE" : "MOVEMENT · GENERIC KIT";
+  $("#moveCues").innerHTML = [
+    "Set the seat & pads so the machine's pivot lines up with your working joint.",
+    "Control the lowering (negative) for about 3 seconds.",
+    "Move through the full range — no bouncing or half reps.",
+    "Brace your core and drive from the target muscle, not momentum."
+  ].map(c => `<div class="cuerow"><span class="cdot">✓</span><span>${c}</span></div>`).join("");
+  $("#moveModal").style.display = "block";
 }
 let memberAppInited = false;
 function initMemberApp(){
@@ -763,6 +866,8 @@ function initMemberApp(){
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.querySelectorAll("#mtab button").forEach(b => b.onclick = () => showMScreen(b.dataset.scr));
   document.querySelectorAll("#mapp [data-goto]").forEach(b => b.onclick = () => showMScreen(b.dataset.goto));
+  const pb = $("#planBack"); if (pb) pb.onclick = () => showMScreen("today");
+  const mc = $("#moveClose"); if (mc) mc.onclick = () => { $("#moveModal").style.display = "none"; };
 
   // rest timer ring
   let restLeft = 90, restTotal = 90; const arc = $("#restArc"), restT = $("#restT"), CIRC = 439.8;
@@ -842,6 +947,7 @@ async function renderMember(role, demo){
     $("#cancelSub").style.display = sub.status==="canceled" ? "none" : "block";
   }
 
+  renderPlan(p, gymName);
   initMemberApp();
   showMScreen("today");
 }
