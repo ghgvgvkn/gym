@@ -278,6 +278,34 @@
   .mapp .pnum .l{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;margin-top:3px}
   .mapp .pmsg{font-size:12.5px;margin-top:10px;min-height:16px}
   .mapp .pmsg.ok{color:var(--mint)} .mapp .pmsg.err{color:var(--coral)}
+  /* meal planner */
+  .mapp .mealx{display:flex;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin-top:10px}
+  .mapp .mealx.approved{border-color:rgba(61,220,151,.4)}
+  .mapp .mealx .slot{width:44px;height:44px;border-radius:13px;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--muted);background:var(--inset);border:1px solid var(--line);text-transform:uppercase;text-align:center;line-height:1.2}
+  .mapp .mealx .mi{flex:1;min-width:0}
+  .mapp .mealx .mi b{font-size:13.5px;display:block}
+  .mapp .mealx .mi .kcal{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:2px}
+  .mapp .mealx .acts{display:flex;gap:6px;flex:none}
+  .mapp .mealx .acts button{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:var(--inset);color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0}
+  .mapp .mealx .acts button.on{background:var(--mint);border-color:var(--mint);color:#06301C;font-weight:800}
+  .mapp .sheetcard{position:absolute;left:0;right:0;bottom:0;max-height:84%;overflow-y:auto;background:var(--elev);border-top:1px solid var(--line2);border-radius:22px 22px 0 0;padding:20px 18px 26px;scrollbar-width:none}
+  .mapp .sheetcard::-webkit-scrollbar{display:none}
+  .mapp .choice{display:flex;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;text-align:left;width:100%;font-family:inherit;color:var(--text)}
+  .mapp .choice.sel{border-color:rgba(216,255,62,.5)}
+  .mapp .choice .ci{flex:1;min-width:0}
+  .mapp .choice .ci b{font-size:13.5px;display:block}
+  .mapp .choice .ci span{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .mapp .choice .pick{flex:none;font-family:var(--mono);font-size:9px;color:var(--volt);border:1px solid rgba(216,255,62,.4);border-radius:8px;padding:5px 9px}
+  .mapp .modeopt{display:flex;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:13px 14px;cursor:pointer;width:100%;font-family:inherit;color:var(--text);text-align:left}
+  .mapp .modeopt.on{border-color:rgba(61,220,151,.5)}
+  .mapp .modeopt b{font-size:14px;flex:1}
+  .mapp .modeopt span{font-family:var(--mono);font-size:10px;color:var(--faint)}
+  .mapp .mpday{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .mapp .mpday .mph{display:flex;align-items:center;gap:10px}
+  .mapp .mpday .mpn{font-family:var(--mono);font-size:11px;color:var(--volt);font-weight:800;letter-spacing:.06em}
+  .mapp .mpday .mpk{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .mapp .mpday .mpm{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.55}
+  .mapp .mpday.today{border-color:rgba(216,255,62,.4)}
 </style>
 
 <header class="bar" id="bar">
@@ -488,18 +516,16 @@
 
     <!-- FOOD -->
     <div class="mscreen" id="m-food">
-      <div class="row"><div class="grow"><div class="eyebrow">FOOD DR. · WEEK 3</div><h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:4px 0 0">Today's fuel</h1></div><span class="chip mint">MID HEALTHY · 80/20</span></div>
+      <div class="row"><div class="grow"><div class="eyebrow">FOOD DR.</div><h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:4px 0 0">Today's fuel</h1></div><button class="chip mint" id="mfMode" style="cursor:pointer">MID HEALTHY ▾</button></div>
       <div class="macros">
         <div class="macro"><div class="mr"><svg width="70" height="70" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" id="mfKcalArc" cx="37" cy="37" r="31" stroke="#D8FF3E" stroke-dasharray="194.8" stroke-dashoffset="52"/></svg><div class="mv num" id="mfKcal">1840</div></div><div class="ml num" id="mfKcalL">KCAL / 2300</div></div>
         <div class="macro"><div class="mr"><svg width="70" height="70" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" id="mfProtArc" cx="37" cy="37" r="31" stroke="#3DDC97" stroke-dasharray="194.8" stroke-dashoffset="66"/></svg><div class="mv num" id="mfProt">96</div></div><div class="ml num" id="mfProtL">PROTEIN / 145G</div></div>
         <div class="macro"><div class="mr"><svg width="70" height="70" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" id="mfCarbArc" cx="37" cy="37" r="31" stroke="#3FD9FF" stroke-dasharray="194.8" stroke-dashoffset="90"/></svg><div class="mv num" id="mfCarb">168</div></div><div class="ml num" id="mfCarbL">CARBS / 260G</div></div>
         <div class="macro"><div class="mr"><svg width="70" height="70" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" id="mfFatArc" cx="37" cy="37" r="31" stroke="#B7A6FF" stroke-dasharray="194.8" stroke-dashoffset="108"/></svg><div class="mv num" id="mfFat">44</div></div><div class="ml num" id="mfFatL">FAT / 72G</div></div>
       </div>
-      <div class="meal"><div class="slot">7 AM</div><div><b>Labneh, za'atar toast + eggs</b><span class="kcal num">420 kcal · 28g protein</span></div><span class="act chip mint">✓</span></div>
-      <div class="meal"><div class="slot">1 PM</div><div><b>Chicken shawarma bowl, freekeh</b><span class="kcal num">640 kcal · 46g protein</span></div><span class="act chip mint">✓</span></div>
-      <div class="meal" style="border-color:rgba(216,255,62,.4)"><div class="slot">5 PM</div><div><b>Pre-workout: dates + espresso</b><span class="kcal num">180 kcal · timed for 6 PM session</span></div><span class="act chip volt">NOW</span></div>
-      <div class="meal"><div class="slot">8 PM</div><div><b>Salmon, roast potato + salad</b><span class="kcal num">600 kcal · swap → grilled kofta</span></div><span class="act chip">⇄ SWAP</span></div>
-      <div class="coachnote" style="margin-top:16px"><div class="dot"></div><div><div class="who">FOOD DR.</div><p>Friday is mansaf at your mom's — I've already banked 350 kcal across Thursday and Saturday. Enjoy it guilt-free.</p></div></div>
+      <div class="row" style="margin-top:18px;gap:8px"><div class="eyebrow num" style="flex:1" id="mfMealTotal">TODAY</div><button class="chip cyan" id="mfPlanBtn" style="cursor:pointer">30-DAY PLAN ›</button><button class="chip" id="mfRegen" style="cursor:pointer" title="new day">↻</button></div>
+      <div id="mfMeals" style="margin-top:2px"></div>
+      <div class="coachnote" style="margin-top:16px"><div class="dot"></div><div><div class="who">FOOD DR.</div><p id="mfNote">Tap ✓ to lock a meal in, ⇄ to see other options, or ✕ to swap it out — I learn your taste as you go. Friday is mansaf night, so I bank calories across the week for it.</p></div></div>
     </div>
 
     <!-- PROGRESS -->
@@ -584,6 +610,26 @@
       <div id="mPlanDays" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
       <div class="coachnote" style="margin-top:16px"><div class="dot"></div><div><div class="who">COACH</div>
         <p id="planNote">This is your week. Tap any day to see every machine, and “how to” on an exercise for the movement demo. The plan re-tunes as you log.</p></div></div>
+    </div>
+
+    <!-- 30-DAY MEAL PLAN (reached from Food → "30-day plan") -->
+    <div class="mscreen" id="m-mealplan">
+      <div class="row" style="margin-bottom:4px">
+        <button class="chip" id="mpBack" style="cursor:pointer">‹ FOOD</button><span class="grow"></span>
+        <span class="chip mint" id="mpMode">MID HEALTHY</span>
+      </div>
+      <h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:6px 0 0">Your 30-day plan</h1>
+      <div class="eyebrow num" id="mpMeta" style="margin-top:4px">30 DAYS · BUILT AROUND YOUR TARGET</div>
+      <div id="mpDays" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+      <div class="foot" style="margin-top:14px;font-size:10px">Every day is built to your calorie &amp; protein target from a curated Levantine dish library. Approvals and swaps on “Today” carry into the plan.</div>
+    </div>
+
+    <!-- SWAP / CHOICES + MODE SHEET -->
+    <div id="foodSheet" style="display:none;position:absolute;inset:0;z-index:80;background:rgba(6,7,9,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)">
+      <div class="sheetcard" id="sheetCard">
+        <div class="row" style="margin-bottom:12px"><b id="sheetTitle" style="font-size:16px;font-weight:800">Choose a meal</b><span class="grow"></span><button class="chip" id="sheetClose" style="cursor:pointer">✕</button></div>
+        <div id="sheetBody" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
     </div>
 
     <!-- MOVEMENT DEMO MODAL -->
@@ -882,6 +928,7 @@ function workoutHtml(p){ if(!p||!p.workout) return ""; const d=p.workout.days[0]
 // backends (workout logging, coach voice, InBody scans, food tracking) are built.
 function showMScreen(name){
   const mm = document.getElementById("moveModal"); if (mm) mm.style.display = "none";
+  const fs = document.getElementById("foodSheet"); if (fs) fs.style.display = "none";
   document.querySelectorAll("#mapp .mscreen").forEach(s => s.classList.toggle("on", s.id === "m-" + name));
   document.querySelectorAll("#mtab button").forEach(b => b.classList.toggle("on", b.dataset.scr === name));
   const sc = document.getElementById("m-" + name); if (sc) sc.scrollTop = 0;
@@ -951,14 +998,21 @@ function initMemberApp(){
     const goal = document.querySelector("#bGoal button.on")?.dataset.v || "recomp";
     myBody = { height_cm: height, weight_kg: weight, birthdate: `${new Date().getFullYear() - age}-06-15`,
       sex, goal, days_per_week: +$("#bDays").value, session_min: +$("#bMin").value, injuries: $("#bInj").value.trim() || null };
-    applyNumbers(calcNumbers(myBody), null);
+    const nums = calcNumbers(myBody); applyNumbers(nums, null);
+    foodTarget = { kcal:nums.target, protein:nums.protein }; today = genDay(foodDayNonce); renderFood();  // meals rebuild to the new target
     save.disabled = true; save.textContent = "Saving…";
     try {
       if (session){ const { error } = await sb.from("profiles").update(myBody).eq("user_id", session.user.id); if (error) throw error; }
-      msg.className = "pmsg ok"; msg.textContent = "Saved — your plan and macros now use your numbers.";
+      msg.className = "pmsg ok"; msg.textContent = "Saved — your plan, macros and meals now use your numbers.";
     } catch(e){ msg.className = "pmsg err"; msg.textContent = "Couldn't save to your account, but your numbers are updated on this device."; }
     finally { save.disabled = false; save.textContent = "Save & recompute my numbers"; }
   };
+  // meal planner controls
+  const mfm = $("#mfMode"); if (mfm) mfm.onclick = openModeSheet;
+  const mpb = $("#mfPlanBtn"); if (mpb) mpb.onclick = () => { render30Day(); showMScreen("mealplan"); };
+  const mrg = $("#mfRegen"); if (mrg) mrg.onclick = () => { foodDayNonce++; today = genDay(foodDayNonce); renderFood(); };
+  const mpbk = $("#mpBack"); if (mpbk) mpbk.onclick = () => showMScreen("food");
+  const shc = $("#sheetClose"); if (shc) shc.onclick = () => { $("#foodSheet").style.display = "none"; };
 
   // rest timer ring
   let restLeft = 90, restTotal = 90; const arc = $("#restArc"), restT = $("#restT"), CIRC = 439.8;
@@ -1046,14 +1100,22 @@ async function renderMember(role, demo){
   $("#pName").textContent = first; $("#pEmail").textContent = email;
   if (!demo && session){
     try {
-      const { data } = await sb.from("profiles").select("height_cm,weight_kg,birthdate,sex,goal,days_per_week,session_min,injuries").eq("user_id",session.user.id).maybeSingle();
+      const { data } = await sb.from("profiles").select("height_cm,weight_kg,birthdate,sex,goal,days_per_week,session_min,injuries,diet_mode,meal_prefs").eq("user_id",session.user.id).maybeSingle();
       myBody = data || {};
+      foodMode = (data && MODES[data.diet_mode]) ? data.diet_mode : "mid_healthy";
+      myPrefs = (data && data.meal_prefs && Array.isArray(data.meal_prefs.liked)) ? { liked:data.meal_prefs.liked||[], disliked:data.meal_prefs.disliked||[] } : { liked:[], disliked:[] };
     } catch(e){ myBody = {}; }
   } else myBody = {};
   fillBodyForm(myBody);
   // if the user has real body data, THEIR numbers override the engine defaults everywhere
-  if (myBody && myBody.weight_kg && myBody.height_cm){ applyNumbers(calcNumbers(myBody), gymName); } else { showNumbers(null); }
+  const nums = (myBody && myBody.weight_kg && myBody.height_cm) ? calcNumbers(myBody) : null;
+  if (nums){ applyNumbers(nums, gymName); } else { showNumbers(null); }
 
+  // meal planner target: the user's own numbers, else the engine's baked defaults
+  foodTarget = nums ? { kcal:nums.target, protein:nums.protein }
+    : { kcal: (p && p.energy && p.energy.target) || 2500, protein: (p && p.macros && p.macros.protein_g) || 150 };
+  today = [];
+  renderFood();
   renderPlan(p, gymName);
   initMemberApp();
   showMScreen("today");
@@ -1104,6 +1166,156 @@ function fillBodyForm(b){
   $("#bDays").value = String(b.days_per_week || 4); $("#bMin").value = String(b.session_min || 60);
   document.querySelectorAll("#bSex button").forEach(x => x.classList.toggle("on", x.dataset.v === (b.sex||"male")));
   document.querySelectorAll("#bGoal button").forEach(x => x.classList.toggle("on", x.dataset.v === (b.goal||"recomp")));
+}
+
+// ---------- meal planner: curated Levantine dish library + generator that learns ----------
+// h = healthiness (3 clean · 2 balanced · 1 indulgent). slot = when it's eaten.
+const DISHES = [
+  {id:"ful_eggs",n:"Ful medames + 2 eggs + bread",ar:"فول مدمس مع بيض",slot:"breakfast",kcal:480,p:26,h:2},
+  {id:"labneh_toast",n:"Labneh, za'atar toast + eggs",ar:"لبنة وزعتر مع بيض",slot:"breakfast",kcal:420,p:28,h:3},
+  {id:"shakshuka",n:"Shakshuka + pita",ar:"شكشوكة مع خبز",slot:"breakfast",kcal:440,p:24,h:2},
+  {id:"zaatar_manakish",n:"Za'atar manakish + tea",ar:"مناقيش زعتر",slot:"breakfast",kcal:430,p:12,h:2},
+  {id:"eggwhite_oats",n:"Egg-white oats + berries",ar:"شوفان مع بياض بيض",slot:"breakfast",kcal:360,p:30,h:3},
+  {id:"cheese_manakish",n:"Cheese manakish",ar:"مناقيش جبنة",slot:"breakfast",kcal:520,p:20,h:1},
+  {id:"yogurt_granola",n:"Greek yogurt, honey + granola",ar:"لبن يوناني مع غرانولا",slot:"breakfast",kcal:340,p:24,h:3},
+  {id:"protein_pancakes",n:"Protein pancakes + labneh",ar:"بانكيك بروتين",slot:"breakfast",kcal:400,p:34,h:3},
+  {id:"chicken_shawarma",n:"Chicken shawarma bowl, freekeh",ar:"شاورما دجاج مع فريكة",slot:"lunch",kcal:640,p:46,h:2},
+  {id:"mansaf",n:"Mansaf — lamb, rice, jameed",ar:"منسف",slot:"lunch",kcal:780,p:42,h:1},
+  {id:"mujadara",n:"Mujadara + salad + yogurt",ar:"مجدرة مع سلطة",slot:"lunch",kcal:520,p:18,h:3},
+  {id:"grilled_chicken_rice",n:"Grilled chicken + rice + salad",ar:"دجاج مشوي مع رز",slot:"lunch",kcal:600,p:48,h:3},
+  {id:"maqluba",n:"Maqluba — chicken, rice, veg",ar:"مقلوبة",slot:"lunch",kcal:700,p:38,h:2},
+  {id:"kofta_bulgur",n:"Grilled kofta + bulgur + fattoush",ar:"كفتة مع برغل",slot:"lunch",kcal:620,p:40,h:2},
+  {id:"sayadieh",n:"Sayadieh — fish + spiced rice",ar:"صيادية",slot:"lunch",kcal:640,p:36,h:2},
+  {id:"falafel_wrap",n:"Falafel wrap + tahini",ar:"عروس فلافل",slot:"lunch",kcal:560,p:20,h:2},
+  {id:"chicken_fattoush",n:"Grilled chicken + fattoush",ar:"دجاج مع فتوش",slot:"lunch",kcal:480,p:44,h:3},
+  {id:"lentil_chicken",n:"Lentil soup + chicken + bread",ar:"شوربة عدس مع دجاج",slot:"lunch",kcal:520,p:34,h:3},
+  {id:"salmon_potato",n:"Salmon, roast potato + salad",ar:"سلمون مع بطاطا",slot:"dinner",kcal:600,p:40,h:3},
+  {id:"kofta_veg",n:"Grilled kofta + grilled veg",ar:"كفتة مع خضار مشوي",slot:"dinner",kcal:520,p:38,h:3},
+  {id:"chicken_freekeh",n:"Chicken + freekeh + yogurt",ar:"دجاج مع فريكة",slot:"dinner",kcal:560,p:44,h:3},
+  {id:"shish_tawook",n:"Shish tawook + rice + garlic",ar:"شيش طاووق",slot:"dinner",kcal:620,p:46,h:2},
+  {id:"fish_tabbouleh",n:"Grilled fish + tabbouleh",ar:"سمك مشوي مع تبولة",slot:"dinner",kcal:460,p:40,h:3},
+  {id:"beef_okra",n:"Beef & okra stew + rice",ar:"بامية باللحمة مع رز",slot:"dinner",kcal:640,p:38,h:2},
+  {id:"veg_omelette",n:"Veggie omelette + labneh + bread",ar:"عجة خضار",slot:"dinner",kcal:420,p:28,h:3},
+  {id:"turkey_wrap",n:"Turkey + hummus wrap",ar:"عروس حبش مع حمص",slot:"dinner",kcal:500,p:34,h:2},
+  {id:"lamb_chops",n:"Lamb chops + grilled veg",ar:"ريش غنم مع خضار",slot:"dinner",kcal:680,p:42,h:2},
+  {id:"dates_espresso",n:"Dates + espresso",ar:"تمر مع قهوة",slot:"snack",kcal:180,p:3,h:2},
+  {id:"yogurt_nuts",n:"Greek yogurt + walnuts",ar:"لبن مع جوز",slot:"snack",kcal:240,p:18,h:3},
+  {id:"hummus_veg",n:"Hummus + carrots",ar:"حمص مع خضار",slot:"snack",kcal:190,p:8,h:3},
+  {id:"protein_shake",n:"Whey shake + banana",ar:"بروتين مع موز",slot:"snack",kcal:260,p:30,h:3},
+  {id:"fruit_cheese",n:"Apple + white cheese",ar:"تفاح مع جبنة بيضاء",slot:"snack",kcal:220,p:12,h:3},
+  {id:"kaak_cheese",n:"Kaak + cheese",ar:"كعك مع جبنة",slot:"snack",kcal:300,p:12,h:1},
+  {id:"boiled_eggs",n:"2 boiled eggs + cucumber",ar:"بيض مسلوق مع خيار",slot:"snack",kcal:180,p:14,h:3},
+  {id:"baklava",n:"Small baklava + tea",ar:"بقلاوة مع شاي",slot:"snack",kcal:260,p:4,h:1},
+  {id:"trail_mix",n:"Nuts + dried fruit",ar:"مكسرات وفواكه مجففة",slot:"snack",kcal:280,p:8,h:2},
+];
+const MODES = {
+  full_healthy:{label:"Full Healthy",h:[3]}, mid_healthy:{label:"Mid Healthy",h:[2,3]},
+  iifym:{label:"Flexible · IIFYM",h:[1,2,3]}, aggressive_recomp:{label:"Aggressive Recomp",h:[3]}, therapeutic:{label:"Therapeutic",h:[3]},
+};
+const SLOT_TIME = {breakfast:"7 AM",lunch:"1 PM",snack:"5 PM",dinner:"8 PM"};
+const SLOT_ORDER = {breakfast:0,lunch:1,snack:2,dinner:3};
+let myPrefs = {liked:[],disliked:[]};
+let foodMode = "mid_healthy";
+let foodTarget = {kcal:2500,protein:150};
+let foodDayNonce = Math.floor(Date.now()/864e5);
+let today = []; // [{slot,id,approved}]
+
+function dishById(id){ return DISHES.find(d => d.id === id) || {n:"—",ar:"",kcal:0,p:0,slot:"snack"}; }
+function rng(seed){ let s = seed>>>0; return () => { s = (s*1664525 + 1013904223)>>>0; return s/4294967296; }; }
+function dishesForSlot(slot){ const allowed = MODES[foodMode].h; return DISHES.filter(d => d.slot===slot && allowed.includes(d.h) && !myPrefs.disliked.includes(d.id)); }
+function pickWeighted(cands, rand){ if(!cands.length) return null;
+  const w = cands.map(d => myPrefs.liked.includes(d.id) ? 3 : 1); const total = w.reduce((a,b)=>a+b,0); let r = rand()*total;
+  for(let i=0;i<cands.length;i++){ r -= w[i]; if(r<=0) return cands[i]; } return cands[cands.length-1]; }
+function weightedPick(arr, weights, rand){ if(!arr.length) return null; const total = weights.reduce((a,b)=>a+b,0); let r = rand()*total; for(let i=0;i<arr.length;i++){ r -= weights[i]; if(r<=0) return arr[i]; } return arr[arr.length-1]; }
+// pick a dish near a per-meal calorie target, favouring closeness (3·2·1) and liked dishes (×2)
+function pickNear(cands, tgt, rand){
+  const near = cands.slice().sort((a,b) => Math.abs(a.kcal-tgt) - Math.abs(b.kcal-tgt)).slice(0,3);
+  const w = near.map((d,i) => (3-i) * (myPrefs.liked.includes(d.id) ? 2 : 1));
+  return weightedPick(near, w, rand) || cands[0];
+}
+function genDay(dayIndex){
+  const rand = rng(dayIndex*2654435761 + 999);
+  const share = {breakfast:0.26, lunch:0.34, dinner:0.32}; // main meals scale to the calorie target
+  const meals = [];
+  ["breakfast","lunch","dinner"].forEach(slot => {
+    let c = dishesForSlot(slot); if(!c.length) c = DISHES.filter(x => x.slot===slot);
+    meals.push({slot, id: pickNear(c, foodTarget.kcal * share[slot], rand).id, approved:false});
+  });
+  // fill the remaining calories with up to three snacks
+  let total = meals.reduce((a,m) => a + dishById(m.id).kcal, 0);
+  for (let s=0; s<3; s++){
+    const remain = foodTarget.kcal - total; if (remain < 150) break;
+    const used = meals.filter(m => m.slot==="snack").map(m => m.id);
+    let c = dishesForSlot("snack").filter(d => !used.includes(d.id)); if(!c.length) break;
+    const d = pickNear(c, Math.min(remain, 300), rand);
+    meals.push({slot:"snack", id:d.id, approved:false}); total += d.kcal;
+  }
+  meals.sort((a,b) => SLOT_ORDER[a.slot] - SLOT_ORDER[b.slot]);
+  return meals;
+}
+function dayTotals(meals){ return meals.reduce((a,m) => { const d = dishById(m.id); a.kcal += d.kcal; a.p += d.p; return a; }, {kcal:0,p:0}); }
+
+function renderFood(){
+  $("#mfMode").innerHTML = MODES[foodMode].label.toUpperCase() + " ▾";
+  $("#mpMode").textContent = MODES[foodMode].label.toUpperCase();
+  if (!today.length) today = genDay(foodDayNonce);
+  const t = dayTotals(today);
+  $("#mfMealTotal").textContent = `TODAY · ${today.length} MEALS · ~${t.kcal} KCAL · ${t.p}G PROTEIN`;
+  $("#mfMeals").innerHTML = today.map((m,i) => {
+    const d = dishById(m.id);
+    return `<div class="mealx${m.approved?" approved":""}"><div class="slot">${SLOT_TIME[m.slot]}</div>
+      <div class="mi"><b>${d.n}</b><span class="kcal num">${d.kcal} kcal · ${d.p}g protein</span></div>
+      <div class="acts"><button class="ok${m.approved?" on":""}" data-i="${i}" title="approve">✓</button>
+      <button data-sw="${i}" title="see other options">⇄</button><button data-rj="${i}" title="not for me">✕</button></div></div>`;
+  }).join("");
+  $("#mfMeals").querySelectorAll("[data-i]").forEach(b => b.onclick = () => approveMeal(+b.dataset.i));
+  $("#mfMeals").querySelectorAll("[data-sw]").forEach(b => b.onclick = () => openSwap(+b.dataset.sw));
+  $("#mfMeals").querySelectorAll("[data-rj]").forEach(b => b.onclick = () => rejectMeal(+b.dataset.rj));
+}
+function approveMeal(i){
+  const m = today[i]; m.approved = !m.approved;
+  if (m.approved){ if(!myPrefs.liked.includes(m.id)) myPrefs.liked.push(m.id); myPrefs.disliked = myPrefs.disliked.filter(x=>x!==m.id); }
+  saveMealState(); renderFood();
+}
+function rejectMeal(i){
+  const m = today[i]; if(!myPrefs.disliked.includes(m.id)) myPrefs.disliked.push(m.id); myPrefs.liked = myPrefs.liked.filter(x=>x!==m.id);
+  const c = dishesForSlot(m.slot).filter(d => d.id !== m.id);
+  const rand = rng((foodDayNonce+i+1)*7919); const nd = pickWeighted(c, rand) || dishById(m.id);
+  today[i] = {slot:m.slot, id:nd.id, approved:false};
+  saveMealState(); renderFood();
+}
+function openSwap(i){
+  const m = today[i]; const cands = dishesForSlot(m.slot).filter(d => d.id !== m.id).slice(0,6);
+  $("#sheetTitle").textContent = `Other ${m.slot} options`;
+  $("#sheetBody").innerHTML = cands.length ? cands.map(d =>
+    `<button class="choice" data-pick="${d.id}"><div class="ci"><b>${d.n}</b><span>${d.kcal} kcal · ${d.p}g protein · ${d.ar}</span></div><span class="pick">PICK</span></button>`
+  ).join("") : `<div style="color:var(--muted);font-size:13px">No other options in this diet mode — try a more flexible mode.</div>`;
+  $("#sheetBody").querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { today[i] = {slot:m.slot, id:b.dataset.pick, approved:false}; $("#foodSheet").style.display="none"; saveMealState(); renderFood(); });
+  $("#sheetTitle").dataset.kind = "swap";
+  $("#foodSheet").style.display = "block";
+}
+function openModeSheet(){
+  $("#sheetTitle").textContent = "Diet mode"; $("#sheetTitle").dataset.kind = "mode";
+  $("#sheetBody").innerHTML = Object.entries(MODES).map(([k,v]) =>
+    `<button class="modeopt${k===foodMode?" on":""}" data-mode="${k}"><b>${v.label}</b><span>${k===foodMode?"CURRENT":"TAP"}</span></button>`
+  ).join("");
+  $("#sheetBody").querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { foodMode = b.dataset.mode; today = genDay(foodDayNonce); $("#foodSheet").style.display="none"; saveMealState(); renderFood(); });
+  $("#foodSheet").style.display = "block";
+}
+function render30Day(){
+  $("#mpMeta").textContent = `30 DAYS · ~${foodTarget.kcal} KCAL/DAY · ${MODES[foodMode].label.toUpperCase()}`;
+  const host = $("#mpDays"); let html = "";
+  for (let day=0; day<30; day++){
+    const meals = day===0 ? today : genDay(foodDayNonce+day);
+    const t = dayTotals(meals);
+    const names = meals.map(m => dishById(m.id).n).join(" · ");
+    html += `<div class="mpday${day===0?" today":""}"><div class="mph"><span class="mpn">DAY ${day+1}${day===0?" · TODAY":""}</span><span class="mpk num">${t.kcal} kcal · ${t.p}g P</span></div><div class="mpm">${names}</div></div>`;
+  }
+  host.innerHTML = html;
+}
+async function saveMealState(){
+  if (!session) return;
+  try { await sb.from("profiles").update({ diet_mode: foodMode, meal_prefs: myPrefs }).eq("user_id", session.user.id); } catch(e){}
 }
 document.addEventListener("click", async (ev) => {
   if (ev.target && ev.target.id === "cancelSub"){
