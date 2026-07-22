@@ -36,6 +36,12 @@
   .btn-out{background:none;border:1px solid var(--line2);color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:.1em;padding:6px 11px;border-radius:8px;cursor:pointer}
 
   .view{display:none}.view.on{display:block}
+  /* Non-active views MUST stay hidden. #auth/#onboard set their display via an ID selector
+     (display:grid / display:flex) which outranks the .view class rule, so without this they
+     render ALWAYS — stacked on top of the real view. That is the "signed in but the sign-in
+     form is still showing / it won't let me in" bug. !important beats the ID rule regardless
+     of specificity, so only the .on view is ever visible. */
+  .view:not(.on){display:none!important}
   .app{padding:36px 0 90px}
   h1{font-size:30px;font-weight:850;letter-spacing:-.03em;margin-bottom:6px;text-wrap:balance}
   h1 i{font-style:normal;color:var(--volt)}
@@ -167,7 +173,7 @@
         <button class="btn volt" id="authBtn">Create account</button>
         <div class="msg" id="authMsg"></div>
         <div class="authfoot">By your gym or on your own — you choose after signup. <a href="/">back to site</a></div>
-        <div class="authfoot" style="opacity:.35;margin-top:6px">build 21jul-1422utc</div>
+        <div class="authfoot" style="opacity:.35;margin-top:6px">build 21jul-1600utc</div>
       </div>
     </div>
   </section>
@@ -298,8 +304,8 @@
   }, 12000);
 })();
 </script>
-<script src="/app/ironmap-data.js"></script>
-<script src="/app/vendor/supabase-js.umd.js" onerror="window.__vendorFailed=true; var m=document.getElementById('bootErrorMsg'); if(m) m.textContent='A required file failed to load. Please reload the page.'; var b=document.getElementById('bootError'); if(b) b.style.display='flex';"></script>
+<script src="/app/ironmap-data.js?v=21jul-1600"></script>
+<script src="/app/vendor/supabase-js.umd.js?v=21jul-1600" onerror="window.__vendorFailed=true; var m=document.getElementById('bootErrorMsg'); if(m) m.textContent='A required file failed to load. Please reload the page.'; var b=document.getElementById('bootError'); if(b) b.style.display='flex';"></script>
 <script type="module">
 const { createClient } = window.supabase || {};
 if (typeof createClient !== "function"){
@@ -311,7 +317,18 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const ADMIN_EMAILS = ["ahmedfahad9000@gmail.com", "admin@ironmap.fit"];
 const IM = window.IRONMAP || { counts:{machines:60,exercises:86}, exercises:[], demoProgram:null };
 
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    // Password-only app — there is no OAuth / magic-link hash to parse. The default (true) makes
+    // supabase-js scan the URL on load and can emit an extra spurious SIGNED_IN; turning it off
+    // removes that background trigger and keeps tokens out of the URL. storageKey and the cross-tab
+    // lock are left at their defaults on purpose (an explicit storageKey would log existing users
+    // out once, and disabling the lock risks cross-tab refresh-token reuse).
+    detectSessionInUrl: false,
+  },
+});
 window.__ironmapBooted = true; // module + Supabase client loaded successfully
 const $ = (s) => document.querySelector(s);
 const show = (id) => { document.querySelectorAll(".view").forEach(v => v.classList.remove("on")); $("#" + id).classList.add("on");
@@ -334,20 +351,25 @@ $("#authBtn").onclick = async () => {
   try {
     if (mode === "up"){
       // Create the account directly in the DB (no confirmation email → no rate limit),
-      // then sign in. The RPC returns {ok:true} or {error:"..."}.
-      const { data:res, error:rerr } = await sb.rpc("app_signup", { p_email: email, p_password: password });
-      if (rerr) throw rerr;
+      // then sign in. The RPC returns {ok:true} or {error:"..."}. Timeout-guarded so a
+      // slow network to the server can never leave the button stuck on "…" forever.
+      const rpc = await withTimeout(sb.rpc("app_signup", { p_email: email, p_password: password }), 12000, { __timedOut:true });
+      if (rpc.__timedOut) throw new Error("The server is slow to respond — please try again.");
+      if (rpc.error) throw rpc.error;
+      const res = rpc.data;
       if (res && res.error){
         const map = { already_registered:"That email already has an account — switch to Sign in.", invalid_email:"That email doesn't look valid.", weak_password:"Password must be at least 6 characters." };
         throw new Error(map[res.error] || res.error);
       }
-      const r = await sb.auth.signInWithPassword({ email, password });
+      const r = await withTimeout(sb.auth.signInWithPassword({ email, password }), 12000, { __timedOut:true });
+      if (r.__timedOut) throw new Error("The sign-in server is slow to respond — please try again.");
       if (r.error) throw r.error;
       await afterAuth(r.data.session);
     } else {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      await afterAuth(data.session);
+      const r = await withTimeout(sb.auth.signInWithPassword({ email, password }), 12000, { __timedOut:true });
+      if (r.__timedOut) throw new Error("The sign-in server is slow to respond — please try again.");
+      if (r.error) throw r.error;
+      await afterAuth(r.data.session);
     }
   } catch(e){
     msg.className="msg err";
@@ -357,7 +379,7 @@ $("#authBtn").onclick = async () => {
     else msg.textContent = raw;
   } finally { $("#authBtn").disabled=false; $("#authBtn").textContent = mode==="in"?"Sign in":"Create account"; }
 };
-$("#signOut").onclick = async () => { await sb.auth.signOut(); bar(false); show("auth"); };
+$("#signOut").onclick = async () => { userInitiatedSignOut = true; try { await sb.auth.signOut(); } catch(e){} bar(false); show("auth"); };
 
 // ---------- onboarding ----------
 let chosen = null, pkg = "growth";
@@ -408,7 +430,23 @@ $("#onboardBtn").onclick = async () => {
 
 // ---------- routing ----------
 let session = null;
-async function afterAuth(s){ session = s; await routeUser(); }
+let userInitiatedSignOut = false;  // ONLY an explicit Sign Out click may send us back to the auth screen
+// Diagnostic ring buffer of auth events. Hidden unless the URL has ?diag=1 — normal users never see
+// it, but appending ?diag=1 shows the exact onAuthStateChange sequence on-screen to screenshot if a
+// bounce ever recurs (invaluable for a Safari-only issue we can't reproduce elsewhere).
+const authLog = [];
+function logAuthEvent(event, ns){
+  const t = new Date().toISOString().slice(11,19);
+  authLog.push(t + " " + event + (ns ? " · session" : " · null"));
+  if (authLog.length > 12) authLog.shift();
+  if (!/[?&]diag/i.test(location.search)) return;
+  let box = document.getElementById("authDiag");
+  if (!box){ box = document.createElement("div"); box.id = "authDiag";
+    box.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:200;max-width:72vw;background:rgba(8,9,11,.94);border:1px solid #2a2f3a;border-radius:8px;padding:8px 10px;font-family:ui-monospace,monospace;font-size:10px;line-height:1.55;color:#9aa4b2;white-space:pre;pointer-events:none";
+    (document.body||document.documentElement).appendChild(box); }
+  box.textContent = "IRONMAP AUTH EVENTS · build 21jul-1600utc\n" + authLog.join("\n");
+}
+async function afterAuth(s){ userInitiatedSignOut = false; session = s; await routeUser(); }
 
 async function routeUser(){
   const email = (session.user.email||"").toLowerCase();
@@ -582,7 +620,12 @@ function withTimeout(promise, ms, fallback){
     // fast sign-up/sign-in finishes, which used to slam the screen back to "auth"
     // right after a successful login (this was the "bounces back after signing up"
     // bug — signup worked, but the stale initial-session replay stomped it).
-    sb.auth.onAuthStateChange((event, ns) => { if (event === "SIGNED_OUT"){ bar(false); show("auth"); } });
+    // Guard: a background SIGNED_OUT — Safari ITP/storage hiccup, a failed silent
+    // token refresh, cross-tab noise — must NEVER eject a user who is actively using
+    // the app. Only an explicit Sign Out click sets userInitiatedSignOut. If the
+    // session is genuinely gone, the next action that needs auth re-checks getUser()
+    // and routes to sign-in then — we just never yank the screen out from under them.
+    sb.auth.onAuthStateChange((event, ns) => { logAuthEvent(event, ns); if (event === "SIGNED_OUT" && userInitiatedSignOut){ bar(false); show("auth"); } });
   } catch (e){
     document.getElementById("bootErrorMsg").textContent = "Startup error: " + (e && e.message ? e.message : e);
     document.getElementById("bootError").style.display = "flex";
