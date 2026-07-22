@@ -120,6 +120,113 @@
   .foot a{color:var(--faint);text-decoration:underline}
   .spin{width:26px;height:26px;border:2px solid var(--line2);border-top-color:var(--volt);border-radius:50%;animation:s .7s linear infinite;margin:120px auto}
   @keyframes s{to{transform:rotate(360deg)}}
+
+  /* ===== MEMBER APP — ported prototype (Today/Workout/Coach/Food/Progress), centered phone-width column ===== */
+  #member{padding:0}
+  .mapp{position:relative;width:100%;max-width:440px;margin:0 auto;height:calc(100vh - 58px);overflow:hidden;background:var(--bg)}
+  .mapp .mscreen{position:absolute;inset:0;padding:22px 20px 104px;overflow-y:auto;overscroll-behavior:contain;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .28s ease,transform .28s ease;scrollbar-width:none}
+  .mapp .mscreen::-webkit-scrollbar{display:none}
+  .mapp .mscreen.on{opacity:1;pointer-events:auto;transform:none}
+  @media (prefers-reduced-motion:reduce){.mapp .mscreen{transition:none;transform:none}}
+  .mapp .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--faint);text-transform:uppercase}
+  .mapp .card{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:16px}
+  .mapp .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:16px;padding:15px;font-size:16px;font-weight:700;letter-spacing:-.01em;cursor:pointer;font-family:inherit}
+  .mapp .btn.volt{background:var(--volt);color:#1A2000}
+  .mapp .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--text)}
+  .mapp .chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line2);border-radius:999px;padding:5px 10px}
+  .mapp .chip.volt{background:rgba(216,255,62,.12);border-color:rgba(216,255,62,.4);color:var(--volt)}
+  .mapp .chip.cyan{background:rgba(63,217,255,.1);border-color:rgba(63,217,255,.35);color:var(--cyan)}
+  .mapp .chip.mint{background:rgba(61,220,151,.1);border-color:rgba(61,220,151,.35);color:var(--mint)}
+  .mapp .chip.coral{background:rgba(255,95,86,.1);border-color:rgba(255,95,86,.4);color:var(--coral)}
+  .mapp button.chip{background:transparent;cursor:pointer}
+  .mapp .row{display:flex;align-items:center;gap:10px}
+  .mapp .row .grow{flex:1}
+  .mapp .mtab{position:absolute;left:14px;right:14px;bottom:14px;z-index:55;height:70px;background:rgba(20,22,26,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line2);border-radius:24px;display:flex;align-items:center;justify-content:space-around;padding:0 8px}
+  .mapp .mtab button{background:none;border:0;color:var(--faint);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;font-family:var(--mono);letter-spacing:.1em;padding:6px 10px;cursor:pointer}
+  .mapp .mtab button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .mapp .mtab button.on{color:var(--volt)}
+  .mapp .mtab .orbtab{width:52px;height:52px;border-radius:50%;margin-top:-24px;background:radial-gradient(circle at 34% 30%,rgba(216,255,62,.9),rgba(63,217,255,.75) 58%,rgba(11,12,14,.9));box-shadow:0 0 24px rgba(63,217,255,.35),inset 0 0 12px rgba(0,0,0,.4);border:1px solid rgba(235,240,245,.25)}
+  .mapp .mtab .orbtab.on{box-shadow:0 0 34px rgba(216,255,62,.5)}
+  .mapp .h-greet{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:4px 0 0;color:var(--text)}
+  .mapp .streakchip{display:flex;align-items:center;gap:7px;font-weight:800;font-size:15px;color:var(--volt)}
+  .mapp .streakchip svg{width:17px;height:17px;fill:var(--volt)}
+  .mapp .readiness{display:flex;gap:14px;align-items:center;margin-top:16px}
+  .mapp .readiness .mini-body{width:44px;height:64px;flex:none}
+  .mapp .workout-hero{margin-top:14px;border-radius:24px;padding:20px;position:relative;overflow:hidden;background:linear-gradient(150deg,#171A10 0%,#12150C 45%,#101215 100%);border:1px solid rgba(216,255,62,.28)}
+  .mapp .workout-hero .glow{position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-110px;background:radial-gradient(circle,rgba(216,255,62,.16),transparent 65%)}
+  .mapp .workout-hero h2{margin:8px 0 4px;font-size:26px;font-weight:850;letter-spacing:-.02em;border:0;padding:0;text-transform:none;color:var(--text);font-family:var(--sans)}
+  .mapp .exlist{display:flex;gap:6px;margin:14px 0 16px;flex-wrap:wrap}
+  .mapp .exlist .ex{font-size:11px;color:var(--muted);background:rgba(235,240,245,.05);border:1px solid var(--line);padding:5px 9px;border-radius:8px;font-family:var(--sans)}
+  .mapp .statrow{display:flex;gap:10px;margin-top:14px}
+  .mapp .stat{flex:1;background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:13px 14px}
+  .mapp .stat .v{font-size:22px;font-weight:800;letter-spacing:-.02em}
+  .mapp .stat .l{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--faint);margin-top:3px;text-transform:uppercase}
+  .mapp .coachnote{display:flex;gap:11px;margin-top:14px;align-items:flex-start}
+  .mapp .coachnote .dot{width:34px;height:34px;border-radius:50%;flex:none;margin-top:2px;background:radial-gradient(circle at 35% 30%,rgba(216,255,62,.85),rgba(63,217,255,.7) 60%,transparent);box-shadow:0 0 14px rgba(63,217,255,.35)}
+  .mapp .coachnote p{margin:0;font-size:13.5px;line-height:1.5;color:var(--text)}
+  .mapp .coachnote .who{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--faint)}
+  .mapp .machinecard{border-radius:22px;overflow:hidden;border:1px solid var(--line2);position:relative;background:linear-gradient(160deg,rgba(63,217,255,.06),transparent 55%),repeating-linear-gradient(0deg,rgba(235,240,245,.03) 0 1px,transparent 1px 22px),repeating-linear-gradient(90deg,rgba(235,240,245,.03) 0 1px,transparent 1px 22px),#0E1013}
+  .mapp .machinecard svg.machine{display:block;width:100%;height:180px}
+  .mapp .machinecard .mtag{position:absolute;left:12px;top:12px}
+  .mapp .machinecard .mlabel{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line);background:rgba(20,22,26,.7)}
+  .mapp .machinecard .mlabel b{font-size:14px}
+  .mapp .machinecard .mlabel span{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.08em}
+  .mapp .setrows{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .mapp .setrow{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px}
+  .mapp .setrow.done{opacity:.55}
+  .mapp .setrow.now{border-color:rgba(216,255,62,.5);background:var(--elev)}
+  .mapp .setrow .sn{font-family:var(--mono);font-size:10px;color:var(--faint);width:38px;letter-spacing:.1em}
+  .mapp .setrow .kg{font-weight:800;font-size:16px}
+  .mapp .setrow .grow{flex:1}
+  .mapp .setrow .check{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line2);display:flex;align-items:center;justify-content:center;color:transparent;flex:none;background:none;padding:0;cursor:pointer}
+  .mapp .setrow.done .check{background:var(--volt);border-color:var(--volt);color:#1A2000;font-weight:900;font-size:13px}
+  .mapp .restwrap{display:flex;flex-direction:column;align-items:center;margin-top:16px;gap:2px}
+  .mapp .ring{position:relative;width:150px;height:150px}
+  .mapp .ring svg{transform:rotate(-90deg)}
+  .mapp .ring .base{stroke:rgba(235,240,245,.08);fill:none;stroke-width:9}
+  .mapp .ring .arc{stroke:var(--volt);fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .95s linear}
+  .mapp .ring .t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .mapp .ring .t b{font-size:34px;font-weight:850;letter-spacing:-.02em;color:var(--volt)}
+  .mapp .ring .t span{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--faint)}
+  .mapp #orbCanvas{display:block;margin:4px auto 0;width:200px;height:200px}
+  .mapp .orbstate{text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--faint);margin-top:2px}
+  .mapp .msgs{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  .mapp .msg{max-width:82%;padding:12px 14px;border-radius:18px;font-size:14px;line-height:1.5}
+  .mapp .msg.user{align-self:flex-end;background:var(--elev);border:1px solid var(--line2);border-bottom-right-radius:6px}
+  .mapp .msg.ai{align-self:flex-start;background:var(--surf);border:1px solid var(--line);border-bottom-left-radius:6px}
+  .mapp .toolchip{align-self:flex-start;display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--mint);background:rgba(61,220,151,.08);border:1px solid rgba(61,220,151,.3);border-radius:10px;padding:8px 11px}
+  .mapp .inputrow{display:flex;gap:10px;margin-top:16px;align-items:center}
+  .mapp .inputrow .field{flex:1;background:var(--surf);border:1px solid var(--line2);border-radius:16px;color:var(--faint);font-size:13.5px;padding:14px 16px}
+  .mapp .mic{width:50px;height:50px;border-radius:50%;border:0;background:var(--volt);flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .mapp .mic svg{width:22px;height:22px;stroke:#1A2000;fill:none;stroke-width:2;stroke-linecap:round}
+  .mapp .macros{display:flex;gap:8px;margin-top:16px}
+  .mapp .macro{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .mapp .macro .mr{position:relative;width:70px;height:70px}
+  .mapp .macro svg{transform:rotate(-90deg)}
+  .mapp .macro .mb{stroke:rgba(235,240,245,.08);fill:none;stroke-width:7}
+  .mapp .macro .ma{fill:none;stroke-width:7;stroke-linecap:round}
+  .mapp .macro .mv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+  .mapp .macro .ml{font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase;text-align:center}
+  .mapp .meal{display:flex;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:10px}
+  .mapp .meal .slot{width:46px;height:46px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--muted);background:var(--inset);border:1px solid var(--line);text-transform:uppercase}
+  .mapp .meal b{font-size:14px;display:block}
+  .mapp .meal .kcal{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:2px}
+  .mapp .meal .act{margin-left:auto;flex:none}
+  .mapp .deltacard{display:flex;gap:10px;margin-top:14px}
+  .mapp .delta{flex:1;background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:14px}
+  .mapp .delta .dv{font-size:22px;font-weight:850;letter-spacing:-.02em}
+  .mapp .delta .dl{font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--faint);margin-top:4px;text-transform:uppercase}
+  .mapp .bodywrap{display:flex;gap:16px;margin-top:16px;align-items:center}
+  .mapp .bodywrap svg{flex:none}
+  .mapp .legend{display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted)}
+  .mapp .legend .sw{width:12px;height:12px;border-radius:4px;display:inline-block;margin-right:7px;vertical-align:-1px}
+  .mapp .spark{margin-top:14px}
+  .mapp .spark svg{width:100%;height:70px;display:block}
+  .mapp .m0{fill:rgba(235,240,245,.07)}.mapp .m1{fill:rgba(183,166,255,.45)}.mapp .m2{fill:rgba(255,95,86,.55)}.mapp .mhot{fill:rgba(216,255,62,.55)}.mapp .mwarm{fill:rgba(61,220,151,.45)}
+  .mapp .memberpanel{margin-top:16px}
+  .mapp .memberpanel .subgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .mapp .memberpanel .subgrid .l{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+  .mapp .memberpanel .subgrid .v{font-size:13px;font-weight:600;margin-top:3px}
 </style>
 
 <header class="bar" id="bar">
@@ -216,32 +323,176 @@
     </div>
   </section>
 
-  <!-- ===== MEMBER / CUSTOMER ===== -->
-  <section class="view app" id="member"><div class="wrap">
-    <div class="eyebrow" id="mEyebrow">TODAY</div>
-    <h1 id="mGreet">Welcome</h1>
-    <p class="sub" id="mSub"></p>
+  <!-- ===== MEMBER / CUSTOMER — full app (Today/Workout/Coach/Food/Progress) ===== -->
+  <section class="view" id="member">
+   <div class="mapp" id="mapp">
 
-    <div id="mSubSection" style="display:none">
-      <h2>Your subscription</h2>
-      <div class="subcard">
-        <div class="row" style="padding-top:0"><div class="grow"><div class="big num" id="mSubPrice">$20<small>/mo</small></div><div class="sub" style="margin-top:2px">IRONMAP Personal — billed by IRONMAP</div></div><span class="chip mint" id="mSubStatus">ACTIVE</span></div>
-        <div class="subgrid">
-          <div><div class="l">Member since</div><div class="v num" id="mSubSince">—</div></div>
-          <div><div class="l">Next billing</div><div class="v num" id="mSubNext">—</div></div>
-          <div><div class="l">Plan</div><div class="v">Personal · solo</div></div>
+    <!-- TODAY -->
+    <div class="mscreen on" id="m-today">
+      <div class="row">
+        <div class="grow">
+          <div class="eyebrow num" id="mtDate">TODAY</div>
+          <h1 class="h-greet" id="mtGreet">Welcome</h1>
         </div>
-        <button class="btn ghost" id="cancelSub" style="margin-top:14px">Cancel subscription (demo)</button>
+        <div class="streakchip num"><svg viewBox="0 0 24 24"><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 .5C15 15 17 14 17 11c2 2 3 4 3 6.5A7.5 7.5 0 0 1 12.5 25 8 8 0 0 1 5 17c0-6 6-8 7-15z"/></svg><span id="mtStreak">12</span></div>
+      </div>
+
+      <div class="card readiness">
+        <svg class="mini-body" viewBox="0 0 44 64" aria-hidden="true">
+          <circle cx="22" cy="7" r="5" class="m0"/><rect x="14" y="14" width="16" height="20" rx="5" class="mwarm"/>
+          <rect x="7" y="15" width="5" height="16" rx="2.5" class="m0"/><rect x="32" y="15" width="5" height="16" rx="2.5" class="m0"/>
+          <rect x="14" y="36" width="7" height="22" rx="3.5" class="m2"/><rect x="23" y="36" width="7" height="22" rx="3.5" class="m2"/>
+        </svg>
+        <div class="grow">
+          <b style="font-size:14.5px">How's the body today?</b>
+          <div style="color:var(--muted);font-size:12px;margin-top:3px">Quads flagged sore yesterday — tap to update.</div>
+        </div>
+        <span class="chip cyan">30-SEC CHECK-IN</span>
+      </div>
+
+      <div class="workout-hero">
+        <div class="glow"></div>
+        <span class="chip volt">ADJUSTED FOR SORENESS</span>
+        <h2>Pull Day</h2>
+        <div class="eyebrow num" id="mtTag">6 EXERCISES · ~52 MIN · UPPER FLOOR</div>
+        <div class="exlist" id="mtExlist">
+          <span class="ex">Iso-Lateral Row</span><span class="ex">Lat Pulldown #2</span>
+          <span class="ex">Seated Cable Row</span><span class="ex">Rear Delt Fly</span><span class="ex num">+2</span>
+        </div>
+        <button class="btn volt" data-goto="workout">Start workout</button>
+      </div>
+
+      <div class="statrow">
+        <div class="stat"><div class="v num">14<span style="color:var(--faint);font-size:14px">/20</span></div><div class="l">Hard sets this week</div></div>
+        <div class="stat"><div class="v num" style="color:var(--mint)"><span id="mtProtein">96</span><span style="color:var(--faint);font-size:14px">g</span></div><div class="l">Protein today</div></div>
+        <div class="stat"><div class="v num" style="color:var(--cyan)">41<span style="color:var(--faint);font-size:14px">d</span></div><div class="l">To next scan</div></div>
+      </div>
+
+      <div class="coachnote">
+        <div class="dot"></div>
+        <div><div class="who">COACH · 6:10 PM</div>
+        <p>Quads still at 6/10 soreness, so today became a pull session — squats moved to Thursday. The Iso-Lateral Row is free right now.</p></div>
+      </div>
+
+      <div class="card memberpanel" id="mMemberPanel" style="display:none">
+        <div class="row"><div class="grow"><div style="font-size:24px;font-weight:850;letter-spacing:-.02em" class="num" id="mSubPrice">$20<span style="font-size:13px;color:var(--faint)">/mo</span></div><div style="color:var(--muted);font-size:12px;margin-top:2px">IRONMAP Personal — billed by IRONMAP</div></div><span class="chip mint" id="mSubStatus">ACTIVE</span></div>
+        <div class="subgrid"><div><div class="l">Member since</div><div class="v num" id="mSubSince">—</div></div><div><div class="l">Next billing</div><div class="v num" id="mSubNext">—</div></div><div><div class="l">Plan</div><div class="v">Personal</div></div></div>
+        <button class="btn ghost" id="cancelSub" style="margin-top:14px;font-size:14px">Cancel subscription (demo)</button>
       </div>
     </div>
 
-    <h2>Your program · sample day</h2>
-    <div class="kpis" id="mMacros"></div>
-    <div id="mWorkout"></div>
-    <h2>Exercises available to you</h2>
-    <div id="mExercises"></div>
-    <div class="foot">Machine catalog &amp; plan engine from IRONMAP core · your account is live in Supabase.</div>
-  </div></section>
+    <!-- WORKOUT -->
+    <div class="mscreen" id="m-workout">
+      <div class="row" style="margin-bottom:12px">
+        <div class="grow"><div class="eyebrow num">EXERCISE 2 OF 6 · PULL DAY</div>
+        <h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:4px 0 0" id="mkName">Iso-Lateral Row</h1></div>
+        <span class="chip">▶ TUTORIAL</span>
+      </div>
+      <div class="machinecard">
+        <span class="chip cyan mtag">YOUR GYM · UPPER FLOOR · PULL AREA</span>
+        <svg class="machine" viewBox="0 0 390 196" aria-hidden="true">
+          <g stroke="#5FD4F2" stroke-width="2" fill="none" stroke-linecap="round" opacity=".9">
+            <path d="M70 170 L70 60 Q70 44 86 44 L150 44"/><path d="M70 170 L130 170"/><rect x="88" y="78" width="34" height="70" rx="4"/>
+            <path d="M105 78 L105 60 L150 52"/><path d="M150 44 L210 84 L232 84"/><path d="M210 84 L210 128"/><rect x="188" y="128" width="44" height="14" rx="6"/>
+            <path d="M232 84 Q262 84 268 108 L268 128"/><rect x="246" y="128" width="46" height="12" rx="6"/><path d="M268 140 L268 170 M292 140 L292 170 M246 170 L312 170"/>
+            <circle cx="150" cy="44" r="6"/><path d="M96 86 h18 M96 98 h18 M96 110 h18 M96 122 h18 M96 134 h18"/>
+          </g>
+          <g font-family="ui-monospace,monospace" font-size="9" fill="#67717C" letter-spacing="2"><text x="20" y="188">PHOTO · CAPTURED BY STAFF · CONFIDENCE 0.94</text></g>
+        </svg>
+        <div class="mlabel"><div><b>Hammer Strength · Iso-Lateral Row #1</b><br><span>SEAT 4 · CHEST PAD 2 · NEUTRAL GRIP</span></div><span class="chip volt num">3×8–10</span></div>
+      </div>
+      <div class="setrows">
+        <div class="setrow done"><span class="sn num">SET 1</span><span class="kg num">40 kg × 10</span><span class="grow"></span><span class="chip num">RIR 3</span><button class="check">✓</button></div>
+        <div class="setrow now"><span class="sn num">SET 2</span><span class="kg num">45 kg × 8</span><span class="grow"></span><span class="chip volt num">TARGET RIR 2</span><button class="check" id="logSet" aria-label="log set">✓</button></div>
+        <div class="setrow"><span class="sn num">SET 3</span><span class="kg num">45 kg × 8</span><span class="grow"></span><span class="chip num">—</span><button class="check">✓</button></div>
+      </div>
+      <div class="restwrap">
+        <div class="ring" id="restRing"><svg width="150" height="150" viewBox="0 0 158 158"><circle class="base" cx="79" cy="79" r="70"/><circle class="arc" id="restArc" cx="79" cy="79" r="70" stroke-dasharray="439.8" stroke-dashoffset="0"/></svg>
+        <div class="t"><b class="num" id="restT">01:30</b><span>REST</span></div></div>
+      </div>
+      <div class="row" style="margin-top:14px;gap:10px">
+        <button class="btn ghost" id="busyBtn" style="font-size:14px;padding:13px">Machine busy?</button>
+        <button class="btn volt" data-goto="today" style="font-size:14px;padding:13px">Done — next</button>
+      </div>
+      <div class="card" id="busyAlt" style="display:none;margin-top:12px;border-color:rgba(61,220,151,.35)">
+        <div class="eyebrow" style="margin-bottom:8px">CLOSEST ALTERNATIVE · SAME MUSCLES</div>
+        <div class="row"><div class="grow"><b style="font-size:15px">Seated Cable Row — Station 3</b><div style="color:var(--muted);font-size:12px;margin-top:3px">8 m away · lats + mid-back · V-grip on the rack</div></div><span class="chip mint">FREE NOW</span></div>
+      </div>
+    </div>
+
+    <!-- COACH -->
+    <div class="mscreen" id="m-coach">
+      <div class="eyebrow" style="text-align:center">COACH · ALWAYS ON · AR / EN</div>
+      <canvas id="orbCanvas" width="460" height="460"></canvas>
+      <div class="orbstate" id="orbState">IDLE — TAP THE ORB</div>
+      <div class="msgs">
+        <div class="msg user">My lower back feels tight today</div>
+        <div class="msg ai">Understood — nothing alarming in your logs, but we won't load the spine today. I'm swapping Romanian deadlifts for back extensions and adding 5 minutes of hip mobility to your warm-up.</div>
+        <div class="toolchip"><span>✓</span><span class="num">plan.swap_exercise → back_extension · plan.add_warmup</span></div>
+        <div class="msg ai">If it's a sharp pain rather than tightness, stop and tell me — that's a different protocol.</div>
+      </div>
+      <div class="inputrow">
+        <div class="field">Message your coach…</div>
+        <button class="mic" aria-label="voice"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      </div>
+    </div>
+
+    <!-- FOOD -->
+    <div class="mscreen" id="m-food">
+      <div class="row"><div class="grow"><div class="eyebrow">FOOD DR. · WEEK 3</div><h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:4px 0 0">Today's fuel</h1></div><span class="chip mint">MID HEALTHY · 80/20</span></div>
+      <div class="macros">
+        <div class="macro"><div class="mr"><svg width="70" height="70" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" id="mfKcalArc" cx="37" cy="37" r="31" stroke="#D8FF3E" stroke-dasharray="194.8" stroke-dashoffset="52"/></svg><div class="mv num" id="mfKcal">1840</div></div><div class="ml num" id="mfKcalL">KCAL / 2300</div></div>
+        <div class="macro"><div class="mr"><svg width="70" height="70" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" id="mfProtArc" cx="37" cy="37" r="31" stroke="#3DDC97" stroke-dasharray="194.8" stroke-dashoffset="66"/></svg><div class="mv num" id="mfProt">96</div></div><div class="ml num" id="mfProtL">PROTEIN / 145G</div></div>
+        <div class="macro"><div class="mr"><svg width="70" height="70" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" id="mfCarbArc" cx="37" cy="37" r="31" stroke="#3FD9FF" stroke-dasharray="194.8" stroke-dashoffset="90"/></svg><div class="mv num" id="mfCarb">168</div></div><div class="ml num" id="mfCarbL">CARBS / 260G</div></div>
+        <div class="macro"><div class="mr"><svg width="70" height="70" viewBox="0 0 74 74"><circle class="mb" cx="37" cy="37" r="31"/><circle class="ma" id="mfFatArc" cx="37" cy="37" r="31" stroke="#B7A6FF" stroke-dasharray="194.8" stroke-dashoffset="108"/></svg><div class="mv num" id="mfFat">44</div></div><div class="ml num" id="mfFatL">FAT / 72G</div></div>
+      </div>
+      <div class="meal"><div class="slot">7 AM</div><div><b>Labneh, za'atar toast + eggs</b><span class="kcal num">420 kcal · 28g protein</span></div><span class="act chip mint">✓</span></div>
+      <div class="meal"><div class="slot">1 PM</div><div><b>Chicken shawarma bowl, freekeh</b><span class="kcal num">640 kcal · 46g protein</span></div><span class="act chip mint">✓</span></div>
+      <div class="meal" style="border-color:rgba(216,255,62,.4)"><div class="slot">5 PM</div><div><b>Pre-workout: dates + espresso</b><span class="kcal num">180 kcal · timed for 6 PM session</span></div><span class="act chip volt">NOW</span></div>
+      <div class="meal"><div class="slot">8 PM</div><div><b>Salmon, roast potato + salad</b><span class="kcal num">600 kcal · swap → grilled kofta</span></div><span class="act chip">⇄ SWAP</span></div>
+      <div class="coachnote" style="margin-top:16px"><div class="dot"></div><div><div class="who">FOOD DR.</div><p>Friday is mansaf at your mom's — I've already banked 350 kcal across Thursday and Saturday. Enjoy it guilt-free.</p></div></div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="mscreen" id="m-progress">
+      <div class="row"><div class="grow"><div class="eyebrow num">INBODY · JUN 2 → JUL 12</div><h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:4px 0 0">Your body, measured</h1></div><span class="chip cyan">SCAN IN 41 D</span></div>
+      <div class="deltacard">
+        <div class="delta"><div class="dv num" style="color:var(--mint)">+0.8 kg</div><div class="dl">Skeletal muscle</div></div>
+        <div class="delta"><div class="dv num" style="color:var(--volt)">−1.2 kg</div><div class="dl">Body fat</div></div>
+        <div class="delta"><div class="dv num" style="color:var(--cyan)">1408</div><div class="dl">Measured BMR</div></div>
+      </div>
+      <div class="card bodywrap">
+        <svg width="140" height="224" viewBox="0 0 150 240" aria-hidden="true">
+          <circle cx="75" cy="20" r="13" class="m0"/><rect x="52" y="38" width="46" height="30" rx="10" class="mhot"/><rect x="52" y="70" width="46" height="34" rx="10" class="mwarm"/>
+          <rect x="30" y="40" width="16" height="52" rx="8" class="mwarm"/><rect x="104" y="40" width="16" height="52" rx="8" class="m1"/>
+          <rect x="30" y="94" width="16" height="26" rx="8" class="m0"/><rect x="104" y="94" width="16" height="26" rx="8" class="m0"/>
+          <rect x="52" y="106" width="21" height="62" rx="9" class="m2"/><rect x="77" y="106" width="21" height="62" rx="9" class="m2"/>
+          <rect x="52" y="172" width="21" height="52" rx="9" class="m0"/><rect x="77" y="172" width="21" height="52" rx="9" class="m0"/>
+        </svg>
+        <div class="legend">
+          <div><span class="sw" style="background:rgba(216,255,62,.55)"></span>Chest — strongest gain (+4.1%)</div>
+          <div><span class="sw" style="background:rgba(61,220,151,.45)"></span>Back &amp; right arm — on track</div>
+          <div><span class="sw" style="background:rgba(183,166,255,.45)"></span>Left arm −4% lean vs right → unilateral work added</div>
+          <div><span class="sw" style="background:rgba(255,95,86,.55)"></span>Quads — sore, volume pulled this week</div>
+        </div>
+      </div>
+      <div class="card spark">
+        <div class="row"><b style="font-size:14px">Weight trend</b><span class="grow"></span><span class="chip num">83.4 → 82.1 kg</span></div>
+        <svg viewBox="0 0 340 70" preserveAspectRatio="none"><polyline points="0,18 34,22 68,20 102,28 136,26 170,34 204,31 238,40 272,38 306,46 340,44" fill="none" stroke="#3FD9FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="340" cy="44" r="4" fill="#D8FF3E"/></svg>
+      </div>
+    </div>
+
+    <!-- TAB BAR -->
+    <nav class="mtab" id="mtab">
+      <button class="on" data-scr="today"><svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8M5 10v10h14V10"/></svg><span>TODAY</span></button>
+      <button data-scr="workout"><svg viewBox="0 0 24 24"><path d="M2 12h3M19 12h3M7 8v8M17 8v8M7 12h10"/><rect x="4.6" y="9" width="2.6" height="6" rx="1"/><rect x="16.8" y="9" width="2.6" height="6" rx="1"/></svg><span>TRAIN</span></button>
+      <button class="orbtab" data-scr="coach" aria-label="coach"></button>
+      <button data-scr="food"><svg viewBox="0 0 24 24"><path d="M4 11h16a8 8 0 0 1-16 0zM9 11V7M12 11V5M15 11V7"/></svg><span>FOOD</span></button>
+      <button data-scr="progress"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg><span>BODY</span></button>
+    </nav>
+
+   </div>
+  </section>
 
   <!-- ===== GYM OWNER ===== -->
   <section class="view app" id="gym"><div class="wrap">
@@ -497,44 +748,110 @@ function workoutHtml(p){ if(!p||!p.workout) return ""; const d=p.workout.days[0]
   return `<div class="card" style="margin-top:6px"><b style="font-size:14px">Day 1 · ${d.focus}</b>
     ${d.items.slice(0,5).map(it=>`<div class="row"><span class="grow">${it.name}</span><span class="m num" style="font-family:var(--mono);font-size:11px;color:var(--faint)">${it.sets}×${it.repRange[0]}–${it.repRange[1]}</span></div>`).join("")}</div>`; }
 
+// The member experience is the full 5-tab app (Today/Workout/Coach/Food/Progress).
+// Real data (name, gym, subscription, and the engine's program/macros from window.IRONMAP)
+// is wired where it exists; the richer screens keep the designed sample content until their
+// backends (workout logging, coach voice, InBody scans, food tracking) are built.
+function showMScreen(name){
+  document.querySelectorAll("#mapp .mscreen").forEach(s => s.classList.toggle("on", s.id === "m-" + name));
+  document.querySelectorAll("#mtab button").forEach(b => b.classList.toggle("on", b.dataset.scr === name));
+  const sc = document.getElementById("m-" + name); if (sc) sc.scrollTop = 0;
+}
+let memberAppInited = false;
+function initMemberApp(){
+  if (memberAppInited) return; memberAppInited = true;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll("#mtab button").forEach(b => b.onclick = () => showMScreen(b.dataset.scr));
+  document.querySelectorAll("#mapp [data-goto]").forEach(b => b.onclick = () => showMScreen(b.dataset.goto));
+
+  // rest timer ring
+  let restLeft = 90, restTotal = 90; const arc = $("#restArc"), restT = $("#restT"), CIRC = 439.8;
+  setInterval(() => { restLeft -= 1; if (restLeft < 0) restLeft = restTotal;
+    const m = Math.floor(restLeft/60), s = restLeft % 60;
+    restT.textContent = "0" + m + ":" + (s < 10 ? "0" + s : s);
+    arc.style.strokeDashoffset = (CIRC * (1 - restLeft/restTotal)).toFixed(1); }, 1000);
+  const logSet = $("#logSet"); if (logSet) logSet.onclick = function(){ const row = this.closest(".setrow"); row.classList.remove("now"); row.classList.add("done"); restLeft = restTotal; };
+  const busyBtn = $("#busyBtn"); if (busyBtn) busyBtn.onclick = () => { const a = $("#busyAlt"); a.style.display = a.style.display === "none" ? "block" : "none"; };
+
+  // coach orb (particle field; tap to cycle idle → listening → speaking)
+  const orb = $("#orbCanvas");
+  if (orb && orb.getContext){
+    const octx = orb.getContext("2d"); let ostate = 0;
+    const ONAMES = ["IDLE — TAP THE ORB", "LISTENING…", "SPEAKING — TAP TO BARGE IN"]; const parts = [];
+    for (let i = 0; i < 260; i++) parts.push({ a:Math.random()*6.283, r:70+Math.random()*38, s:Math.random()*.008+.002, z:Math.random(), c:Math.random()<.3?"216,255,62":"63,217,255" });
+    let tG = 0;
+    (function tick(){ tG += .016; octx.clearRect(0,0,460,460); const cx=230, cy=230, breathe=1+Math.sin(tG*1.4)*.03;
+      parts.forEach(p => { p.a += p.s*(ostate===2?2.4:1); let rr=p.r*breathe;
+        if (ostate===1) rr = p.r*.78 + Math.sin(tG*6+p.z*9)*5; if (ostate===2) rr = p.r + Math.sin(tG*9+p.z*14)*13;
+        const x=cx+Math.cos(p.a)*rr, y=cy+Math.sin(p.a)*rr*.86, al=.22+p.z*.55;
+        octx.beginPath(); octx.arc(x,y,1.1+p.z*2.1,0,6.283); octx.fillStyle="rgba("+p.c+","+al+")"; octx.fill(); });
+      const g = octx.createRadialGradient(cx,cy,4,cx,cy,120);
+      g.addColorStop(0, ostate===1?"rgba(216,255,62,.32)":"rgba(63,217,255,.26)"); g.addColorStop(1,"rgba(0,0,0,0)");
+      octx.fillStyle=g; octx.beginPath(); octx.arc(cx,cy,120,0,6.283); octx.fill();
+      if (!reduced) requestAnimationFrame(tick); })();
+    orb.onclick = () => { ostate = (ostate+1)%3; $("#orbState").textContent = ONAMES[ostate]; };
+  }
+}
+
 async function renderMember(role, demo){
   const email = session ? session.user.email : "you@email.com";
-  const first = (email.split("@")[0]||"there").replace(/^\w/,c=>c.toUpperCase());
-  $("#mGreet").innerHTML = `Welcome, ${first}`;
-  let gymName=null;
-  if (role==="member" && !demo && session){
-    try { const { data } = await sb.from("memberships").select("gyms(name)").eq("user_id",session.user.id).eq("status","active").maybeSingle(); gymName=data?.gyms?.name; } catch(e){}
-  }
-  $("#mEyebrow").textContent = gymName ? gymName.toUpperCase() : "PERSONAL · TODAY";
-  $("#mSub").textContent = gymName ? "Your workouts are mapped to the machines in your gym." : "Personal coaching with generic-equipment plans.";
+  const first = (email.split("@")[0] || "there").replace(/^\w/, c => c.toUpperCase());
+  const h = new Date().getHours();
+  const partOfDay = h < 12 ? "Morning" : h < 18 ? "Afternoon" : "Evening";
+  $("#mtGreet").textContent = `${partOfDay}, ${first}`;
+  $("#mtDate").textContent = new Date().toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"short" }).toUpperCase();
 
-  // subscription panel — only for solo (direct) users
-  const solo = role==="direct";
-  $("#mSubSection").style.display = solo ? "block" : "none";
+  // gym vs personal context
+  let gymName = null;
+  if (role === "member" && !demo && session){
+    try { const { data } = await sb.from("memberships").select("gyms(name)").eq("user_id",session.user.id).eq("status","active").maybeSingle(); gymName = data?.gyms?.name; } catch(e){}
+  }
+  const floor = gymName ? gymName.toUpperCase() : "GENERIC KIT";
+
+  // real program from the engine (window.IRONMAP); designed sample stays if absent
+  const p = IM.demoProgram;
+  if (p && p.workout && p.workout.days && p.workout.days[0]){
+    const items = p.workout.days[0].items || [];
+    $("#mtTag").textContent = `${items.length} EXERCISES · ~${Math.max(30, items.length*9)} MIN · ${floor}`;
+    if (items.length){
+      $("#mtExlist").innerHTML = items.slice(0,4).map(it => `<span class="ex">${it.name}</span>`).join("") + (items.length>4 ? `<span class="ex num">+${items.length-4}</span>` : "");
+    }
+  } else {
+    $("#mtTag").textContent = `6 EXERCISES · ~52 MIN · ${floor}`;
+  }
+  if (p && p.macros){
+    const m = p.macros, e = p.energy || {};
+    if (e.target) $("#mfKcalL").textContent = `KCAL / ${e.target}`;
+    if (m.protein_g){ $("#mfProtL").textContent = `PROTEIN / ${m.protein_g}G`; $("#mtProtein").textContent = Math.round(m.protein_g*0.66); }
+    if (m.carbs_g) $("#mfCarbL").textContent = `CARBS / ${m.carbs_g}G`;
+    if (m.fat_g) $("#mfFatL").textContent = `FAT / ${m.fat_g}G`;
+  }
+
+  // membership panel — only for solo (direct) users
+  const solo = role === "direct";
+  $("#mMemberPanel").style.display = solo ? "block" : "none";
   if (solo){
-    let sub=null;
-    if (!demo && session){ try { const { data } = await sb.from("user_subscriptions").select("*").eq("user_id",session.user.id).maybeSingle(); sub=data; } catch(e){} }
+    let sub = null;
+    if (!demo && session){ try { const { data } = await sb.from("user_subscriptions").select("*").eq("user_id",session.user.id).maybeSingle(); sub = data; } catch(e){} }
     sub = sub || { price_usd:20, status:"active", created_at:new Date().toISOString() };
-    $("#mSubPrice").innerHTML = `$${Math.round(sub.price_usd)}<small>/mo</small>`;
-    const st=$("#mSubStatus"); st.textContent=(sub.status||"active").toUpperCase(); st.className="chip "+(sub.status==="canceled"?"coral":"mint");
+    $("#mSubPrice").innerHTML = `$${Math.round(sub.price_usd)}<span style="font-size:13px;color:var(--faint)">/mo</span>`;
+    const st = $("#mSubStatus"); st.textContent = (sub.status||"active").toUpperCase(); st.className = "chip " + (sub.status==="canceled"?"coral":"mint");
     $("#mSubSince").textContent = fmtDate(sub.created_at);
-    const next=new Date(sub.created_at); next.setMonth(next.getMonth()+1);
+    const next = new Date(sub.created_at); next.setMonth(next.getMonth()+1);
     $("#mSubNext").textContent = sub.status==="canceled" ? "—" : fmtDate(next);
     $("#cancelSub").style.display = sub.status==="canceled" ? "none" : "block";
   }
 
-  const p=IM.demoProgram;
-  $("#mMacros").innerHTML = macroKpis(p);
-  $("#mWorkout").innerHTML = workoutHtml(p);
-  const exs=(IM.exercises||[]).filter(e=>e.machine).slice(0,6);
-  $("#mExercises").innerHTML = exs.length ? exs.map(e=>`<div class="ex"><span class="grow">${e.name}</span><span class="m">${e.pattern||""}</span></div>`).join("")
-    : `<div class="ex"><span class="grow">${IM.counts.exercises} exercises across ${IM.counts.machines} machines</span></div>`;
+  initMemberApp();
+  showMScreen("today");
 }
-$("#cancelSub").onclick = async () => {
-  if (!session) return;
-  await sb.from("user_subscriptions").update({ status:"canceled" }).eq("user_id",session.user.id);
-  renderMember("direct");
-};
+document.addEventListener("click", async (ev) => {
+  if (ev.target && ev.target.id === "cancelSub"){
+    if (!session) return;
+    await sb.from("user_subscriptions").update({ status:"canceled" }).eq("user_id",session.user.id);
+    renderMember("direct");
+  }
+});
 
 let curGymId = null;
 async function renderGym(demo){
