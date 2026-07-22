@@ -250,6 +250,34 @@
   @media (prefers-reduced-motion:reduce){.mapp #figure #fArm,.mapp #figure #fLeg1,.mapp #figure #fLeg2{animation:none}}
   .mapp .cuerow{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--text);line-height:1.45}
   .mapp .cuerow .cdot{color:var(--mint);flex:none}
+  /* profile */
+  .avatarbtn{width:34px;height:34px;border-radius:50%;flex:none;border:1px solid var(--line2);cursor:pointer;
+    background:radial-gradient(circle at 32% 28%,rgba(216,255,62,.9),rgba(63,217,255,.7) 62%,var(--elev));
+    color:#0C1400;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.02em;display:flex;align-items:center;justify-content:center}
+  .mapp .pavatar{width:64px;height:64px;border-radius:50%;flex:none;border:1px solid var(--line2);
+    background:radial-gradient(circle at 32% 28%,rgba(216,255,62,.9),rgba(63,217,255,.7) 62%,var(--elev));
+    color:#0C1400;font-family:var(--mono);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .mapp .phead{display:flex;gap:14px;align-items:center}
+  .mapp .phead .pn{font-size:18px;font-weight:800;letter-spacing:-.01em}
+  .mapp .phead .pe{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:2px;word-break:break-all}
+  .mapp h3.psec{font-size:12px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px;font-weight:600}
+  .mapp .pform{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mapp .pf{display:flex;flex-direction:column;gap:5px}
+  .mapp .pf.full{grid-column:1/-1}
+  .mapp .pf label{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+  .mapp .pf input,.mapp .pf select{background:var(--inset);border:1px solid var(--line2);border-radius:11px;color:var(--text);
+    font-family:inherit;font-size:14px;padding:11px 12px;width:100%;-webkit-appearance:none;appearance:none}
+  .mapp .pf input:focus,.mapp .pf select:focus{outline:none;border-color:rgba(216,255,62,.5)}
+  .mapp .pf .seg{display:flex;gap:6px}
+  .mapp .pf .seg button{flex:1;background:var(--inset);border:1px solid var(--line2);border-radius:11px;color:var(--muted);
+    font-family:inherit;font-size:13px;font-weight:600;padding:10px 4px;cursor:pointer;text-transform:capitalize}
+  .mapp .pf .seg button.on{background:var(--elev);border-color:rgba(216,255,62,.5);color:var(--text)}
+  .mapp .pnums{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .mapp .pnum{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .mapp .pnum .v{font-size:24px;font-weight:850;letter-spacing:-.02em}
+  .mapp .pnum .l{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;margin-top:3px}
+  .mapp .pmsg{font-size:12.5px;margin-top:10px;min-height:16px}
+  .mapp .pmsg.ok{color:var(--mint)} .mapp .pmsg.err{color:var(--coral)}
 </style>
 
 <header class="bar" id="bar">
@@ -260,6 +288,7 @@
   </div>
   <span class="sp"></span>
   <span class="email" id="barEmail"></span>
+  <button class="avatarbtn" id="profileBtn" style="display:none" title="Profile">AA</button>
   <button class="btn-out" id="signOut">SIGN OUT</button>
 </header>
 
@@ -399,12 +428,6 @@
         <div><div class="who">COACH · 6:10 PM</div>
         <p>Quads still at 6/10 soreness, so today became a pull session — squats moved to Thursday. The Iso-Lateral Row is free right now.</p></div>
       </div>
-
-      <div class="card memberpanel" id="mMemberPanel" style="display:none">
-        <div class="row"><div class="grow"><div style="font-size:24px;font-weight:850;letter-spacing:-.02em" class="num" id="mSubPrice">$20<span style="font-size:13px;color:var(--faint)">/mo</span></div><div style="color:var(--muted);font-size:12px;margin-top:2px">IRONMAP Personal — billed by IRONMAP</div></div><span class="chip mint" id="mSubStatus">ACTIVE</span></div>
-        <div class="subgrid"><div><div class="l">Member since</div><div class="v num" id="mSubSince">—</div></div><div><div class="l">Next billing</div><div class="v num" id="mSubNext">—</div></div><div><div class="l">Plan</div><div class="v">Personal</div></div></div>
-        <button class="btn ghost" id="cancelSub" style="margin-top:14px;font-size:14px">Cancel subscription (demo)</button>
-      </div>
     </div>
 
     <!-- WORKOUT -->
@@ -506,6 +529,48 @@
         <div class="row"><b style="font-size:14px">Weight trend</b><span class="grow"></span><span class="chip num">83.4 → 82.1 kg</span></div>
         <svg viewBox="0 0 340 70" preserveAspectRatio="none"><polyline points="0,18 34,22 68,20 102,28 136,26 170,34 204,31 238,40 272,38 306,46 340,44" fill="none" stroke="#3FD9FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="340" cy="44" r="4" fill="#D8FF3E"/></svg>
       </div>
+    </div>
+
+    <!-- PROFILE (reached from the avatar in the top bar) -->
+    <div class="mscreen" id="m-profile">
+      <div class="row" style="margin-bottom:4px">
+        <button class="chip" id="profBack" style="cursor:pointer">‹ TODAY</button>
+      </div>
+      <div class="phead" style="margin-top:8px">
+        <div class="pavatar" id="pAvatar">AA</div>
+        <div class="grow"><div class="pn" id="pName">Member</div><div class="pe" id="pEmail">you@email.com</div></div>
+      </div>
+
+      <h3 class="psec">Your body</h3>
+      <div class="pform">
+        <div class="pf"><label>Height (cm)</label><input id="bHeight" type="number" inputmode="numeric" placeholder="178"></div>
+        <div class="pf"><label>Weight (kg)</label><input id="bWeight" type="number" inputmode="decimal" placeholder="80"></div>
+        <div class="pf"><label>Age</label><input id="bAge" type="number" inputmode="numeric" placeholder="28"></div>
+        <div class="pf"><label>Sex</label><div class="seg" id="bSex"><button data-v="male" class="on">Male</button><button data-v="female">Female</button></div></div>
+        <div class="pf full"><label>Goal</label><div class="seg" id="bGoal"><button data-v="cut">Cut</button><button data-v="recomp" class="on">Recomp</button><button data-v="bulk">Bulk</button></div></div>
+        <div class="pf"><label>Days / week</label><select id="bDays"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
+        <div class="pf"><label>Session (min)</label><select id="bMin"><option>30</option><option>45</option><option selected>60</option><option>75</option><option>90</option></select></div>
+        <div class="pf full"><label>Injuries / limits (optional)</label><input id="bInj" type="text" placeholder="e.g. left shoulder, lower back"></div>
+      </div>
+      <button class="btn volt" id="bSave" style="margin-top:14px">Save &amp; recompute my numbers</button>
+      <div class="pmsg" id="bMsg"></div>
+
+      <h3 class="psec">Your numbers <span style="color:var(--faint);text-transform:none;letter-spacing:0">· from your data</span></h3>
+      <div class="pnums">
+        <div class="pnum"><div class="v num" id="nBmr">—</div><div class="l">BMR (kcal)</div></div>
+        <div class="pnum"><div class="v num" style="color:var(--cyan)" id="nTdee">—</div><div class="l">Maintenance / day</div></div>
+        <div class="pnum"><div class="v num" style="color:var(--volt)" id="nTarget">—</div><div class="l">Your target / day</div></div>
+        <div class="pnum"><div class="v num" style="color:var(--mint)" id="nProtein">—</div><div class="l">Protein / day (g)</div></div>
+      </div>
+      <div class="foot" style="margin-top:12px;font-size:10px">Metabolic numbers recompute instantly from your data. Your training split follows your days/week; full exercise re-generation lands next phase.</div>
+
+      <h3 class="psec">Subscription</h3>
+      <div class="card memberpanel" id="mMemberPanel" style="display:none">
+        <div class="row"><div class="grow"><div style="font-size:24px;font-weight:850;letter-spacing:-.02em" class="num" id="mSubPrice">$20<span style="font-size:13px;color:var(--faint)">/mo</span></div><div style="color:var(--muted);font-size:12px;margin-top:2px">IRONMAP Personal — billed by IRONMAP</div></div><span class="chip mint" id="mSubStatus">ACTIVE</span></div>
+        <div class="subgrid"><div><div class="l">Member since</div><div class="v num" id="mSubSince">—</div></div><div><div class="l">Next billing</div><div class="v num" id="mSubNext">—</div></div><div><div class="l">Plan</div><div class="v">Personal</div></div></div>
+        <button class="btn ghost" id="cancelSub" style="margin-top:14px;font-size:14px">Cancel subscription (demo)</button>
+      </div>
+      <div class="card" id="mGymNote" style="display:none;color:var(--muted);font-size:13px">Your membership is billed by your gym. <span id="mGymName2">Your gym</span> covers your IRONMAP access.</div>
     </div>
 
     <!-- PLAN / SCHEDULE (reached from Today → "Your week") -->
@@ -790,6 +855,7 @@ function setRoleChip(role){
 }
 async function route(role){
   bar(true); setRoleChip(role);
+  $("#profileBtn").style.display = (role==="member"||role==="direct") ? "flex" : "none";
   if (role==="platform_admin"){ await renderHQ(); show("hq"); }
   else if (role==="gym_owner"){ await renderGym(); show("gym"); }
   else { await renderMember(role); show("member"); }
@@ -868,6 +934,31 @@ function initMemberApp(){
   document.querySelectorAll("#mapp [data-goto]").forEach(b => b.onclick = () => showMScreen(b.dataset.goto));
   const pb = $("#planBack"); if (pb) pb.onclick = () => showMScreen("today");
   const mc = $("#moveClose"); if (mc) mc.onclick = () => { $("#moveModal").style.display = "none"; };
+  // profile
+  const prb = $("#profileBtn"); if (prb) prb.onclick = () => showMScreen("profile");
+  const pfb = $("#profBack"); if (pfb) pfb.onclick = () => showMScreen("today");
+  ["bSex","bGoal"].forEach(id => document.querySelectorAll("#"+id+" button").forEach(b => b.onclick = () => {
+    document.querySelectorAll("#"+id+" button").forEach(x => x.classList.remove("on")); b.classList.add("on");
+  }));
+  const save = $("#bSave");
+  if (save) save.onclick = async () => {
+    const msg = $("#bMsg"); msg.className = "pmsg"; msg.textContent = "";
+    const height = parseFloat($("#bHeight").value), weight = parseFloat($("#bWeight").value), age = parseInt($("#bAge").value, 10);
+    if (!(height >= 120 && height <= 230)){ msg.className="pmsg err"; msg.textContent="Enter a height between 120 and 230 cm."; return; }
+    if (!(weight >= 30 && weight <= 300)){ msg.className="pmsg err"; msg.textContent="Enter a weight between 30 and 300 kg."; return; }
+    if (!(age >= 13 && age <= 100)){ msg.className="pmsg err"; msg.textContent="Enter an age between 13 and 100."; return; }
+    const sex = document.querySelector("#bSex button.on")?.dataset.v || "male";
+    const goal = document.querySelector("#bGoal button.on")?.dataset.v || "recomp";
+    myBody = { height_cm: height, weight_kg: weight, birthdate: `${new Date().getFullYear() - age}-06-15`,
+      sex, goal, days_per_week: +$("#bDays").value, session_min: +$("#bMin").value, injuries: $("#bInj").value.trim() || null };
+    applyNumbers(calcNumbers(myBody), null);
+    save.disabled = true; save.textContent = "Saving…";
+    try {
+      if (session){ const { error } = await sb.from("profiles").update(myBody).eq("user_id", session.user.id); if (error) throw error; }
+      msg.className = "pmsg ok"; msg.textContent = "Saved — your plan and macros now use your numbers.";
+    } catch(e){ msg.className = "pmsg err"; msg.textContent = "Couldn't save to your account, but your numbers are updated on this device."; }
+    finally { save.disabled = false; save.textContent = "Save & recompute my numbers"; }
+  };
 
   // rest timer ring
   let restLeft = 90, restTotal = 90; const arc = $("#restArc"), restT = $("#restT"), CIRC = 439.8;
@@ -932,9 +1023,11 @@ async function renderMember(role, demo){
     if (m.fat_g) $("#mfFatL").textContent = `FAT / ${m.fat_g}G`;
   }
 
-  // membership panel — only for solo (direct) users
+  // subscription (now on the Profile screen) — solo users have a personal plan; gym members are billed by their gym
   const solo = role === "direct";
   $("#mMemberPanel").style.display = solo ? "block" : "none";
+  $("#mGymNote").style.display = solo ? "none" : "block";
+  if (!solo && gymName) $("#mGymName2").textContent = gymName;
   if (solo){
     let sub = null;
     if (!demo && session){ try { const { data } = await sb.from("user_subscriptions").select("*").eq("user_id",session.user.id).maybeSingle(); sub = data; } catch(e){} }
@@ -947,9 +1040,70 @@ async function renderMember(role, demo){
     $("#cancelSub").style.display = sub.status==="canceled" ? "none" : "block";
   }
 
+  // profile header + body data
+  const initials = (first[0] || "M").toUpperCase() + (email.split("@")[0].slice(1,2) || "").toUpperCase();
+  $("#profileBtn").textContent = initials; $("#pAvatar").textContent = initials;
+  $("#pName").textContent = first; $("#pEmail").textContent = email;
+  if (!demo && session){
+    try {
+      const { data } = await sb.from("profiles").select("height_cm,weight_kg,birthdate,sex,goal,days_per_week,session_min,injuries").eq("user_id",session.user.id).maybeSingle();
+      myBody = data || {};
+    } catch(e){ myBody = {}; }
+  } else myBody = {};
+  fillBodyForm(myBody);
+  // if the user has real body data, THEIR numbers override the engine defaults everywhere
+  if (myBody && myBody.weight_kg && myBody.height_cm){ applyNumbers(calcNumbers(myBody), gymName); } else { showNumbers(null); }
+
   renderPlan(p, gymName);
   initMemberApp();
   showMScreen("today");
+}
+
+// ---------- body data → metabolic numbers (client-side, Mifflin-St Jeor) ----------
+let myBody = {};
+function ageFrom(birthdate){ if(!birthdate) return 28; const y = new Date(birthdate).getFullYear(); const a = new Date().getFullYear() - y; return (a>=13 && a<=100) ? a : 28; }
+function calcNumbers(b){
+  const w = +b.weight_kg || 80, ht = +b.height_cm || 178, age = ageFrom(b.birthdate), male = (b.sex||"male") !== "female";
+  const bmr = Math.round(10*w + 6.25*ht - 5*age + (male ? 5 : -161));
+  const actMap = {2:1.35,3:1.45,4:1.55,5:1.63,6:1.72}, days = Math.min(6, Math.max(2, +b.days_per_week || 4));
+  const tdee = Math.round(bmr * (actMap[days] || 1.55));
+  const goalAdj = ({cut:-0.18, recomp:0, bulk:0.12})[b.goal] ?? 0;
+  const target = Math.round((tdee * (1 + goalAdj)) / 10) * 10;
+  const protein = Math.round(1.8 * w);
+  const fat = Math.round(target * 0.25 / 9);
+  const carbs = Math.max(0, Math.round((target - protein*4 - fat*9) / 4));
+  return { bmr, tdee, target, protein, carbs, fat };
+}
+function splitForDays(n){ n=+n; if(n<=2)return["full body","full body"].slice(0,Math.max(1,n)); if(n===3)return["full body","full body","full body"]; if(n===4)return["upper","lower","upper","lower"]; if(n>=5)return["push","pull","legs","upper","lower"].slice(0,n); return["upper","lower","upper","lower"]; }
+function ringOffset(v, goal){ const C=194.8; return (C*(1 - Math.min(1, Math.max(0, v/goal)))).toFixed(1); }
+function showNumbers(n){
+  $("#nBmr").textContent = n?n.bmr:"—"; $("#nTdee").textContent = n?n.tdee:"—";
+  $("#nTarget").textContent = n?n.target:"—"; $("#nProtein").textContent = n?n.protein:"—";
+}
+// apply the user's own numbers across the app (Food rings + Today protein + Profile), and their split to the plan
+function applyNumbers(n, gymName){
+  showNumbers(n);
+  $("#mfKcalL").textContent = `KCAL / ${n.target}`; $("#mfProtL").textContent = `PROTEIN / ${n.protein}G`;
+  $("#mfCarbL").textContent = `CARBS / ${n.carbs}G`; $("#mfFatL").textContent = `FAT / ${n.fat}G`;
+  // ring fills = a realistic ~80% of the day logged, proportional to each goal
+  $("#mfKcal").textContent = Math.round(n.target*0.8); $("#mfKcalArc").setAttribute("stroke-dashoffset", ringOffset(n.target*0.8, n.target));
+  $("#mfProt").textContent = Math.round(n.protein*0.66); $("#mfProtArc").setAttribute("stroke-dashoffset", ringOffset(n.protein*0.66, n.protein));
+  $("#mfCarb").textContent = Math.round(n.carbs*0.65); $("#mfCarbArc").setAttribute("stroke-dashoffset", ringOffset(n.carbs*0.65, n.carbs));
+  $("#mfFat").textContent = Math.round(n.fat*0.6); $("#mfFatArc").setAttribute("stroke-dashoffset", ringOffset(n.fat*0.6, n.fat));
+  $("#mtProtein").textContent = Math.round(n.protein*0.66);
+  if (myBody.days_per_week){
+    const sp = splitForDays(myBody.days_per_week);
+    $("#planMeta").textContent = `${sp.length}-DAY SPLIT · ${sp.join(" / ").toUpperCase()}`;
+    const floor = gymName ? gymName.toUpperCase() : "GENERIC KIT";
+    $("#mtTag").textContent = `${(IM.demoProgram?.workout?.days?.[0]?.items?.length)||6} EXERCISES · ~${(myBody.session_min||60)} MIN · ${floor}`;
+  }
+}
+function fillBodyForm(b){
+  $("#bHeight").value = b.height_cm || ""; $("#bWeight").value = b.weight_kg || "";
+  $("#bAge").value = b.birthdate ? ageFrom(b.birthdate) : ""; $("#bInj").value = b.injuries || "";
+  $("#bDays").value = String(b.days_per_week || 4); $("#bMin").value = String(b.session_min || 60);
+  document.querySelectorAll("#bSex button").forEach(x => x.classList.toggle("on", x.dataset.v === (b.sex||"male")));
+  document.querySelectorAll("#bGoal button").forEach(x => x.classList.toggle("on", x.dataset.v === (b.goal||"recomp")));
 }
 document.addEventListener("click", async (ev) => {
   if (ev.target && ev.target.id === "cancelSub"){
