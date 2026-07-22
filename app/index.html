@@ -552,9 +552,15 @@
         </div>
       </div>
       <div class="card spark">
-        <div class="row"><b style="font-size:14px">Weight trend</b><span class="grow"></span><span class="chip num">83.4 → 82.1 kg</span></div>
-        <svg viewBox="0 0 340 70" preserveAspectRatio="none"><polyline points="0,18 34,22 68,20 102,28 136,26 170,34 204,31 238,40 272,38 306,46 340,44" fill="none" stroke="#3FD9FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="340" cy="44" r="4" fill="#D8FF3E"/></svg>
+        <div class="row"><b style="font-size:14px">Weight trend</b><span class="grow"></span><span class="chip num" id="wTrend">LOG TO START</span></div>
+        <svg viewBox="0 0 340 70" preserveAspectRatio="none" id="wChart" style="margin-top:6px"></svg>
+        <div class="row" style="margin-top:12px;gap:8px">
+          <input id="wInput" type="number" inputmode="decimal" placeholder="today's weight (kg)" style="flex:1;background:var(--inset);border:1px solid var(--line2);border-radius:11px;color:var(--text);font-family:inherit;font-size:14px;padding:11px 12px">
+          <button class="btn volt" id="wLog" style="flex:none;width:auto;padding:11px 18px;font-size:14px">Log</button>
+        </div>
       </div>
+      <div class="coachnote" style="margin-top:14px"><div class="dot"></div><div><div class="who">ADAPTIVE COACH</div>
+        <p id="wAdaptive">Log your weight a few times a week. I read the real trend, estimate what you're actually burning, and auto-tune your calorie target so progress never stalls.</p></div></div>
     </div>
 
     <!-- PROFILE (reached from the avatar in the top bar) -->
@@ -1013,6 +1019,15 @@ function initMemberApp(){
   const mrg = $("#mfRegen"); if (mrg) mrg.onclick = () => { foodDayNonce++; today = genDay(foodDayNonce); renderFood(); };
   const mpbk = $("#mpBack"); if (mpbk) mpbk.onclick = () => showMScreen("food");
   const shc = $("#sheetClose"); if (shc) shc.onclick = () => { $("#foodSheet").style.display = "none"; };
+  // weight log → adaptive macros
+  const wlb = $("#wLog");
+  if (wlb) wlb.onclick = async () => {
+    const v = parseFloat($("#wInput").value);
+    if (!(v >= 30 && v <= 300)){ $("#wInput").style.borderColor = "var(--coral)"; return; }
+    $("#wInput").style.borderColor = ""; wlb.disabled = true; wlb.textContent = "…";
+    await logWeight(v); $("#wInput").value = ""; renderWeight(); renderFood();
+    wlb.disabled = false; wlb.textContent = "Log";
+  };
 
   // rest timer ring
   let restLeft = 90, restTotal = 90; const arc = $("#restArc"), restT = $("#restT"), CIRC = 439.8;
@@ -1112,10 +1127,12 @@ async function renderMember(role, demo){
   if (nums){ applyNumbers(nums, gymName); } else { showNumbers(null); }
 
   // meal planner target: the user's own numbers, else the engine's baked defaults
-  foodTarget = nums ? { kcal:nums.target, protein:nums.protein }
-    : { kcal: (p && p.energy && p.energy.target) || 2500, protein: (p && p.macros && p.macros.protein_g) || 150 };
+  foodTarget = nums ? { kcal:nums.target, protein:nums.protein, carbs:nums.carbs, fat:nums.fat }
+    : { kcal: (p && p.energy && p.energy.target) || 2500, protein: (p && p.macros && p.macros.protein_g) || 150, carbs: (p && p.macros && p.macros.carbs_g) || 260, fat: (p && p.macros && p.macros.fat_g) || 72 };
+  await loadWeights();          // weight-trend adaptive macros may override foodTarget
   today = [];
   renderFood();
+  renderWeight();
   renderPlan(p, gymName);
   initMemberApp();
   showMScreen("today");
@@ -1147,12 +1164,7 @@ function applyNumbers(n, gymName){
   showNumbers(n);
   $("#mfKcalL").textContent = `KCAL / ${n.target}`; $("#mfProtL").textContent = `PROTEIN / ${n.protein}G`;
   $("#mfCarbL").textContent = `CARBS / ${n.carbs}G`; $("#mfFatL").textContent = `FAT / ${n.fat}G`;
-  // ring fills = a realistic ~80% of the day logged, proportional to each goal
-  $("#mfKcal").textContent = Math.round(n.target*0.8); $("#mfKcalArc").setAttribute("stroke-dashoffset", ringOffset(n.target*0.8, n.target));
-  $("#mfProt").textContent = Math.round(n.protein*0.66); $("#mfProtArc").setAttribute("stroke-dashoffset", ringOffset(n.protein*0.66, n.protein));
-  $("#mfCarb").textContent = Math.round(n.carbs*0.65); $("#mfCarbArc").setAttribute("stroke-dashoffset", ringOffset(n.carbs*0.65, n.carbs));
-  $("#mfFat").textContent = Math.round(n.fat*0.6); $("#mfFatArc").setAttribute("stroke-dashoffset", ringOffset(n.fat*0.6, n.fat));
-  $("#mtProtein").textContent = Math.round(n.protein*0.66);
+  // ring FILLS are set by renderFood from the meals you've actually approved (real logging)
   if (myBody.days_per_week){
     const sp = splitForDays(myBody.days_per_week);
     $("#planMeta").textContent = `${sp.length}-DAY SPLIT · ${sp.join(" / ").toUpperCase()}`;
@@ -1271,6 +1283,15 @@ function renderFood(){
   $("#mfMeals").querySelectorAll("[data-i]").forEach(b => b.onclick = () => approveMeal(+b.dataset.i));
   $("#mfMeals").querySelectorAll("[data-sw]").forEach(b => b.onclick = () => openSwap(+b.dataset.sw));
   $("#mfMeals").querySelectorAll("[data-rj]").forEach(b => b.onclick = () => rejectMeal(+b.dataset.rj));
+  // rings = what you've actually approved (logged) today, against your target
+  const eaten = dayTotals(today.filter(m => m.approved));
+  const frac = foodTarget.kcal ? Math.min(1, eaten.kcal / foodTarget.kcal) : 0;
+  const cCarb = Math.round((foodTarget.carbs||260) * frac), cFat = Math.round((foodTarget.fat||72) * frac);
+  $("#mfKcal").textContent = eaten.kcal; $("#mfKcalArc").setAttribute("stroke-dashoffset", ringOffset(eaten.kcal, foodTarget.kcal));
+  $("#mfProt").textContent = eaten.p; $("#mfProtArc").setAttribute("stroke-dashoffset", ringOffset(eaten.p, foodTarget.protein));
+  $("#mfCarb").textContent = cCarb; $("#mfCarbArc").setAttribute("stroke-dashoffset", ringOffset(cCarb, foodTarget.carbs||260));
+  $("#mfFat").textContent = cFat; $("#mfFatArc").setAttribute("stroke-dashoffset", ringOffset(cFat, foodTarget.fat||72));
+  $("#mtProtein").textContent = eaten.p;
 }
 function approveMeal(i){
   const m = today[i]; m.approved = !m.approved;
@@ -1316,6 +1337,73 @@ function render30Day(){
 async function saveMealState(){
   if (!session) return;
   try { await sb.from("profiles").update({ diet_mode: foodMode, meal_prefs: myPrefs }).eq("user_id", session.user.id); } catch(e){}
+}
+
+// ---------- weight-trend adaptive macros (MacroFactor-style: read the real trend, re-tune calories) ----------
+let weights = [];          // [{on:"YYYY-MM-DD", w:kg}] ascending
+let adaptiveTarget = null; // coach-adjusted kcal target
+function wKey(){ return "wl_" + (session ? session.user.id : "anon"); }
+async function loadWeights(){
+  weights = [];
+  if (session){ try { const { data } = await sb.from("weight_logs").select("weight_kg,logged_on").eq("user_id",session.user.id).order("logged_on"); if (data && data.length) weights = data.map(r => ({ on:r.logged_on, w:+r.weight_kg })); } catch(e){} }
+  if (!weights.length){ try { weights = JSON.parse(localStorage.getItem(wKey()) || "[]"); } catch(e){ weights = []; } }
+  recomputeAdaptive();
+}
+async function logWeight(kg){
+  const on = new Date().toISOString().slice(0,10);
+  weights = weights.filter(x => x.on !== on); weights.push({ on, w:kg }); weights.sort((a,b) => a.on < b.on ? -1 : 1);
+  try { localStorage.setItem(wKey(), JSON.stringify(weights)); } catch(e){}
+  if (session){ try { await sb.from("weight_logs").upsert({ user_id:session.user.id, weight_kg:kg, logged_on:on }, { onConflict:"user_id,logged_on" }); } catch(e){} }
+  recomputeAdaptive();
+}
+function trendPerWeek(){
+  if (weights.length < 2) return null;
+  const pts = weights.slice(-14).map(p => ({ x:(new Date(p.on)).getTime()/864e5, y:p.w }));
+  const n=pts.length, sx=pts.reduce((a,p)=>a+p.x,0), sy=pts.reduce((a,p)=>a+p.y,0), sxx=pts.reduce((a,p)=>a+p.x*p.x,0), sxy=pts.reduce((a,p)=>a+p.x*p.y,0);
+  const denom = n*sxx - sx*sx; if (!denom) return null;
+  return ((n*sxy - sx*sy) / denom) * 7;
+}
+function recomputeAdaptive(){
+  const hasBase = myBody && myBody.weight_kg && myBody.height_cm;
+  if (hasBase && weights.length) myBody.weight_kg = weights[weights.length-1].w;   // track current weight
+  const rate = trendPerWeek();
+  let msg, adj = 0;
+  if (!hasBase){ adaptiveTarget = null; msg = "Add your height, weight and age in Profile so I can tune calories to your trend."; }
+  else if (rate === null){ adaptiveTarget = null; msg = weights.length ? "One weigh-in logged — a few more this week and I'll auto-tune your target to your real trend." : "Log your weight a few times a week and I'll auto-tune your calories to your real trend."; }
+  else {
+    const r = (rate>=0?"+":"") + rate.toFixed(1), base = calcNumbers(myBody).target, goal = myBody.goal || "recomp";
+    if (goal === "cut"){
+      if (rate > -0.15){ adj = -140; msg = `You're ${r} kg/wk — the cut has stalled, so I dropped your target ${Math.abs(adj)} kcal to get the scale moving.`; }
+      else if (rate < -0.85){ adj = 120; msg = `You're ${r} kg/wk — losing fast enough to risk muscle, so I nudged your target up ${adj} kcal.`; }
+      else { msg = `You're ${r} kg/wk — right in the cut zone. Target held.`; }
+    } else if (goal === "bulk"){
+      if (rate < 0.1){ adj = 150; msg = `You're ${r} kg/wk — not gaining yet, so I raised your target ${adj} kcal.`; }
+      else if (rate > 0.5){ adj = -120; msg = `You're ${r} kg/wk — gaining fast (more fat than muscle), so I trimmed ${Math.abs(adj)} kcal.`; }
+      else { msg = `You're ${r} kg/wk — a clean lean-bulk pace. Target held.`; }
+    } else {
+      if (rate > 0.3){ adj = -120; msg = `You're ${r} kg/wk — drifting up, so I trimmed ${Math.abs(adj)} kcal to stay recomp.`; }
+      else if (rate < -0.3){ adj = 120; msg = `You're ${r} kg/wk — dropping too quick for a recomp, so I added ${adj} kcal.`; }
+      else { msg = `You're ${r} kg/wk — holding steady while you recomp. Target held.`; }
+    }
+    adaptiveTarget = Math.max(1200, Math.round((base + adj)/10)*10);
+    const w = myBody.weight_kg || 80, protein = Math.round(1.8*w), fat = Math.round(adaptiveTarget*0.25/9);
+    foodTarget = { kcal:adaptiveTarget, protein, fat, carbs: Math.max(0, Math.round((adaptiveTarget - protein*4 - fat*9)/4)) };
+    $("#mfKcalL").textContent = `KCAL / ${foodTarget.kcal}`; $("#mfCarbL").textContent = `CARBS / ${foodTarget.carbs}G`; $("#mfFatL").textContent = `FAT / ${foodTarget.fat}G`;
+    const nt = $("#nTarget"); if (nt) nt.textContent = foodTarget.kcal;
+    today = genDay(foodDayNonce);
+  }
+  const el = $("#wAdaptive"); if (el) el.textContent = msg;
+}
+function renderWeight(){
+  const chart = $("#wChart"); if (!chart) return;
+  if (!weights.length){ chart.innerHTML = ""; $("#wTrend").textContent = "LOG TO START"; return; }
+  const ws = weights.slice(-14), ys = ws.map(p=>p.w);
+  const min = Math.min(...ys)-.5, max = Math.max(...ys)+.5, span = Math.max(.6, max-min);
+  const pts = ws.map((p,i) => { const x = ws.length>1 ? (i/(ws.length-1))*340 : 340; const y = 62 - ((p.w-min)/span)*54; return [x, y]; });
+  const poly = pts.map(p => `${p[0].toFixed(0)},${p[1].toFixed(0)}`).join(" "); const last = pts[pts.length-1];
+  chart.innerHTML = `<polyline points="${poly}" fill="none" stroke="#3FD9FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${last[0].toFixed(0)}" cy="${last[1].toFixed(0)}" r="4" fill="#D8FF3E"/>`;
+  const rate = trendPerWeek();
+  $("#wTrend").textContent = rate===null ? `${ys[ys.length-1]} kg` : `${ys[0]} → ${ys[ys.length-1]} kg · ${rate>=0?"+":""}${rate.toFixed(1)}/wk`;
 }
 document.addEventListener("click", async (ev) => {
   if (ev.target && ev.target.id === "cancelSub"){
