@@ -313,6 +313,14 @@
   .mapp .feelseg button.right.on{background:rgba(61,220,151,.16);border-color:var(--mint);color:var(--mint)}
   .mapp .feelseg button.hard.on{background:rgba(255,106,97,.16);border-color:var(--coral);color:var(--coral)}
   .mapp .setrow.now .kg{color:var(--volt)}
+  /* soreness check-in */
+  .mapp .soregrp{display:flex;align-items:center;gap:10px;background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:9px 12px}
+  .mapp .soregrp .sn{flex:1;font-size:14px;font-weight:600;text-transform:capitalize}
+  .mapp .soregrp .lvls{display:flex;gap:5px}
+  .mapp .soregrp .lvls button{padding:6px 9px;border-radius:8px;border:1px solid var(--line2);background:var(--inset);color:var(--faint);cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.04em}
+  .mapp .soregrp .lvls button.on0{background:rgba(61,220,151,.18);border-color:var(--mint);color:var(--mint)}
+  .mapp .soregrp .lvls button.on1{background:rgba(216,255,62,.16);border-color:var(--volt);color:var(--volt)}
+  .mapp .soregrp .lvls button.on2,.mapp .soregrp .lvls button.on3{background:rgba(255,106,97,.16);border-color:var(--coral);color:var(--coral)}
 </style>
 
 <header class="bar" id="bar">
@@ -424,15 +432,15 @@
         <div class="streakchip num"><svg viewBox="0 0 24 24"><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 .5C15 15 17 14 17 11c2 2 3 4 3 6.5A7.5 7.5 0 0 1 12.5 25 8 8 0 0 1 5 17c0-6 6-8 7-15z"/></svg><span id="mtStreak">12</span></div>
       </div>
 
-      <div class="card readiness">
+      <div class="card readiness" id="readyCard" style="cursor:pointer">
         <svg class="mini-body" viewBox="0 0 44 64" aria-hidden="true">
-          <circle cx="22" cy="7" r="5" class="m0"/><rect x="14" y="14" width="16" height="20" rx="5" class="mwarm"/>
-          <rect x="7" y="15" width="5" height="16" rx="2.5" class="m0"/><rect x="32" y="15" width="5" height="16" rx="2.5" class="m0"/>
-          <rect x="14" y="36" width="7" height="22" rx="3.5" class="m2"/><rect x="23" y="36" width="7" height="22" rx="3.5" class="m2"/>
+          <circle cx="22" cy="7" r="5" class="m0"/><rect x="14" y="14" width="16" height="20" rx="5" class="mwarm" id="mbChest"/>
+          <rect x="7" y="15" width="5" height="16" rx="2.5" class="m0" id="mbArmL"/><rect x="32" y="15" width="5" height="16" rx="2.5" class="m0" id="mbArmR"/>
+          <rect x="14" y="36" width="7" height="22" rx="3.5" class="m2" id="mbLegL"/><rect x="23" y="36" width="7" height="22" rx="3.5" class="m2" id="mbLegR"/>
         </svg>
         <div class="grow">
           <b style="font-size:14.5px">How's the body today?</b>
-          <div style="color:var(--muted);font-size:12px;margin-top:3px">Quads flagged sore yesterday — tap to update.</div>
+          <div style="color:var(--muted);font-size:12px;margin-top:3px" id="readySub">Tap to log soreness — I'll steer today around what needs to recover.</div>
         </div>
         <span class="chip cyan">30-SEC CHECK-IN</span>
       </div>
@@ -460,8 +468,8 @@
 
       <div class="coachnote">
         <div class="dot"></div>
-        <div><div class="who">COACH · 6:10 PM</div>
-        <p>Quads still at 6/10 soreness, so today became a pull session — squats moved to Thursday. The Iso-Lateral Row is free right now.</p></div>
+        <div><div class="who">COACH · TODAY</div>
+        <p id="todayCoachNote">Log how your body feels and I'll steer today's session around what's recovered — pulling volume off anything still sore.</p></div>
       </div>
     </div>
 
@@ -544,19 +552,22 @@
         <div class="delta"><div class="dv num" style="color:var(--volt)">−1.2 kg</div><div class="dl">Body fat</div></div>
         <div class="delta"><div class="dv num" style="color:var(--cyan)">1408</div><div class="dl">Measured BMR</div></div>
       </div>
+      <h3 class="psec" style="margin-top:6px">Recovery map <span style="color:var(--faint);text-transform:none;letter-spacing:0">· tap the body card on Today to update</span></h3>
       <div class="card bodywrap">
-        <svg width="140" height="224" viewBox="0 0 150 240" aria-hidden="true">
-          <circle cx="75" cy="20" r="13" class="m0"/><rect x="52" y="38" width="46" height="30" rx="10" class="mhot"/><rect x="52" y="70" width="46" height="34" rx="10" class="mwarm"/>
-          <rect x="30" y="40" width="16" height="52" rx="8" class="mwarm"/><rect x="104" y="40" width="16" height="52" rx="8" class="m1"/>
-          <rect x="30" y="94" width="16" height="26" rx="8" class="m0"/><rect x="104" y="94" width="16" height="26" rx="8" class="m0"/>
-          <rect x="52" y="106" width="21" height="62" rx="9" class="m2"/><rect x="77" y="106" width="21" height="62" rx="9" class="m2"/>
-          <rect x="52" y="172" width="21" height="52" rx="9" class="m0"/><rect x="77" y="172" width="21" height="52" rx="9" class="m0"/>
+        <svg width="140" height="224" viewBox="0 0 150 240" aria-hidden="true" id="recBody">
+          <circle cx="75" cy="20" r="13" fill="rgba(235,240,245,.07)"/>
+          <rect x="52" y="38" width="46" height="30" rx="10" id="rcChest"/>
+          <rect x="52" y="70" width="46" height="34" rx="10" id="rcCore"/>
+          <rect x="30" y="40" width="16" height="52" rx="8" id="rcArmL"/><rect x="104" y="40" width="16" height="52" rx="8" id="rcArmR"/>
+          <rect x="30" y="94" width="16" height="26" rx="8" id="rcForeL"/><rect x="104" y="94" width="16" height="26" rx="8" id="rcForeR"/>
+          <rect x="52" y="106" width="21" height="62" rx="9" id="rcLegUL"/><rect x="77" y="106" width="21" height="62" rx="9" id="rcLegUR"/>
+          <rect x="52" y="172" width="21" height="52" rx="9" id="rcLegLL"/><rect x="77" y="172" width="21" height="52" rx="9" id="rcLegLR"/>
         </svg>
-        <div class="legend">
-          <div><span class="sw" style="background:rgba(216,255,62,.55)"></span>Chest — strongest gain (+4.1%)</div>
-          <div><span class="sw" style="background:rgba(61,220,151,.45)"></span>Back &amp; right arm — on track</div>
-          <div><span class="sw" style="background:rgba(183,166,255,.45)"></span>Left arm −4% lean vs right → unilateral work added</div>
-          <div><span class="sw" style="background:rgba(255,95,86,.55)"></span>Quads — sore, volume pulled this week</div>
+        <div class="legend" id="recLegend">
+          <div><span class="sw" style="background:rgba(61,220,151,.55)"></span>Recovered — good to train</div>
+          <div><span class="sw" style="background:rgba(216,255,62,.55)"></span>Worked recently — light</div>
+          <div><span class="sw" style="background:rgba(255,106,97,.6)"></span>Sore — resting it</div>
+          <div><span class="sw" style="background:rgba(235,240,245,.12)"></span>No signal yet</div>
         </div>
       </div>
       <div class="card spark">
@@ -645,6 +656,16 @@
       <div class="sheetcard" id="sheetCard">
         <div class="row" style="margin-bottom:12px"><b id="sheetTitle" style="font-size:16px;font-weight:800">Choose a meal</b><span class="grow"></span><button class="chip" id="sheetClose" style="cursor:pointer">✕</button></div>
         <div id="sheetBody" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+
+    <!-- SORENESS CHECK-IN SHEET -->
+    <div id="soreSheet" style="display:none;position:absolute;inset:0;z-index:80;background:rgba(6,7,9,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)">
+      <div class="sheetcard">
+        <div class="row" style="margin-bottom:6px"><b style="font-size:16px;font-weight:800">How's the body?</b><span class="grow"></span><button class="chip" id="soreClose" style="cursor:pointer">✕</button></div>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:14px">Tap each area to how sore it is. I'll pull volume off anything that needs to recover.</div>
+        <div id="soreGroups" style="display:flex;flex-direction:column;gap:8px"></div>
+        <button class="btn volt" id="soreSave" style="margin-top:14px">Save &amp; adjust today</button>
       </div>
     </div>
 
@@ -945,6 +966,7 @@ function workoutHtml(p){ if(!p||!p.workout) return ""; const d=p.workout.days[0]
 function showMScreen(name){
   const mm = document.getElementById("moveModal"); if (mm) mm.style.display = "none";
   const fs = document.getElementById("foodSheet"); if (fs) fs.style.display = "none";
+  const ss = document.getElementById("soreSheet"); if (ss) ss.style.display = "none";
   document.querySelectorAll("#mapp .mscreen").forEach(s => s.classList.toggle("on", s.id === "m-" + name));
   document.querySelectorAll("#mtab button").forEach(b => b.classList.toggle("on", b.dataset.scr === name));
   const sc = document.getElementById("m-" + name); if (sc) sc.scrollTop = 0;
@@ -1041,11 +1063,58 @@ function giveFeedback(feel){
 function nextExercise(){
   const s = wkSession;
   if (s.idx < s.items.length-1){ s.idx++; s.logged=[]; s.feel=null; renderWorkout(); const el=document.getElementById("m-workout"); if(el) el.scrollTop=0; }
-  else { s.idx=0; s.logged=[]; s.feel=null; renderWorkout(); showMScreen("today"); }
+  else {
+    // workout finished → the groups you just trained are freshly fatigued
+    const groups = FOCUS_GROUPS[(s.focus||"session").toLowerCase()] || FOCUS_GROUPS.session;
+    const at = new Date().toISOString(); groups.forEach(g => { soreness[g] = { lvl:2, at }; });
+    saveSoreness(); renderRecovery();
+    s.idx=0; s.logged=[]; s.feel=null; renderWorkout(); showMScreen("today");
+  }
 }
 async function saveLiftState(){
   try { localStorage.setItem("ls_" + (session?session.user.id:"anon"), JSON.stringify(liftState)); } catch(e){}
   if (session){ try { await sb.from("profiles").update({ lift_state: liftState }).eq("user_id", session.user.id); } catch(e){} }
+}
+
+// ---------- recovery / fatigue heatmap → "what to train today" ----------
+const MUSCLE_GROUPS = ["chest","back","shoulders","arms","legs","core"];
+const SORE_LABELS = ["Fine","Mild","Sore","Ouch"];
+const FOCUS_GROUPS = { upper:["chest","back","shoulders","arms"], lower:["legs","core"], push:["chest","shoulders","arms"], pull:["back","arms"], legs:["legs"], "full body":MUSCLE_GROUPS, session:["chest","back","legs"] };
+const REGION_GROUPS = { rcChest:["chest"], rcCore:["core","back"], rcArmL:["arms","shoulders"], rcArmR:["arms","shoulders"], rcForeL:["arms"], rcForeR:["arms"], rcLegUL:["legs"], rcLegUR:["legs"], rcLegLL:["legs"], rcLegLR:["legs"] };
+let soreness = {}; // { group: {lvl:0-3, at:ISO} }
+function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+function effectiveSore(g){ const s = soreness[g]; if(!s) return null; const hrs = (Date.now()-new Date(s.at))/3.6e6; return Math.max(0, s.lvl - hrs/24); } // decays ~1 level/day
+function recColor(v){ if(v===null) return "rgba(235,240,245,.12)"; if(v < 0.6) return "rgba(61,220,151,.55)"; if(v < 1.6) return "rgba(216,255,62,.55)"; return "rgba(255,106,97,.6)"; }
+function paint(id, groups){ const el = document.getElementById(id); if(!el) return; const vals = groups.map(effectiveSore).filter(v=>v!==null); el.setAttribute("fill", recColor(vals.length ? Math.max(...vals) : null)); }
+function renderRecovery(){
+  Object.entries(REGION_GROUPS).forEach(([id,groups]) => paint(id, groups));
+  paint("mbChest",["chest"]); paint("mbArmL",["arms"]); paint("mbArmR",["arms"]); paint("mbLegL",["legs"]); paint("mbLegR",["legs"]);
+  const sore = MUSCLE_GROUPS.filter(g => { const v=effectiveSore(g); return v!==null && v>=1.6; });
+  const any = Object.keys(soreness).length > 0;
+  if (sore.length){
+    $("#readySub").textContent = `Sore: ${sore.join(", ")} — tap to update.`;
+    const trainable = MUSCLE_GROUPS.filter(g => !sore.includes(g)).slice(0,3);
+    $("#todayCoachNote").textContent = `${cap(sore.join(", "))} ${sore.length>1?"are":"is"} still sore, so I pulled ${sore.length>1?"their":"its"} volume today and leaned the session into ${trainable.join(", ")}. Give the sore ${sore.length>1?"ones":"one"} another day.`;
+  } else if (any){
+    $("#readySub").textContent = "Everything's recovered — good to go.";
+    $("#todayCoachNote").textContent = "Nothing's flagged sore, so you're clear to train the full session at target intensity.";
+  }
+}
+function openSore(){
+  $("#soreGroups").innerHTML = MUSCLE_GROUPS.map(g => {
+    const lvl = soreness[g] ? Math.round(effectiveSore(g)) : -1;
+    return `<div class="soregrp"><span class="sn">${g}</span><div class="lvls">${SORE_LABELS.map((lab,i) => `<button data-g="${g}" data-l="${i}" class="${lvl===i?("on"+i):""}">${lab}</button>`).join("")}</div></div>`;
+  }).join("");
+  $("#soreGroups").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const g=b.dataset.g, l=+b.dataset.l;
+    document.querySelectorAll(`#soreGroups button[data-g="${g}"]`).forEach(x => x.className="");
+    b.className = "on"+l; soreness[g] = { lvl:l, at:new Date().toISOString() };
+  });
+  $("#soreSheet").style.display = "block";
+}
+async function saveSoreness(){
+  try { localStorage.setItem("sore_" + (session?session.user.id:"anon"), JSON.stringify(soreness)); } catch(e){}
+  if (session){ try { await sb.from("profiles").update({ soreness }).eq("user_id", session.user.id); } catch(e){} }
 }
 
 let memberAppInited = false;
@@ -1109,6 +1178,10 @@ function initMemberApp(){
   // workout session player: per-set feedback → progression
   document.querySelectorAll("#wkFeel button").forEach(b => b.onclick = () => giveFeedback(b.dataset.f));
   const wkn = $("#wkNextBtn"); if (wkn) wkn.onclick = nextExercise;
+  // recovery / soreness check-in
+  const rc = $("#readyCard"); if (rc) rc.onclick = openSore;
+  const sc = $("#soreClose"); if (sc) sc.onclick = () => { $("#soreSheet").style.display = "none"; };
+  const sv = $("#soreSave"); if (sv) sv.onclick = async () => { $("#soreSheet").style.display = "none"; renderRecovery(); await saveSoreness(); };
 
   // coach orb (particle field; tap to cycle idle → listening → speaking)
   const orb = $("#orbCanvas");
@@ -1187,14 +1260,16 @@ async function renderMember(role, demo){
   $("#pName").textContent = first; $("#pEmail").textContent = email;
   if (!demo && session){
     try {
-      const { data } = await sb.from("profiles").select("height_cm,weight_kg,birthdate,sex,goal,days_per_week,session_min,injuries,diet_mode,meal_prefs,lift_state,retune_cadence").eq("user_id",session.user.id).maybeSingle();
+      const { data } = await sb.from("profiles").select("height_cm,weight_kg,birthdate,sex,goal,days_per_week,session_min,injuries,diet_mode,meal_prefs,lift_state,retune_cadence,soreness").eq("user_id",session.user.id).maybeSingle();
       myBody = data || {};
       foodMode = (data && MODES[data.diet_mode]) ? data.diet_mode : "mid_healthy";
       myPrefs = (data && data.meal_prefs && Array.isArray(data.meal_prefs.liked)) ? { liked:data.meal_prefs.liked||[], disliked:data.meal_prefs.disliked||[] } : { liked:[], disliked:[] };
       liftState = (data && data.lift_state && typeof data.lift_state==="object") ? data.lift_state : {};
+      soreness = (data && data.soreness && typeof data.soreness==="object") ? data.soreness : {};
     } catch(e){ myBody = {}; }
   } else myBody = {};
   if (!liftState || !Object.keys(liftState).length){ try { liftState = JSON.parse(localStorage.getItem("ls_"+(session?session.user.id:"anon"))||"{}"); } catch(e){ liftState = {}; } }
+  if (!soreness || !Object.keys(soreness).length){ try { soreness = JSON.parse(localStorage.getItem("sore_"+(session?session.user.id:"anon"))||"{}"); } catch(e){ soreness = {}; } }
   wkGym = gymName;
   fillBodyForm(myBody);
   // if the user has real body data, THEIR numbers override the engine defaults everywhere
@@ -1210,6 +1285,7 @@ async function renderMember(role, demo){
   renderWeight();
   renderPlan(p, gymName);
   buildSession(); renderWorkout();
+  renderRecovery();
   initMemberApp();
   showMScreen("today");
 }
