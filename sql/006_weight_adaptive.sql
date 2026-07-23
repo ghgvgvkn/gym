@@ -35,3 +35,9 @@ alter table public.weight_logs enable row level security;
 drop policy if exists own_all on public.weight_logs;
 create policy own_all on public.weight_logs for all
   using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- Phase 3 (adaptive training) columns — applied live via MCP; repeated idempotently:
+alter table public.profiles
+  add column if not exists lift_state     jsonb not null default '{}'::jsonb,
+  add column if not exists retune_cadence text,
+  add column if not exists soreness       jsonb not null default '{}'::jsonb;

@@ -306,6 +306,13 @@
   .mapp .mpday .mpk{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
   .mapp .mpday .mpm{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.55}
   .mapp .mpday.today{border-color:rgba(216,255,62,.4)}
+  /* workout feedback / progression */
+  .mapp .feelseg{display:flex;gap:6px}
+  .mapp .feelseg button{flex:1;background:var(--inset);border:1px solid var(--line2);border-radius:11px;color:var(--muted);font-family:inherit;font-size:13px;font-weight:600;padding:11px 4px;cursor:pointer}
+  .mapp .feelseg button.easy.on{background:rgba(63,217,255,.16);border-color:var(--cyan);color:var(--cyan)}
+  .mapp .feelseg button.right.on{background:rgba(61,220,151,.16);border-color:var(--mint);color:var(--mint)}
+  .mapp .feelseg button.hard.on{background:rgba(255,106,97,.16);border-color:var(--coral);color:var(--coral)}
+  .mapp .setrow.now .kg{color:var(--volt)}
 </style>
 
 <header class="bar" id="bar">
@@ -461,12 +468,12 @@
     <!-- WORKOUT -->
     <div class="mscreen" id="m-workout">
       <div class="row" style="margin-bottom:12px">
-        <div class="grow"><div class="eyebrow num">EXERCISE 2 OF 6 · PULL DAY</div>
-        <h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:4px 0 0" id="mkName">Iso-Lateral Row</h1></div>
+        <div class="grow"><div class="eyebrow num" id="wkStep">EXERCISE 1 OF 6 · UPPER</div>
+        <h1 style="font-size:24px;font-weight:850;letter-spacing:-.02em;margin:4px 0 0" id="mkName">Exercise</h1></div>
         <span class="chip">▶ TUTORIAL</span>
       </div>
       <div class="machinecard">
-        <span class="chip cyan mtag">YOUR GYM · UPPER FLOOR · PULL AREA</span>
+        <span class="chip cyan mtag" id="wkFloor">YOUR GYM · UPPER FLOOR</span>
         <svg class="machine" viewBox="0 0 390 196" aria-hidden="true">
           <g stroke="#5FD4F2" stroke-width="2" fill="none" stroke-linecap="round" opacity=".9">
             <path d="M70 170 L70 60 Q70 44 86 44 L150 44"/><path d="M70 170 L130 170"/><rect x="88" y="78" width="34" height="70" rx="4"/>
@@ -476,12 +483,13 @@
           </g>
           <g font-family="ui-monospace,monospace" font-size="9" fill="#67717C" letter-spacing="2"><text x="20" y="188">PHOTO · CAPTURED BY STAFF · CONFIDENCE 0.94</text></g>
         </svg>
-        <div class="mlabel"><div><b>Hammer Strength · Iso-Lateral Row #1</b><br><span>SEAT 4 · CHEST PAD 2 · NEUTRAL GRIP</span></div><span class="chip volt num">3×8–10</span></div>
+        <div class="mlabel"><div><b id="wkMachine">Machine</b><br><span id="wkSetup">MACHINE-BOUND</span></div><span class="chip volt num" id="wkScheme">3×8–12</span></div>
       </div>
-      <div class="setrows">
-        <div class="setrow done"><span class="sn num">SET 1</span><span class="kg num">40 kg × 10</span><span class="grow"></span><span class="chip num">RIR 3</span><button class="check">✓</button></div>
-        <div class="setrow now"><span class="sn num">SET 2</span><span class="kg num">45 kg × 8</span><span class="grow"></span><span class="chip volt num">TARGET RIR 2</span><button class="check" id="logSet" aria-label="log set">✓</button></div>
-        <div class="setrow"><span class="sn num">SET 3</span><span class="kg num">45 kg × 8</span><span class="grow"></span><span class="chip num">—</span><button class="check">✓</button></div>
+      <div class="setrows" id="wkSets"></div>
+      <div class="card" id="wkFeedback" style="display:none;margin-top:12px;border-color:rgba(216,255,62,.35)">
+        <div class="eyebrow" style="margin-bottom:9px">HOW DID THAT FEEL? · THE COACH RE-TUNES NEXT TIME</div>
+        <div class="feelseg" id="wkFeel"><button data-f="easy">Too easy</button><button data-f="right">Just right</button><button data-f="hard">Too hard</button></div>
+        <div id="wkNext" style="font-size:13px;color:var(--mint);margin-top:10px;min-height:16px"></div>
       </div>
       <div class="restwrap">
         <div class="ring" id="restRing"><svg width="150" height="150" viewBox="0 0 158 158"><circle class="base" cx="79" cy="79" r="70"/><circle class="arc" id="restArc" cx="79" cy="79" r="70" stroke-dasharray="439.8" stroke-dashoffset="0"/></svg>
@@ -489,11 +497,11 @@
       </div>
       <div class="row" style="margin-top:14px;gap:10px">
         <button class="btn ghost" id="busyBtn" style="font-size:14px;padding:13px">Machine busy?</button>
-        <button class="btn volt" data-goto="today" style="font-size:14px;padding:13px">Done — next</button>
+        <button class="btn volt" id="wkNextBtn" style="font-size:14px;padding:13px">Next exercise ›</button>
       </div>
       <div class="card" id="busyAlt" style="display:none;margin-top:12px;border-color:rgba(61,220,151,.35)">
         <div class="eyebrow" style="margin-bottom:8px">CLOSEST ALTERNATIVE · SAME MUSCLES</div>
-        <div class="row"><div class="grow"><b style="font-size:15px">Seated Cable Row — Station 3</b><div style="color:var(--muted);font-size:12px;margin-top:3px">8 m away · lats + mid-back · V-grip on the rack</div></div><span class="chip mint">FREE NOW</span></div>
+        <div class="row"><div class="grow"><b style="font-size:15px" id="wkAltName">Alternative machine</b><div style="color:var(--muted);font-size:12px;margin-top:3px">Same muscles · free right now</div></div><span class="chip mint">FREE NOW</span></div>
       </div>
     </div>
 
@@ -583,6 +591,8 @@
         <div class="pf"><label>Days / week</label><select id="bDays"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
         <div class="pf"><label>Session (min)</label><select id="bMin"><option>30</option><option>45</option><option selected>60</option><option>75</option><option>90</option></select></div>
         <div class="pf full"><label>Injuries / limits (optional)</label><input id="bInj" type="text" placeholder="e.g. left shoulder, lower back"></div>
+        <div class="pf full"><label>Re-tune my plan</label><div class="seg" id="bCadence"><button data-v="weekly">Weekly</button><button data-v="biweekly" class="on">Every 2 wks</button><button data-v="monthly">Monthly</button></div>
+          <div style="font-family:var(--mono);font-size:9.5px;color:var(--faint);margin-top:5px">Every 2 weeks is the sweet spot — enough data to adapt without chasing noise.</div></div>
       </div>
       <button class="btn volt" id="bSave" style="margin-top:14px">Save &amp; recompute my numbers</button>
       <div class="pmsg" id="bMsg"></div>
@@ -979,6 +989,65 @@ function openMove(x){
   ].map(c => `<div class="cuerow"><span class="cdot">✓</span><span>${c}</span></div>`).join("");
   $("#moveModal").style.display = "block";
 }
+
+// ---------- workout session player + per-set feedback → progression ----------
+let restLeft = 90, restTotal = 90;   // module-level so a logged set resets the rest ring
+let liftState = {};                  // { key: {kg} } — learned working weights
+let wkSession = null;                // { focus, items:[...], idx, logged:[bool], feel }
+let wkGym = null;                    // gym name for the workout "floor" tag
+function round25(x){ return Math.max(2.5, Math.round(x/2.5)*2.5); }
+function liftKey(it){ return (it.machine && it.machine!=="free") ? it.machine : ("free_" + it.name.toLowerCase().replace(/[^a-z]+/g,"_")); }
+function defaultKg(it){ if(!it.machine || it.machine==="free") return 20; return it.compound ? 45 : 30; }
+function suggestKg(it){ const k=liftKey(it); return (liftState[k] && liftState[k].kg) ? liftState[k].kg : defaultKg(it); }
+function buildSession(){
+  const day = (IM.demoProgram?.workout?.days || [])[0] || { focus:"session", items:[] };
+  const items = (day.items||[]).map(it => ({ name:it.name, machine:it.machine, sets:it.sets||3, repRange:it.repRange||[8,12], compound:it.compound, key:liftKey(it) }));
+  wkSession = { focus: day.focus || "session", items, idx:0, logged:[], feel:null };
+}
+function renderWorkout(){
+  if (!wkSession) buildSession();
+  if (!wkSession.items.length) return;
+  const s = wkSession, item = s.items[s.idx], mn = machineName(item.machine);
+  const kg = suggestKg(item), lo = item.repRange[0], hi = item.repRange[1];
+  $("#wkStep").textContent = `EXERCISE ${s.idx+1} OF ${s.items.length} · ${(s.focus||"").toUpperCase()}`;
+  $("#mkName").textContent = item.name;
+  $("#wkMachine").textContent = mn || "Free weight / bodyweight";
+  $("#wkSetup").textContent = mn ? (wkGym ? "YOUR GYM · MACHINE-BOUND" : "GENERIC KIT") : "NO MACHINE NEEDED";
+  $("#wkFloor").textContent = wkGym ? `YOUR GYM · ${wkGym.toUpperCase()}` : "GENERIC KIT";
+  $("#wkScheme").textContent = `${item.sets}×${lo}–${hi}`;
+  $("#wkAltName").textContent = "Another " + (mn ? mn.toLowerCase() : "option") + " nearby";
+  if (s.logged.length !== item.sets) s.logged = new Array(item.sets).fill(false);
+  $("#wkSets").innerHTML = s.logged.map((d,i) => {
+    const now = !d && s.logged.slice(0,i).every(x=>x);
+    const tag = d ? '<span class="chip num">LOGGED</span>' : now ? '<span class="chip volt num">TAP ✓</span>' : '<span class="chip num">—</span>';
+    return `<div class="setrow ${d?"done":now?"now":""}"><span class="sn num">SET ${i+1}</span><span class="kg num">${kg} kg × ${lo}–${hi}</span><span class="grow"></span>${tag}<button class="check" data-set="${i}">✓</button></div>`;
+  }).join("");
+  $("#wkSets").querySelectorAll("[data-set]").forEach(b => b.onclick = () => logWorkSet(+b.dataset.set));
+  const allDone = s.logged.every(x=>x);
+  $("#wkFeedback").style.display = allDone ? "block" : "none";
+  document.querySelectorAll("#wkFeel button").forEach(b => b.className = b.dataset.f + (s.feel===b.dataset.f ? " on" : ""));
+  if (!s.feel) $("#wkNext").textContent = "";
+  $("#wkNextBtn").textContent = s.idx < s.items.length-1 ? "Next exercise ›" : "Finish workout ✓";
+}
+function logWorkSet(i){ wkSession.logged[i] = !wkSession.logged[i]; restLeft = restTotal; renderWorkout(); }
+function giveFeedback(feel){
+  const s = wkSession, item = s.items[s.idx], k = item.key, cur = suggestKg(item);
+  const nk = feel==="easy" ? round25(cur*1.06) : feel==="hard" ? round25(cur*0.92) : round25(cur + 2.5);
+  liftState[k] = { kg: nk }; s.feel = feel; saveLiftState();
+  const verb = feel==="easy" ? "Bumping up" : feel==="hard" ? "Backing off" : "Progressing";
+  $("#wkNext").textContent = nk===cur ? `Holding ${cur} kg next time.` : `${verb} → next time you'll start at ${nk} kg (was ${cur}).`;
+  document.querySelectorAll("#wkFeel button").forEach(b => b.className = b.dataset.f + (feel===b.dataset.f ? " on" : ""));
+}
+function nextExercise(){
+  const s = wkSession;
+  if (s.idx < s.items.length-1){ s.idx++; s.logged=[]; s.feel=null; renderWorkout(); const el=document.getElementById("m-workout"); if(el) el.scrollTop=0; }
+  else { s.idx=0; s.logged=[]; s.feel=null; renderWorkout(); showMScreen("today"); }
+}
+async function saveLiftState(){
+  try { localStorage.setItem("ls_" + (session?session.user.id:"anon"), JSON.stringify(liftState)); } catch(e){}
+  if (session){ try { await sb.from("profiles").update({ lift_state: liftState }).eq("user_id", session.user.id); } catch(e){} }
+}
+
 let memberAppInited = false;
 function initMemberApp(){
   if (memberAppInited) return; memberAppInited = true;
@@ -990,7 +1059,7 @@ function initMemberApp(){
   // profile
   const prb = $("#profileBtn"); if (prb) prb.onclick = () => showMScreen("profile");
   const pfb = $("#profBack"); if (pfb) pfb.onclick = () => showMScreen("today");
-  ["bSex","bGoal"].forEach(id => document.querySelectorAll("#"+id+" button").forEach(b => b.onclick = () => {
+  ["bSex","bGoal","bCadence"].forEach(id => document.querySelectorAll("#"+id+" button").forEach(b => b.onclick = () => {
     document.querySelectorAll("#"+id+" button").forEach(x => x.classList.remove("on")); b.classList.add("on");
   }));
   const save = $("#bSave");
@@ -1002,8 +1071,9 @@ function initMemberApp(){
     if (!(age >= 13 && age <= 100)){ msg.className="pmsg err"; msg.textContent="Enter an age between 13 and 100."; return; }
     const sex = document.querySelector("#bSex button.on")?.dataset.v || "male";
     const goal = document.querySelector("#bGoal button.on")?.dataset.v || "recomp";
+    const cadence = document.querySelector("#bCadence button.on")?.dataset.v || "biweekly";
     myBody = { height_cm: height, weight_kg: weight, birthdate: `${new Date().getFullYear() - age}-06-15`,
-      sex, goal, days_per_week: +$("#bDays").value, session_min: +$("#bMin").value, injuries: $("#bInj").value.trim() || null };
+      sex, goal, days_per_week: +$("#bDays").value, session_min: +$("#bMin").value, injuries: $("#bInj").value.trim() || null, retune_cadence: cadence };
     const nums = calcNumbers(myBody); applyNumbers(nums, null);
     foodTarget = { kcal:nums.target, protein:nums.protein }; today = genDay(foodDayNonce); renderFood();  // meals rebuild to the new target
     save.disabled = true; save.textContent = "Saving…";
@@ -1029,14 +1099,16 @@ function initMemberApp(){
     wlb.disabled = false; wlb.textContent = "Log";
   };
 
-  // rest timer ring
-  let restLeft = 90, restTotal = 90; const arc = $("#restArc"), restT = $("#restT"), CIRC = 439.8;
+  // rest timer ring (restLeft/restTotal are module-level so a logged set can reset it)
+  const arc = $("#restArc"), restT = $("#restT"), CIRC = 439.8;
   setInterval(() => { restLeft -= 1; if (restLeft < 0) restLeft = restTotal;
     const m = Math.floor(restLeft/60), s = restLeft % 60;
     restT.textContent = "0" + m + ":" + (s < 10 ? "0" + s : s);
     arc.style.strokeDashoffset = (CIRC * (1 - restLeft/restTotal)).toFixed(1); }, 1000);
-  const logSet = $("#logSet"); if (logSet) logSet.onclick = function(){ const row = this.closest(".setrow"); row.classList.remove("now"); row.classList.add("done"); restLeft = restTotal; };
   const busyBtn = $("#busyBtn"); if (busyBtn) busyBtn.onclick = () => { const a = $("#busyAlt"); a.style.display = a.style.display === "none" ? "block" : "none"; };
+  // workout session player: per-set feedback → progression
+  document.querySelectorAll("#wkFeel button").forEach(b => b.onclick = () => giveFeedback(b.dataset.f));
+  const wkn = $("#wkNextBtn"); if (wkn) wkn.onclick = nextExercise;
 
   // coach orb (particle field; tap to cycle idle → listening → speaking)
   const orb = $("#orbCanvas");
@@ -1115,12 +1187,15 @@ async function renderMember(role, demo){
   $("#pName").textContent = first; $("#pEmail").textContent = email;
   if (!demo && session){
     try {
-      const { data } = await sb.from("profiles").select("height_cm,weight_kg,birthdate,sex,goal,days_per_week,session_min,injuries,diet_mode,meal_prefs").eq("user_id",session.user.id).maybeSingle();
+      const { data } = await sb.from("profiles").select("height_cm,weight_kg,birthdate,sex,goal,days_per_week,session_min,injuries,diet_mode,meal_prefs,lift_state,retune_cadence").eq("user_id",session.user.id).maybeSingle();
       myBody = data || {};
       foodMode = (data && MODES[data.diet_mode]) ? data.diet_mode : "mid_healthy";
       myPrefs = (data && data.meal_prefs && Array.isArray(data.meal_prefs.liked)) ? { liked:data.meal_prefs.liked||[], disliked:data.meal_prefs.disliked||[] } : { liked:[], disliked:[] };
+      liftState = (data && data.lift_state && typeof data.lift_state==="object") ? data.lift_state : {};
     } catch(e){ myBody = {}; }
   } else myBody = {};
+  if (!liftState || !Object.keys(liftState).length){ try { liftState = JSON.parse(localStorage.getItem("ls_"+(session?session.user.id:"anon"))||"{}"); } catch(e){ liftState = {}; } }
+  wkGym = gymName;
   fillBodyForm(myBody);
   // if the user has real body data, THEIR numbers override the engine defaults everywhere
   const nums = (myBody && myBody.weight_kg && myBody.height_cm) ? calcNumbers(myBody) : null;
@@ -1134,6 +1209,7 @@ async function renderMember(role, demo){
   renderFood();
   renderWeight();
   renderPlan(p, gymName);
+  buildSession(); renderWorkout();
   initMemberApp();
   showMScreen("today");
 }
@@ -1178,6 +1254,7 @@ function fillBodyForm(b){
   $("#bDays").value = String(b.days_per_week || 4); $("#bMin").value = String(b.session_min || 60);
   document.querySelectorAll("#bSex button").forEach(x => x.classList.toggle("on", x.dataset.v === (b.sex||"male")));
   document.querySelectorAll("#bGoal button").forEach(x => x.classList.toggle("on", x.dataset.v === (b.goal||"recomp")));
+  document.querySelectorAll("#bCadence button").forEach(x => x.classList.toggle("on", x.dataset.v === (b.retune_cadence||"biweekly")));
 }
 
 // ---------- meal planner: curated Levantine dish library + generator that learns ----------
